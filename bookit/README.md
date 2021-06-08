@@ -2,19 +2,18 @@
 This is a reference example react app.
 
 Dev URL: https://dev.dw8w9gnfvrrdu.amplifyapp.com/
-
 ## Install dependencies
 
 ```shell
-$ cd examples/react-amplified
+$ cd bookit
 $ npm install
 ```
 
 ## Configure Amplify
 
 ```shell
-$ cd examples/react-amplified
-$ amplify pull --appId d2za2chtlf8675 --envName dev
+$ cd bookit
+$ amplify pull --appId dw8w9gnfvrrdu --envName dev
 ? Select the authentication method you want to use: AWS access keys
 
  (Contact account admin for creds)
@@ -22,8 +21,8 @@ $ amplify pull --appId d2za2chtlf8675 --envName dev
 ? secretAccessKey:  ****************************************
 ? region:  us-east-2
 
-Amplify AppID found: d2za2chtlf8675. Amplify App name is: reactamplified
-Backend environment dev found in Amplify Console app: reactamplified
+Amplify AppID found: d2za2chtlf8675. Amplify App name is: bookit
+Backend environment dev found in Amplify Console app: bookit
 ? Choose your default editor: None
 ? Choose the type of app that you're building javascript
 Please tell us about your project
@@ -40,8 +39,6 @@ Please tell us about your project
 ```
 npm start
 ```
-
-Demo: https://dev.d2za2chtlf8675.amplifyapp.com/
 
 ## Start the backend API and databases
 
