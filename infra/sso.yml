@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  This defines the permission set for AWS SSO to be run in the master account.
+Parameters:
+  SSOAdministratorsGroupId:
+    Type: String
+    Description: The SSO group id of administrators in SSO. Create me in the SSO console first.
+  SSODevelopersGroupId:
+    Type: String
+    Description: The SSO group id of developers. Create me in the SSO console first.
+  SSOInstanceArn:
+    Type: String
+    Default: Get me from aws sso-admin list-instances
+  AWSAccountID:
+    Type: String
+
+Resources:
+  # For Developers
+  DeveloperAccessPermissionSet:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      Name: DeveloperAccess
+      Description: DeveloperAccess
+      InstanceArn: !Ref SSOInstanceArn
+      InlinePolicy: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "DenyAdmin",
+              "Effect": "Deny",
+              "Action": [
+                "organizations:*",
+                "account:*"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "DenyChangesToSSO",
+              "Effect": "Deny",
+              "Action": [
+                "iam:*"
+              ],
+              "Resource": [
+                "arn:aws:iam::*:role/aws-reserved/sso.amazonaws.com/*/AWSReservedSSO_*"
+              ]
+            },
+            {
+              "Sid": "DenyChangesToSSOServiceRole",
+              "Effect": "Deny",
+              "Action": [
+                "iam:*"
+              ],
+              "Resource": [
+                "arn:aws:iam::*:role/aws-service-role/sso.amazonaws.com/AWSServiceRoleForSSO"
+              ]
+            },
+            {
+              "Sid": "AllowOnlyKnownServices",
+              "Effect": "Allow",
+              "Action": [
+                "amplify:*",
+                "api:*",
+                "appsync:*",
+                "cloudformation:*",
+                "cloudwatch:*",
+                "cognito:*",
+                "dynamodb:*",
+                "iam:*",
+                "lambda:*",
+                "s3:*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+
+  # For Admins
+  AdministratorAccessPermissionSet:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      Name: AdministratorAccess
+      Description: Administrator
+      InstanceArn: !Ref SSOInstanceArn
+      ManagedPolicies:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  # Assignments
+  AdminstratorsMasterAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: !Ref SSOInstanceArn
+      PermissionSetArn: !GetAtt AdministratorAccessPermissionSet.PermissionSetArn
+      PrincipalId: !Ref SSOAdministratorsGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref AWSAccountID
+      TargetType: AWS_ACCOUNT
+  DevelopersMasterAssignment:
+    Type: AWS::SSO::Assignment
+    Properties:
+      InstanceArn: !Ref SSOInstanceArn
+      PermissionSetArn: !GetAtt DeveloperAccessPermissionSet.PermissionSetArn
+      PrincipalId: !Ref SSODevelopersGroupId
+      PrincipalType: GROUP
+      TargetId: !Ref AWSAccountID
+      TargetType: AWS_ACCOUNT

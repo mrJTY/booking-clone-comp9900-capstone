@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Defines the user and policy for the CI
+Resources:
+  CIGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: ci-group
+
+  CIUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: ci-user
+      Groups:
+        - !Ref CIGroup
+
+  CIPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: ci-policy
+      Groups:
+        - !Ref CIGroup
+      PolicyDocument: >-
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                  "cloudformation:CreateUploadBucket",
+                  "cloudformation:DescribeStackResource",
+                  "cloudformation:UpdateStackSet",
+                  "cloudformation:DescribeStackEvents",
+                  "cloudformation:UpdateStack",
+                  "cloudformation:CreateStackSet",
+                  "cloudformation:DescribeStackResources",
+                  "cloudformation:DeleteStackSet",
+                  "cloudformation:DescribeStacks",
+                  "cloudformation:CreateStack",
+                  "cloudformation:DeleteStack"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                  "iam:CreateRole",
+                  "iam:GetRole",
+                  "iam:PassRole",
+                  "iam:PutRolePolicy",
+                  "iam:GetPolicy",
+                  "iam:DeleteRole",
+                  "iam:DeleteRolePolicy",
+                  "iam:CreatePolicy",
+                  "iam:UpdateRole",
+                  "iam:GetRolePolicy"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                  "s3:CreateBucket",
+                  "s3:PutObject",
+                  "s3:GetObject"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                  "dynamodb:*",
+                  "cloudfront:*",
+                  "cognito-identity:*",
+                  "s3:*",
+                  "appsync:*",
+                  "lambda:*",
+                  "cognito-idp:*",
+                  "amplify:*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }

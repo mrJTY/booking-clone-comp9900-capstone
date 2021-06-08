@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Defines the user and policy for a read-only amplify user. Use this for running `amplify pull`
+Resources:
+  AmplifyReadOnlyGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: amplify-read-only-group
+
+  AmplifyReadOnlyUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: amplify-read-only-user
+      Groups:
+        - !Ref AmplifyReadOnlyGroup
+
+  AmplifyReadOnlyPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: amplify-read-only-policy
+      Groups:
+        - !Ref AmplifyReadOnlyGroup
+      PolicyDocument: >-
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                  "amplify:Describe*",
+                  "amplify:Get*",
+                  "amplify:List*",
+                  "appsync:Describe*",
+                  "appsync:Get*",
+                  "appsync:List*",
+                  "cloudformation:Describe*",
+                  "cloudformation:Get*",
+                  "cloudformation:List*",
+                  "cloudfront:Describe*",
+                  "cloudfront:Get*",
+                  "cloudfront:List*",
+                  "cognito-identity:Describe*",
+                  "cognito-identity:Get*",
+                  "cognito-identity:List*",
+                  "cognito-idp:Describe*",
+                  "cognito-idp:Get*",
+                  "cognito-idp:List*",
+                  "dynamodb:Describe*",
+                  "dynamodb:Get*",
+                  "dynamodb:List*",
+                  "lambda:Describe*",
+                  "lambda:Get*",
+                  "lambda:List*",
+                  "s3:Describe*",
+                  "s3:Get*",
+                  "s3:List*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
