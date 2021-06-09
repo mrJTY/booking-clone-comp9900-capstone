@@ -5,7 +5,7 @@ Install Docker Compose: https://docs.docker.com/compose/
 
 Start the backend and frontend services by:
 ```shell
-./bin/up.sh
+./bin/start-services
 
 # Or
 docker-compose up
@@ -16,7 +16,7 @@ docker-compose up
 Shutdown the network if the application is misbehaving:
 
 ```shell
-./bin/down.sh
+docker-compose down
 ```
 
 # Backend API
