@@ -7,8 +7,8 @@ repo_root=$(git rev-parse --show-toplevel)
 export REPO_ROOT="${repo_root}"
 
 main() {
-  docker-compose up
-  # Add these flags if images are stale --force-recreate --build
+  docker-compose down
+  docker-compose up --build --force-recreate
 }
 
 main

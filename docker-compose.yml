@@ -1,5 +1,7 @@
 version: "3.9"
 services:
+
+  # Backend DB
   db:
     # Serving on port 5439
     network_mode: host
@@ -10,6 +12,8 @@ services:
       # this is just local dev
       POSTGRES_PASSWORD: password
       POSTGRES_DB: bookit
+
+  # Backend API
   api:
     # Serving on port 5000
     network_mode: host
@@ -22,3 +26,11 @@ services:
     command: ./start-api.sh
     depends_on:
       - db
+
+  # For adhoc queries, mutations on the backend
+  register-users:
+    network_mode: host
+    build: ./adhoc
+    command: ./register-users.sh
+    depends_on:
+      - api
