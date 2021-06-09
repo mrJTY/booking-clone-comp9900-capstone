@@ -1,17 +1,27 @@
 # Blue Sky Thinking
 
-# Backend API
-- Install Pyenv: https://github.com/pyenv/pyenv
-- Install Pipenv: https://github.com/pypa/pipenv
-- Install environment: `./bin/install-backend.sh`
+# Quick start
+Install Docker Compose: https://docs.docker.com/compose/
+
+Start the backend and frontend services by:
+```shell
+./bin/up.sh
+
+# Or
+docker-compose up
+```
+
+## Cleaning up
+
+Shutdown the network if the application is misbehaving:
 
 ```shell
-# Install the backend Python environment
-./bin/install-backend.sh
-
-# Start the API:
-./bin/run-api.sh
+./bin/down.sh
 ```
+
+# Backend API
+
+Flask DB
 
 # Front end
 TODO(Vidan)

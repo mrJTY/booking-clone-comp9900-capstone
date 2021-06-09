@@ -1,0 +1,24 @@
+version: "3.9"
+services:
+  db:
+    # Serving on port 5439
+    network_mode: host
+    image: 'postgres:latest'
+    environment:
+      POSTGRES_USER: admin
+      # Secrets shouldn't be committed but
+      # this is just local dev
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: bookit
+  api:
+    # Serving on port 5000
+    network_mode: host
+    build: ./api
+    volumes:
+      - ./api:/opt/bookit/api
+    environment:
+      FLASK_APP: api.py
+      DATABASE_URL: postgresql://admin:password@localhost/bookit
+    command: ./start-api.sh
+    depends_on:
+      - db
