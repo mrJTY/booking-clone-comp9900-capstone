@@ -1,18 +1,18 @@
 import logging
 
-from app import app
-from app import db
-from app.models.user import User
+from api import app
+from api import db
+from api.models.user import User
 from flask import jsonify, request
 
 logging.basicConfig(level=logging.INFO)
 
-@app.route('/users/<int:id>')
+@app.route('/users/<int:id>', methods=["GET"])
 def users(id):
     logging.info(f"Getting user {id}")
     return jsonify(User.query.get_or_404(id).to_dict())
 
-@app.route('/register_user', methods=["POST"])
+@app.route('/user', methods=["POST"])
 def register_user():
     logging.info("Registering a user")
     content = request.json

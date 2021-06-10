@@ -4,8 +4,7 @@ services:
   # Backend DB
   db:
     # Serving on port 5439
-    network_mode: host
-    image: 'postgres:latest'
+    image: 'postgres:11'
     environment:
       POSTGRES_USER: admin
       # Secrets shouldn't be committed but
@@ -16,21 +15,24 @@ services:
   # Backend API
   api:
     # Serving on port 5000
-    network_mode: host
     build: ./api
+    ports:
+      - "5000:5000"
     volumes:
       - ./api:/opt/bookit/api
     environment:
-      FLASK_APP: api.py
-      DATABASE_URL: postgresql://admin:password@localhost/bookit
+      DATABASE_URL: postgresql://admin:password@db/bookit
     command: ./start-api.sh
+    links:
+      - db
     depends_on:
       - db
 
   # For adhoc queries, mutations on the backend
   register-users:
-    network_mode: host
     build: ./adhoc
     command: ./register-users.sh
+    links:
+      - api
     depends_on:
       - api

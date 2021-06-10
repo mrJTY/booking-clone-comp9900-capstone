@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 
-from app import db
+from api import db
 
 # TODO: Remove this, this is just an example
 class Post(db.Model):

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export FLASK_APP=__init__.py
+
 main() {
   # Temporary hack to wait until postgres is ready
   echo "Waiting for database to be ready..."
@@ -14,7 +16,7 @@ main() {
   flask db upgrade
 
   # Start the api
-  flask run
+  flask run --host=0.0.0.0
 }
 
 main

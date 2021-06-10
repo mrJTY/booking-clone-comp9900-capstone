@@ -8,7 +8,7 @@ export REPO_ROOT="${repo_root}"
 
 main() {
   docker-compose down
-  docker-compose up --build --force-recreate
+  docker-compose up --build --force-recreate --remove-orphans
 }
 
 main
