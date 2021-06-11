@@ -21,6 +21,10 @@ import flask_cors
 cors = flask_cors.CORS()
 cors.init_app(app)
 
+# JWT
+from api.auth import authenticate, identity
+jwt = JWT(app, authenticate, identity)
+
 # Must be loaded later
 from api.routes import index_routes, user_routes
 import api.models

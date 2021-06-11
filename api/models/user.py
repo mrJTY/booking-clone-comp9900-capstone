@@ -14,7 +14,6 @@ class User(db.Model):
     def __repr__(self):
         return json.dumps(self.to_dict())
 
-
     def to_dict(self):
         data = {
             'id': self.id,

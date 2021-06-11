@@ -1,27 +1,36 @@
+import logging
+
 from werkzeug.security import safe_str_cmp
-from flask_jwt import JWT, jwt_required, current_identity
-from api import app
-from api.models.user import  User
+from api.models.user import User
+from api import db
 
-# TODO: use database
-users = [
-    User(1, 'user1', 'abcxyz', 'foo@bar.com'),
-    User(2, 'user2', 'abcxyz', 'foo2@bar.com'),
-]
-
-username_table = {u.username: u for u in users}
-userid_table = {u.id: u for u in users}
-
+logging.basicConfig(level=logging.INFO)
 
 def authenticate(username, password):
-    user = username_table.get(username, None)
+    logging.info(f"Authenticating user: {username}")
+    logging.info("Querying user...")
+    user = db.session\
+        .query(User)\
+        .filter_by(username=username)\
+        .first()
+    logging.info(f"Found user: ${user}")
+
     if user and safe_str_cmp(user.password.encode('utf-8'), password.encode('utf-8')):
         return user
 
 
 def identity(payload):
-    user_id = payload['identity']
-    return userid_table.get(user_id, None)
+    """
+    Flask JWT for confirming identity
+
+    :param payload: Dict with {"exp": ..., "iat": ..., "nbf": ..., "identity": ...}
+    :return:
+    """
+    id = payload['identity']
+    user = db.session \
+        .query(User) \
+        .filter_by(id=id) \
+        .first()
+    return user
 
 
-jwt = JWT(app, authenticate, identity)
