@@ -19,13 +19,14 @@ main(){
   # Register some dummy users
   curl -X POST \
     -H "Content-Type: application/json" \
-    -d '{"username": "john", "email": "john@wick.com"}' \
+    -d '{"username": "john", "email": "john@wick.com", "password": "keanu"}' \
     http://api:5000/user
 
   curl -X POST \
     -H "Content-Type: application/json" \
-    -d '{"username": "alon", "email": "alon@mask.com"}' \
+    -d '{"username": "alon", "email": "alon@mask.com", "password": "doge"}' \
     http://api:5000/user
+
 }
 
 main
