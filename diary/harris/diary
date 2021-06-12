@@ -1,0 +1,10 @@
+Harris Phan's diary (z3415157)
+
+Week 1
+Group is formed and we were trying to look for one more member to no avail. Github and Jira accounts were created. Started off using Amazon amplify with Justin starting it all off
+thanks to Justin.
+
+Week 2
+Justin implemented tasks for Jira and I got to work on all of my sectins, which included the design draft doc (the proposal). Got started on the design doc Got to work on creating the hashing for the password. 
+No password should be exposed in a POST statement, which is what happened. During the team meeting on Tuesday, the tutor said they needed to be able to execute the code on their end as
+well, which means we reverted to a flask setup instead of an AWS setup which was full cloud. Docker would be used for the container.
