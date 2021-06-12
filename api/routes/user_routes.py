@@ -13,7 +13,7 @@ def users(id):
     logging.info(f"Getting user {id}")
     return jsonify(User.query.get_or_404(id).to_dict())
 
-@app.route('/user', methods=["POST"])
+@app.route('/users', methods=["POST"])
 def register_user():
     logging.info("Registering a user")
     content = request.json
@@ -23,13 +23,12 @@ def register_user():
             logging.info(content)
             username = content["username"]
             password = content["password"]
-            email= content["email"]
+            email = content["email"]
             u = User(
                 username=username,
                 email=email,
-                # TODO(HP): Store a hashed password
-				# Harris: The password is now hashed using werkzeug
-                password=generate_password_hash(password)
+                # FIXME, generate_hash breaks auth
+                password_hash=password
             )
             logging.info(u)
             db.session.add(u)
@@ -43,7 +42,7 @@ def register_user():
 
 # This can only be accessed if /auth was called
 # See: https://pythonhosted.org/Flask-JWT/
-@app.route('/protected')
+@app.route('/current_user')
 @jwt_required()
-def protected():
+def current_user():
     return f"{current_identity}"

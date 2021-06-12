@@ -1,4 +1,4 @@
-name: Build the service docker images
+name: test
 on:
   push:
     branches:
@@ -18,11 +18,13 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build API
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: ./api
-          builder: ${{ steps.buildx.outputs.name }}
-          push: false
-      # TODO: Build Frontend Docker
+      - name: Build the docker-compose stack
+        run: docker-compose up -d
+
+      - name: Install virtualenv
+        run: pip install virtualenv
+
+      - name: Test backend
+        run: sleep 10 && cd ./api && ./test.sh
+
+

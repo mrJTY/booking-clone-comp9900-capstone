@@ -8,7 +8,7 @@ main(){
   access_token=$(
     curl -s -X POST \
       -H "Content-Type: application/json" \
-      -d '{"username": "john", "password": "keanu"}' \
+      -d '{"username": "test_user", "password": "test"}' \
       http://localhost:5000/auth |
     jq -r '.access_token'
   )
@@ -16,7 +16,7 @@ main(){
   # Test to see if you can access the protected page
   curl -s -X GET \
     -H "Authorization: JWT ${access_token}" \
-    http://localhost:5000/protected
+    http://localhost:5000/current_user
 
 
 }

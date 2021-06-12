@@ -1,6 +1,6 @@
 import logging
 
-from werkzeug.security import safe_str_cmp
+from werkzeug.security import safe_str_cmp, generate_password_hash
 from api.models.user import User
 from api import db
 
@@ -15,9 +15,13 @@ def authenticate(username, password):
         .first()
     logging.info(f"Found user: ${user}")
 
-    if user and safe_str_cmp(user.password.encode('utf-8'), password.encode('utf-8')):
-        return user
+    # FIXME(HP): Hashes are failing auth
+    stored_password_hash = user.password_hash.encode('utf-8')
+    # provided_password_hash = generate_password_hash(password)
 
+    # TODO(HP): Change the comparison after bug has been fixed
+    if user and safe_str_cmp(stored_password_hash, password.encode('utf8')):
+        return user
 
 def identity(payload):
     """

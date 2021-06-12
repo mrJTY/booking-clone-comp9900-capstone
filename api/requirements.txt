@@ -1,5 +1,7 @@
 flask
-flask-migrate
-flask-jwt
 flask-cors
+flask-jwt
+flask-migrate
 psycopg2
+pytest
+requests
