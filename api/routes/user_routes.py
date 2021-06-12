@@ -4,6 +4,7 @@ from api import app, db
 from api.models.user import User
 from flask import jsonify, request
 from flask_jwt import current_identity, jwt_required
+from werkzeug.security import generate_password_hash
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,7 +28,8 @@ def register_user():
                 username=username,
                 email=email,
                 # TODO(HP): Store a hashed password
-                password=password,
+				# Harris: The password is now hashed using werkzeug
+                password=generate_password_hash(password)
             )
             logging.info(u)
             db.session.add(u)
