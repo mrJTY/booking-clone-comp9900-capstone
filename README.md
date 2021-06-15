@@ -1,22 +1,16 @@
 # Blue Sky Thinking
 
 # Quick start
-Install Docker Compose: https://docs.docker.com/compose/
+
+Install by:
+```shell
+./bin/install.sh
+```
 
 Start the backend and frontend services by:
 ```shell
-./bin/start-services
+./bin/start-api.sh
 
-# Or
-docker-compose up
-```
-
-## Cleaning up
-
-Shutdown the network if the application is misbehaving:
-
-```shell
-docker-compose down
 ```
 
 # Backend API

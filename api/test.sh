@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+export REPO_ROOT="${repo_root}"
+
 main() {
-  virtualenv .venv
-  ./.venv/bin/pip install -r requirements.txt
-  API_URL="http://localhost:5000" ./.venv/bin/pytest -s .
+  API_URL="http://localhost:5000" "${REPO_ROOT}"/.venv/bin/pytest -s .
 }
 
 main
