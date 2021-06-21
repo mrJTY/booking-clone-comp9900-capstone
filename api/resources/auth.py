@@ -1,8 +1,8 @@
 from flask_jwt import jwt_required, current_identity
-from api import api
+from api import app
 
 
-@api.route("/current_user")
+@app.route("/current_user")
 @jwt_required()
 def current_user():
     return f"{current_identity}"

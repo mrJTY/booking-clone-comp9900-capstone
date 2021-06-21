@@ -1,6 +1,6 @@
 import logging
 
-from api import db, api
+from api import db
 from api.resources.user import UserModel
 from werkzeug.security import safe_str_cmp, generate_password_hash
 
