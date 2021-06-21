@@ -24,6 +24,6 @@ jobs:
         run: ./bin/start-api.sh &
 
       - name: Test backend
-        run: sleep 10 && cd ./api && ./test.sh
+        run: ./bin/test-backend.sh
 
 
