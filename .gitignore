@@ -7,3 +7,6 @@ api/migrations
 
 # Don't commit the database
 *.db
+
+# ignored compiled Python
+*.pyc
