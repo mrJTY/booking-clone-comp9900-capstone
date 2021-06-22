@@ -6,6 +6,7 @@ from flask_restplus import Resource, fields
 import api
 from api import db
 from api.utils.req_handling import *
+import hashlib
 
 user = api.api.namespace("users", description="User operations")
 
@@ -85,11 +86,12 @@ class UserList(Resource):
                 username = content["username"]
                 password = content["password"]
                 email = content["email"]
+                password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
                 u = UserModel(
                     username=username,
                     email=email,
                     # FIXME, generate_hash breaks auth
-                    password_hash=password,
+                    password_hash=password_hash,
                 )
                 logging.info(u)
                 db.session.add(u)
