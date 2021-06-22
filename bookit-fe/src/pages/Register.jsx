@@ -107,7 +107,7 @@ const Register = () => {
       // Post a register request
       axios({
         method: 'POST',
-        url: `${baseUrl}/admin/auth/register`,
+        url: `${baseUrl}/users`,
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
@@ -115,14 +115,18 @@ const Register = () => {
         data: {
           email: data.email,
           password: data.password,
-          name: data.name
+          username: data.name
         }
       })
         .then((response) => {
+
+          console.log(response);
+          alert('Success! :)');
+
           // store the authorization token
-          setToken(response.data.token);
+          // setToken(response.data.token);
           // navigate to the Dashboard screen
-          history.push('/dashboard');
+          // history.push('/dashboard');
         })
         .catch((error) => {
           let errorText = '';
