@@ -12,7 +12,7 @@ main() {
   rm -rf api/migrations
   rm -rf api/*.db
 
-  # CD into the api because python is so sh*t at imports
+  # Go to the api directory
   cd "${REPO_ROOT}"/api
 
   # Init the db
