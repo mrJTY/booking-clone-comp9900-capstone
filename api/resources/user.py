@@ -9,7 +9,16 @@ from api.utils.req_handling import *
 
 user = api.api.namespace("users", description="User operations")
 
-user_marshalled = api.api.model(
+create_user_details = api.api.model(
+    "User",
+    {
+        "username": fields.String(required=True, description="Username of the user"),
+        "password": fields.String(required=True, description="The password of the user"),
+        "email": fields.String(required=True, description="Email address of the user"),
+    },
+)
+
+get_user_details = api.api.model(
     "User",
     {
         "id": fields.Integer(required=True, description="The UserID"),
@@ -43,7 +52,7 @@ class UserModel(db.Model):
 @user.response(404, "User not found")
 class User(Resource):
     @user.doc(description=f"UserID must be provided")
-    @user.marshal_with(user_marshalled)
+    @user.marshal_with(get_user_details)
     def get(self, user_id):
         logging.info(f"Getting user {user_id}")
         return UserModel.query.get_or_404(user_id).to_dict()
@@ -64,7 +73,8 @@ class User(Resource):
 @user.route("")
 class UserList(Resource):
     @user.doc(description=f"Creates a new User")
-    @user.marshal_with(user_marshalled)
+    @user.expect(create_user_details)
+    @user.marshal_with(get_user_details)
     def post(self):
         logging.info("Registering a user")
         content = get_request_json()
