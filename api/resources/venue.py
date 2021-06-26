@@ -63,22 +63,22 @@ class Venue(Resource):
 
     #HP: Updating a venue
     #Need to see what changes are required in this
-    #@venue.doc(description=f"venue_id must be provided")
-    #def put(self, venue_id):
-    #    logging.info(f"Updating venue {venue_id}")
-
+    @venue.doc(description=f"venue_id must be provided")
+    @venue.marshal_with(venue_details)
+    def put(self, venue_id):
+        logging.info(f"Updating venue {venue_id}")
         #get venue id
-    #    get_venue = VenueModel.query.get_or_404(venue_id)
-    #    #update the venue data
-    #    get_venue.venue_name = request.json
-    #    pass
+        content = get_request_json()
+        venue = VenueModel.query.get_or_404(venue_id)
+        #update the venue data
+        venue.venue_name = content['venue_name']
+        venue.address = content['address']
+        venue.category = content['category']
+        venue.description = content['description']        
+        db.session.update(venue)
+        db.session.commit()
+        return venue 
 
-    # TODO: Update a venue
-    # def put(self, todo_id):
-    #     args = parser.parse_args()
-    #     task = {'task': args['task']}
-    #     TODOS[todo_id] = task
-    #     return task, 201
 
 
 @venue.route("")
