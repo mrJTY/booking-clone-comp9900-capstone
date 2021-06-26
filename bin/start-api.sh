@@ -15,11 +15,6 @@ main() {
   # Go to the api directory
   cd "${REPO_ROOT}"/api
 
-  # Init the db
-  "${REPO_ROOT}"/.venv/bin/flask db init
-  "${REPO_ROOT}"/.venv/bin/flask db migrate
-  "${REPO_ROOT}"/.venv/bin/flask db upgrade
-
   # Start the api
   "${REPO_ROOT}"/.venv/bin/python "${REPO_ROOT}"/api/run.py
 }
