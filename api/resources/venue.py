@@ -52,10 +52,26 @@ class Venue(Resource):
         logging.info(f"Getting venue {venue_id}")
         return VenueModel.query.get_or_404(venue_id).to_dict()
 
-    # TODO: Delete a venue
-    # def delete(self, todo_id):
-    #     del TODOS[todo_id]
-    #     return '', 204
+    @venue.doc(description=f"venue_id must be provided")
+    @venue.marshal_with(venue_details)
+    def delete(self, venue_id):
+        logging.info(f"Deleting venue {venue_id}")
+        venue = VenueModel.query.get_or_404(venue_id)
+        db.session.delete(venue)
+        db.session.commit()
+        return venue
+
+    #HP: Updating a venue
+    #Need to see what changes are required in this
+    #@venue.doc(description=f"venue_id must be provided")
+    #def put(self, venue_id):
+    #    logging.info(f"Updating venue {venue_id}")
+
+        #get venue id
+    #    get_venue = VenueModel.query.get_or_404(venue_id)
+    #    #update the venue data
+    #    get_venue.venue_name = request.json
+    #    pass
 
     # TODO: Update a venue
     # def put(self, todo_id):
