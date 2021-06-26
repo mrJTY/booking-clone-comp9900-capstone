@@ -14,7 +14,10 @@ def authenticate(username, password):
     user = db.session.query(UserModel).filter_by(username=username).first()
     logging.info(f"Found user: ${user}")
     stored_password_hash = user.password_hash.encode("utf-8").decode("utf-8")
-    if user and stored_password_hash == hashlib.sha256(password.encode("utf-8")).hexdigest():
+    if (
+        user
+        and stored_password_hash == hashlib.sha256(password.encode("utf-8")).hexdigest()
+    ):
         return user
 
 

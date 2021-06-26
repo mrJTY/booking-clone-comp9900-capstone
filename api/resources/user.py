@@ -1,11 +1,10 @@
 import logging
 import json
 
-from flask import jsonify, request
-from flask_restplus import Resource, fields
-import api
 from api import db
 from api.utils.req_handling import *
+from flask_restplus import Resource, fields
+import api
 import hashlib
 
 user = api.api.namespace("users", description="User operations")
@@ -14,7 +13,9 @@ create_user_details = api.api.model(
     "User",
     {
         "username": fields.String(required=True, description="Username of the user"),
-        "password": fields.String(required=True, description="The password of the user"),
+        "password": fields.String(
+            required=True, description="The password of the user"
+        ),
         "email": fields.String(required=True, description="Email address of the user"),
     },
 )
@@ -102,4 +103,4 @@ class UserList(Resource):
 
             except Exception as e:
                 logging.error(e)
-                api.abort(500, f"{e}")
+                api.api.abort(500, f"{e}")
