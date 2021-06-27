@@ -63,6 +63,7 @@ class AuthLogout(Resource):
             logging.error(e)
             api.api.abort(500, f"{e}")
 
+
 # FIXME! This fails
 @auth.route("/me")
 @auth.response(404, "User not logged in")

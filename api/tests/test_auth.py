@@ -34,7 +34,5 @@ def test_authenticate():
         # assert protected_response.status_code == 200
 
         # Logout
-        logout_response = requests.post(
-            f"{API_URL}/auth/logout"
-        )
+        logout_response = requests.post(f"{API_URL}/auth/logout")
         assert logout_response.status_code == 200

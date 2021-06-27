@@ -61,25 +61,24 @@ class Venue(Resource):
         db.session.commit()
         return venue
 
-    #Need to see what updates are made
+    # Need to see what updates are made
     @venue.doc(description=f"venue_id must be provided")
     @venue.marshal_with(venue_details)
     def put(self, venue_id):
         logging.info(f"Updating venue {venue_id}")
-        #get venue id
+        # get venue id
         content = get_request_json()
         venue = VenueModel.query.get_or_404(venue_id)
-        #update the venue data
+        # update the venue data
         venue.venue_name = content["venue_name"]
         venue.address = content["address"]
         venue.category = content["category"]
         venue.description = content["description"]
-        flag_modified(venue, "description")        
+        flag_modified(venue, "description")
         db.session.merge(venue)
         db.session.flush()
         db.session.commit()
-        return venue 
-
+        return venue
 
 
 @venue.route("")
