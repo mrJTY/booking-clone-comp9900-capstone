@@ -1,4 +1,4 @@
-name: test
+name: build-and-test
 on:
   push:
     branches:
@@ -26,4 +26,5 @@ jobs:
       - name: Test backend
         run: ./bin/test-backend.sh
 
-
+      - name: Run the linter
+        run: ./bin/lint.sh
