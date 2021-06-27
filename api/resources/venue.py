@@ -1,6 +1,6 @@
 import logging
 import json
-
+from sqlalchemy.orm.attributes import flag_modified
 from api import db
 from api.utils.req_handling import *
 from flask_restplus import Resource, fields
@@ -57,12 +57,11 @@ class Venue(Resource):
     def delete(self, venue_id):
         logging.info(f"Deleting venue {venue_id}")
         venue = VenueModel.query.get_or_404(venue_id)
-        db.session.delete(venue)
+        VenueModel.query.filter(VenueModel.venue_id == venue_id).delete()
         db.session.commit()
         return venue
 
-    #HP: Updating a venue
-    #Need to see what changes are required in this
+    #Need to see what updates are made
     @venue.doc(description=f"venue_id must be provided")
     @venue.marshal_with(venue_details)
     def put(self, venue_id):
@@ -71,11 +70,13 @@ class Venue(Resource):
         content = get_request_json()
         venue = VenueModel.query.get_or_404(venue_id)
         #update the venue data
-        venue.venue_name = content['venue_name']
-        venue.address = content['address']
-        venue.category = content['category']
-        venue.description = content['description']        
-        db.session.update(venue)
+        venue.venue_name = content["venue_name"]
+        venue.address = content["address"]
+        venue.category = content["category"]
+        venue.description = content["description"]
+        flag_modified(venue, "description")        
+        db.session.merge(venue)
+        db.session.flush()
         db.session.commit()
         return venue 
 
