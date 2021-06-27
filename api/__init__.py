@@ -19,16 +19,14 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+# Flask Login
+from flask_login import LoginManager
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
 # CORS
 import flask_cors
 
 cors = flask_cors.CORS()
 cors.init_app(app)
-
-# JWT for auth
-# https://pythonhosted.org/Flask-JWT/
-from api.auth import authenticate, identity
-from flask_jwt import JWT
-from api.resources.auth import current_user
-
-jwt = JWT(app, authenticate, identity)

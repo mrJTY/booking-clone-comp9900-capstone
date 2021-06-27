@@ -1,7 +1,7 @@
 import logging
 import json
 
-from api import db
+from api import db, login_manager
 from api.utils.req_handling import *
 from flask_restplus import Resource, fields
 import api
@@ -35,6 +35,7 @@ class UserModel(db.Model):
     username = db.Column(db.Text, unique=True)
     email = db.Column(db.Text, unique=True)
     password_hash = db.Column(db.Text)
+    is_active = db.Column(db.Boolean)
 
     def __repr__(self):
         return json.dumps(self.to_dict())
@@ -104,3 +105,8 @@ class UserList(Resource):
             except Exception as e:
                 logging.error(e)
                 api.api.abort(500, f"{e}")
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
