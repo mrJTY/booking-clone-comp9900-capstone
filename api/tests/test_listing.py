@@ -60,20 +60,8 @@ def test_create_listing():
         assert actual["category"] == TEST_LISTING["category"]
         assert actual["description"] == TEST_LISTING["description"]
 
-
-def test_update_listing():
-    with requests.session() as s:
-        # Login first
-        login_response = s.post(
-            f"{API_URL}/auth/login",
-            json={
-                "username": TEST_LISTING_USER["username"],
-                "password": TEST_LISTING_USER["password"],
-            },
-        )
-        assert login_response.status_code == 200
-
-        listing_url = f"{API_URL}/listings/1"
+        # Test update
+        listing_url = f"{API_URL}/listings/{actual['listing_id']}"
         response = s.put(listing_url, json=TEST_2_LISTING)
         actual = response.json()
         assert actual["listing_name"] == TEST_2_LISTING["listing_name"]
@@ -90,3 +78,22 @@ def test_update_listing():
 #    print(actual)
 #    expected = {""}
 #    assert actual == expected
+
+
+def test_get_my_listings():
+    with requests.session() as s:
+        # Login first
+        login_response = s.post(
+            f"{API_URL}/auth/login",
+            json={
+                "username": TEST_LISTING_USER["username"],
+                "password": TEST_LISTING_USER["password"],
+            },
+        )
+        assert login_response.status_code == 200
+        assert login_response.text == "true\n"
+
+        # Get my listings
+        url = f"{API_URL}/listings/mylistings"
+        response = s.get(url)
+        assert response.status_code == 200

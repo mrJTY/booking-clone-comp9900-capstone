@@ -1,6 +1,6 @@
-from api import app, db
-from api import login_manager
-from api.resources.user import UserModel
+from api import app
+from api import db
+import api.utils.generate_fake_data as g
 
 if __name__ == "__main__":
     import api.resources.user
@@ -10,4 +10,7 @@ if __name__ == "__main__":
     # Create all database tables
     db.create_all()
 
-    app.run(debug=True, host="0.0.0.0")
+    # Generate some fake data
+    g.generate_fake_data()
+
+    app.run(debug=True, host="0.0.0.0", use_reloader=False)

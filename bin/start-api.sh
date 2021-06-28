@@ -4,7 +4,6 @@ set -eu
 
 repo_root=$(git rev-parse --show-toplevel)
 export REPO_ROOT="${repo_root}"
-export FLASK_APP="${REPO_ROOT}"/api/__init__.py
 export PYTHONPATH="${REPO_ROOT}":"${REPO_ROOT}"/api
 
 main() {

@@ -12,12 +12,20 @@ listing = api.api.namespace("listings", description="Listing operations")
 listing_details = api.api.model(
     "Listing",
     {
-        "listing_id": fields.Integer(required=True, description="The ID of the listing"),
-        "listing_name": fields.String(required=True, description="The name of the listing"),
-        "address": fields.String(required=True, description="The address of the listing"),
+        "listing_id": fields.Integer(
+            required=True, description="The ID of the listing"
+        ),
+        "listing_name": fields.String(
+            required=True, description="The name of the listing"
+        ),
+        "address": fields.String(
+            required=True, description="The address of the listing"
+        ),
         "category": fields.String(required=True, description="The category"),
         "description": fields.String(required=True, description="The description"),
-        "user_id": fields.Integer(required=True, description="The owner of the listing"),
+        "user_id": fields.Integer(
+            required=True, description="The owner of the listing"
+        ),
     },
 )
 
@@ -26,9 +34,9 @@ class ListingModel(db.Model):
     __tablename__ = "listings"
     listing_id = db.Column(db.Integer, primary_key=True)
     listing_name = db.Column(db.Text, unique=True)
-    address = db.Column(db.Text, unique=True)
-    category = db.Column(db.Text, unique=True)
-    description = db.Column(db.Text, unique=True)
+    address = db.Column(db.Text)
+    category = db.Column(db.Text)
+    description = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
 
     def __repr__(self):
@@ -122,3 +130,14 @@ class ListingList(Resource):
             except Exception as e:
                 logging.error(e)
                 api.api.abort(500, f"{e}")
+
+
+# TODO: Paginate this and add docs
+@listing.route("/mylistings")
+class MyListings(Resource):
+    @listing.doc(description=f"Fetch my listings")
+    @login_required
+    def get(self):
+        my_listings = ListingModel.query.filter_by(user_id=current_user.user_id).all()
+        my_listings = [l.to_dict() for l in my_listings]
+        return {"mylistings": my_listings}

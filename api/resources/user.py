@@ -1,7 +1,8 @@
 import logging
 import json
 
-from api import db, login_manager
+from api import login_manager
+from api import db
 from api.utils.req_handling import *
 from flask_restplus import Resource, fields
 import api
@@ -110,7 +111,6 @@ class UserList(Resource):
                 u = UserModel(
                     username=username,
                     email=email,
-                    # FIXME, generate_hash breaks auth
                     password_hash=password_hash,
                 )
                 logging.info(u)
