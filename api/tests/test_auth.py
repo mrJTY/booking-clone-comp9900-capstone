@@ -29,12 +29,17 @@ def test_authenticate():
         assert login_response.status_code == 200
         assert login_response.text == "true\n"
 
-        # Try to access the protected url
-        protected_url = f"{API_URL}/auth/me"
-        protected_response = s.get(protected_url)
-        print(protected_response.text)
-        assert protected_response.status_code == 200
 
-        # Logout
-        logout_response = s.post(f"{API_URL}/auth/logout")
-        assert logout_response.status_code == 200
+    # FIXME! Use tokens!
+    protected_url = f"{API_URL}/auth/me"
+    protected_response = requests.get(
+        protected_url,
+        headers={
+            "Authorization": f"Password {TEST_USER['password']}",
+            "Username": TEST_USER["username"],
+        },
+    )
+    print(protected_response.text)
+    assert protected_response.status_code == 200
+
+    # TODO: logout

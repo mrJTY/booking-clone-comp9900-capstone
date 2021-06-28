@@ -129,3 +129,22 @@ class UserList(Resource):
 @login_manager.user_loader
 def load_user(user_id):
     return UserModel.query.get(user_id)
+
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    # Get the authorization header
+    username = request.headers.get("Username")
+    token = request.headers.get("Authorization")
+    if token:
+        # TODO: convert me to use tokens!
+        token = token.replace(f"Password ", "", 1)
+        user = UserModel.query.filter_by(username=username).first()
+
+        stored_password_hash = user.password_hash.encode("utf-8").decode("utf-8")
+        given_password_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+        if user and stored_password_hash == given_password_hash:
+            return user
+
+    # finally, return None if it did not login the user
+    return None
