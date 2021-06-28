@@ -13,3 +13,9 @@
 - Added Swagger for API docs
 - Gave a demo for the team to get setup on their development environment.
 - Proposal doc submitted
+
+# Week 03-04
+- Refactored venues -> listings
+- Added `flask_login` to manager user sessions
+- Generated some fake data
+- Created `/mylistings` endpoint that returns listings owned by the currently logged in user
