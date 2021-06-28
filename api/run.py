@@ -4,7 +4,7 @@ from api.resources.user import UserModel
 
 if __name__ == "__main__":
     import api.resources.user
-    import api.resources.venue
+    import api.resources.listing
     import api.resources.auth
 
     # Create all database tables
