@@ -7,8 +7,8 @@ export REPO_ROOT="${repo_root}"
 
 main() {
   cd "${REPO_ROOT}"/bookit-fe
-  npm install
-  npm start
+  yarn install
+  yarn start
 }
 
 main

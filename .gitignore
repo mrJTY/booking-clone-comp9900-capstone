@@ -10,3 +10,6 @@ api/migrations
 
 # ignored compiled Python
 *.pyc
+
+# require a local frontend install to minimize repo size
+node_modules

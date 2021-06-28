@@ -115,7 +115,7 @@ const Register = () => {
         data: {
           email: data.email,
           password: data.password,
-          username: data.name
+          username: data.username
         }
       })
         .then((response) => {
@@ -124,9 +124,9 @@ const Register = () => {
           alert('Success! :)');
 
           // store the authorization token
-          // setToken(response.data.token);
-          // navigate to the Dashboard screen
-          // history.push('/dashboard');
+          // setToken(response.data.access_token);
+          // navigate to the Login screen
+          history.push('/login');
         })
         .catch((error) => {
           let errorText = '';
@@ -197,12 +197,12 @@ const Register = () => {
         <Box className={classes.box}>
           <FormControl>
             <Controller
-              name="name"
+              name="username"
               control={control}
               defaultValue=""
               render={({ field }) => (
                 <TextField
-                  label="Your Name"
+                  label="Username"
                   color="primary"
                   {...field}
                 />

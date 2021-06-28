@@ -29,7 +29,7 @@ install_backend() {
 install_frontend() {
   echo "Installing the frontend..."
   cd "${REPO_ROOT}"/bookit-fe
-  npm install
+  yarn install
   cd -
 }
 

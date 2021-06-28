@@ -106,26 +106,24 @@ const Login = () => {
       // Post a Login request
       axios({
         method: 'POST',
-        url: `${baseUrl}/auth`,
+        url: `${baseUrl}/auth/login`,
         headers: {
           accept: 'application/json',
           'Content-Type': 'application/json',
         },
         data: {
-          email: data.email,
+          username: data.username,
           password: data.password
         }
       })
         .then((response) => {
-          // store the authorization token
 
           console.log(response);
-          alert('Success! :)');
 
-          // setToken(response.data.token);
-          // // navigate to the Dashboard screen
-          // history.push('/dashboard');
-
+          // store the authorization token
+          setToken(response.data.access_token);
+          // // navigate to the Home screen
+          history.push('/home');
         })
         .catch((error) => {
           let errorText = '';
@@ -145,7 +143,7 @@ const Login = () => {
   // the useEffect hook simply sets the page variable to the login page itself
   React.useEffect(() => {
     setPage('/login');
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const registerScreenButton = () => {
     // redirect user to the Register page
     history.push('/register');
@@ -168,12 +166,12 @@ const Login = () => {
         <Box className={classes.box}>
           <FormControl>
             <Controller
-              name="email"
+              name="username"
               control={control}
               defaultValue=""
               render={({ field }) => (
                 <TextField
-                  label="Email"
+                  label="Username"
                   {...field}
                 />
               )}

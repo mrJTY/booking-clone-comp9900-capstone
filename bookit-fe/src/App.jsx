@@ -2,7 +2,13 @@ import React from 'react';
 import './App.css';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
+import MyBookings from './pages/MyBookings';
+import Booking from './pages/Booking';
+import MyListings from './pages/MyListings';
+import Listing from './pages/Listing';
+import Discover from './pages/Discover';
+import Profile from './pages/Profile';
 import {
   BrowserRouter as Router,
   Switch,
@@ -88,8 +94,26 @@ function App () {
                 <Route exact path="/register">
                   <Register />
                 </Route>
-                <Route exact path="/dashboard">
-                  <Dashboard />
+                <Route exact path="/home">
+                  <Home />
+                </Route>
+                <Route exact path="/mybookings">
+                  <MyBookings />
+                </Route>
+                <Route exact path="/bookings/:id">
+                  <Booking />
+                </Route>                
+                <Route exact path="/mylistings">
+                  <MyListings />
+                </Route>
+                <Route exact path="/listings/:id">
+                  <Listing />
+                </Route>
+                <Route exact path="/discover">
+                  <Discover />
+                </Route>
+                <Route exact path="/profile/:user">
+                  <Profile />
                 </Route>
                 <Route path="/">
                   <Redirect to="/login" />
