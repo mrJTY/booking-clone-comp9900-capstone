@@ -1,6 +1,7 @@
 import logging
 import hashlib
 
+from api import db
 from api.resources.user import UserModel
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_restplus import Resource, fields
@@ -42,7 +43,10 @@ class AuthLogin(Resource):
 
             # Log the user in
             if stored_password_hash == given_password_hash:
-                login_user(user)
+                user.authenticated = True
+                db.session.add(user)
+                db.session.commit()
+                login_user(user, remember=True)
                 return True
             return False
         except Exception as e:
@@ -57,6 +61,10 @@ class AuthLogout(Resource):
     def post(self):
         try:
             # Log the user out
+            user = current_user
+            user.authenticated = False
+            db.session.add(user)
+            db.session.commit()
             logout_user()
             return True
         except Exception as e:
@@ -74,4 +82,4 @@ class AuthMe(Resource):
     @login_required
     def get(self):
         logging.info(current_user)
-        return current_user
+        return current_user.username

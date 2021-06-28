@@ -1,10 +1,11 @@
-import logging
-import json
-from sqlalchemy.orm.attributes import flag_modified
 from api import db
 from api.utils.req_handling import *
+from flask_login import current_user, login_required
 from flask_restplus import Resource, fields
+from sqlalchemy.orm.attributes import flag_modified
 import api
+import json
+import logging
 
 venue = api.api.namespace("venues", description="Venue operations")
 
@@ -16,16 +17,19 @@ venue_details = api.api.model(
         "address": fields.String(required=True, description="The address of the venue"),
         "category": fields.String(required=True, description="The category"),
         "description": fields.String(required=True, description="The description"),
+        "user_id": fields.Integer(required=True, description="The owner of the venue"),
     },
 )
 
 
 class VenueModel(db.Model):
+    __tablename__ = "venues"
     venue_id = db.Column(db.Integer, primary_key=True)
     venue_name = db.Column(db.Text, unique=True)
     address = db.Column(db.Text, unique=True)
     category = db.Column(db.Text, unique=True)
     description = db.Column(db.Text, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
 
     def __repr__(self):
         return json.dumps(self.to_dict())
@@ -37,6 +41,7 @@ class VenueModel(db.Model):
             "address": self.address,
             "category": self.category,
             "description": self.description,
+            "user_id": self.user_id,
         }
         return data
 
@@ -54,6 +59,7 @@ class Venue(Resource):
 
     @venue.doc(description=f"venue_id must be provided")
     @venue.marshal_with(venue_details)
+    @login_required
     def delete(self, venue_id):
         logging.info(f"Deleting venue {venue_id}")
         venue = VenueModel.query.get_or_404(venue_id)
@@ -64,6 +70,7 @@ class Venue(Resource):
     # Need to see what updates are made
     @venue.doc(description=f"venue_id must be provided")
     @venue.marshal_with(venue_details)
+    @login_required
     def put(self, venue_id):
         logging.info(f"Updating venue {venue_id}")
         # get venue id
@@ -74,6 +81,7 @@ class Venue(Resource):
         venue.address = content["address"]
         venue.category = content["category"]
         venue.description = content["description"]
+        venue.user_id = current_user.user_id
         flag_modified(venue, "description")
         db.session.merge(venue)
         db.session.flush()
@@ -86,6 +94,7 @@ class VenueList(Resource):
     @venue.doc(description=f"Creates a new venue")
     @venue.expect(venue_details)
     @venue.marshal_with(venue_details)
+    @login_required
     def post(self):
         logging.info("Registering a venue")
         content = get_request_json()
@@ -102,6 +111,7 @@ class VenueList(Resource):
                     address=address,
                     description=description,
                     category=category,
+                    user_id=current_user.user_id,
                 )
                 db.session.add(v)
                 db.session.commit()
