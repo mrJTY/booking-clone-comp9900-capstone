@@ -7,7 +7,10 @@ import {
 } from 'react-router-dom';
 import {
   makeStyles,
+  Box,
   Container,
+  Typography,
+  CircularProgress,
 } from '@material-ui/core';
 
 // Page styling used on the MyBookings screen and its subcomponents
@@ -29,7 +32,14 @@ const useStyles = makeStyles((theme) => ({
   containerDiv: {
     display: 'flex',
     flexDirection: 'column',
-    alignSelf: 'flex-start'
+    alignSelf: 'flex-start',
+    width: '100%',
+  },
+  mytitleDiv: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    margin: theme.spacing(1),
   },
   button: {
     margin: theme.spacing(1),
@@ -77,7 +87,26 @@ const Discover = () => {
     <Container>
       <Navbar page={page} />
       <Container className={classes.container}>
-        <h2>Welcome to your Discoveries!</h2>
+        {
+          loadingState !== 'success' &&
+          <div>
+            <CircularProgress color="secondary" />
+          </div>
+        }
+        {
+          loadingState === 'success' &&
+          <Box className={classes.containerDiv}>
+            <Box className={classes.mytitleDiv}>
+              <Box>
+                <Typography paragraph align="left" variant="h4">
+                  Discover
+                </Typography>
+              </Box>
+            </Box>
+            <br />
+            <br />
+          </Box>
+        }
       </Container>
     </Container>
   )

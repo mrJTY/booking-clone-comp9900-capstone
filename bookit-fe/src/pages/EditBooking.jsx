@@ -101,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // The EditBooking page allows a user to create or modify a booking.
-const Listing = () => {
+const EditBooking = () => {
   const context = React.useContext(StoreContext);
   // const token = context.token[0];
   // const history = useHistory();
@@ -114,15 +114,15 @@ const Listing = () => {
   const [page, setPage] = context.pageState;
   // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
-  
+
   React.useEffect(() => {
-    setPage('/listings/id');
-    async function setupListing () {
+    setPage('/bookings/edit/id');
+    async function setupEditBooking () {
       setLoadingState('loading');
       // await fetchUserFeed(...);
       setLoadingState('success');
     }
-    setupListing();
+    setupEditBooking();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // classes used for Material UI component styling
@@ -131,19 +131,19 @@ const Listing = () => {
     <Container className={classes.outerContainer}>
       <Navbar page={page} />
       <Container className={classes.container}>
-        {
-          loadingState !== 'success' &&
-          <div>
-            <CircularProgress color="secondary" />
-          </div>
-        }
-        {
-          loadingState === 'success' &&
-          <h2>Listing Placeholder</h2>
-        }
+      {
+        loadingState !== 'success' &&
+        <div>
+          <CircularProgress color="secondary" />
+        </div>
+      }
+      {
+        loadingState === 'success' &&
+        <h2>Edit Booking page placeholder</h2>
+      }
       </Container>
     </Container>
   )
 }
 
-export default Listing;
+export default EditBooking;

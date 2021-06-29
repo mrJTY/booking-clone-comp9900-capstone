@@ -60,9 +60,15 @@ const Navbar = ({ page }) => {
   const classes = useStyles();
   const theme = useTheme();
   // also need own username to navigate to own profile page
-  const username = 'me';
+  const user = 'me';
+
+  // *** TESTING
+  const [username, setUsername] = context.username;
+  const [password, setPassword] = context.password;
+  // END TEST
 
   const setToken = context.token[1];
+
   const baseUrl = context.baseUrl;
   // sends a POST API request confirming an admin logging out
   const logoutButton = () => {
@@ -73,13 +79,20 @@ const Navbar = ({ page }) => {
         accept: 'application/json',
         'content-type': 'application/json',
         // Authorization: `Bearer ${token}`
+        Authorization: `Password ${password}`,
+        Username: `${username}`,
       }
     })
       .then(() => {
         // unset the authorization token
         setToken(null);
+
         // navigate to the Login screen
         history.push('/login');
+
+        // *** TEST unset the username / password
+        setUsername(null);
+        setPassword(null);
       })
       .catch((error) => {
         let errorText = '';
@@ -100,6 +113,9 @@ const Navbar = ({ page }) => {
         );
         setToken(null);
         history.push('/login');
+        // *** TEST unset the username / password
+        setUsername(null);
+        setPassword(null);
       })
   }
 
@@ -161,7 +177,7 @@ const Navbar = ({ page }) => {
                 color={page === '/profile/me' ? "primary" : "default"}
                 className={classes.buttonText}
                 onClick={() => {
-                  history.push(`/profile/${username}`)
+                  history.push(`/profile/${user}`)
                 }}
               >
                 Profile

@@ -5,8 +5,11 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import MyBookings from './pages/MyBookings';
 import Booking from './pages/Booking';
+import EditBooking from './pages/EditBooking';
 import MyListings from './pages/MyListings';
 import Listing from './pages/Listing';
+import NewListing from './pages/NewListing';
+import EditListing from './pages/EditListing';
 import Discover from './pages/Discover';
 import Profile from './pages/Profile';
 import {
@@ -102,12 +105,21 @@ function App () {
                 </Route>
                 <Route exact path="/bookings/:id">
                   <Booking />
-                </Route>                
+                </Route>
+                <Route exact path="/bookings/edit/:id">
+                  <EditBooking />
+                </Route>
                 <Route exact path="/mylistings">
                   <MyListings />
                 </Route>
+                <Route exact path="/listings/create">
+                  <NewListing />
+                </Route>
                 <Route exact path="/listings/:id">
                   <Listing />
+                </Route>
+                <Route exact path="/listings/edit/:id">
+                  <EditListing />
                 </Route>
                 <Route exact path="/discover">
                   <Discover />

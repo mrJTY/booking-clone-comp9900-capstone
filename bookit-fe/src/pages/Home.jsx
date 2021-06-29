@@ -7,8 +7,13 @@ import {
 } from 'react-router-dom';
 import {
   makeStyles,
+  Box,
   Container,
+  Typography,
+  CircularProgress,
 } from '@material-ui/core';
+// import axios from 'axios';
+// import { toast } from 'react-toastify';
 
 // Page styling used on the Home screen and its subcomponents
 const useStyles = makeStyles((theme) => ({
@@ -29,7 +34,14 @@ const useStyles = makeStyles((theme) => ({
   containerDiv: {
     display: 'flex',
     flexDirection: 'column',
-    alignSelf: 'flex-start'
+    alignSelf: 'flex-start',
+    width: '100%',
+  },
+  mytitleDiv: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    margin: theme.spacing(1),
   },
   button: {
     margin: theme.spacing(1),
@@ -45,12 +57,18 @@ const Home = () => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   // const history = useHistory();
+  // const baseUrl = context.baseUrl;
   
   React.useEffect(() => {
     if (token === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // *** TESTING
+  const username = context.username[0];
+  // const password = context.password[0];
+  // END TEST
 
   // object containing all of the users a user is following from a GET API request
   // const [following, setFollowing] = context.following;
@@ -59,14 +77,22 @@ const Home = () => {
   // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
 
+  // class used for the Toastify error component styling
+  // const toastErrorStyle = {
+  //   backgroundColor: '#cc0000',
+  //   opacity: 0.8,
+  //   textAlign: 'center',
+  //   fontSize: '18px'
+  // };
+
   React.useEffect(() => {
     setPage('/home');
-    async function setupDash () {
+    async function setupHome () {
       setLoadingState('loading');
       // await fetchUserFeed(...);
       setLoadingState('success');
     }
-    setupDash();
+    setupHome();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // classes used for Material UI component styling
@@ -78,15 +104,23 @@ const Home = () => {
         {
           loadingState !== 'success' &&
           <div>
-            <h1>Loading your Dashboard...</h1>
+            <CircularProgress color="secondary" />
           </div>
         }
         {
           loadingState === 'success' &&
           // following.length === 0 &&
-          <div>
-            <h3>You are following nobody. Try searching for users to follow!</h3>
-          </div>
+          <Box className={classes.containerDiv}>
+            <Box className={classes.mytitleDiv}>
+              <Box>
+                <Typography paragraph align="left" variant="h4">
+                  Welcome, {username}.
+                </Typography>
+              </Box>
+            </Box>
+            <br />
+            <br />
+          </Box>
         }
         {/* {
           loadingState === 'success' &&

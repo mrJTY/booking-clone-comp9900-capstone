@@ -64,7 +64,6 @@ const useStyles = makeStyles((theme) => ({
 const Register = () => {
   // context variables used throughout the page
   const context = React.useContext(StoreContext);
-  const setToken = context.token[1];
   const baseUrl = context.baseUrl;
   const history = useHistory();
   // class used for the Toastify error component styling
@@ -121,10 +120,19 @@ const Register = () => {
         .then((response) => {
 
           console.log(response);
-          alert('Success! :)');
 
-          // store the authorization token
-          // setToken(response.data.access_token);
+          toast.success(
+            'Successfully signed up to BookIt', {
+              position: 'top-right',
+              hideProgressBar: true,
+              style: {
+                opacity: 0.8,
+                textAlign: 'center',
+                fontSize: '18px'
+              }
+            }
+          );
+
           // navigate to the Login screen
           history.push('/login');
         })

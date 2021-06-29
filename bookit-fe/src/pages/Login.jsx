@@ -1,7 +1,10 @@
 import React from 'react';
 import BookitLogo from '../assets/bookit-logo.png';
 import { useHistory } from 'react-router-dom';
-import { useForm, Controller, appendErrors } from 'react-hook-form';
+import {
+  useForm,
+  Controller,
+} from 'react-hook-form';
 import { StoreContext } from '../utils/store';
 import {
   makeStyles,
@@ -66,7 +69,11 @@ const useStyles = makeStyles((theme) => ({
 const Login = () => {
   // context variables used throughout the page
   const context = React.useContext(StoreContext);
-  const setToken = context.token[1];
+  // const setToken = context.token[1];
+
+  const setUsername = context.username[1];
+  const setPassword = context.password[1];
+
   const baseUrl = context.baseUrl;
   const setPage = context.pageState[1];
   const history = useHistory();
@@ -85,10 +92,15 @@ const Login = () => {
     console.log('entered data is:');
     console.log(data);
 
+    // *** TESTING
+    setUsername(data.username);
+    setPassword(data.password);
+    // *** END TEST
+
     // Check for empty fields
-    if (data.email === '') {
+    if (data.username === '') {
       toast.error(
-        'Please enter your Email address', {
+        'Please enter your Username', {
           position: 'top-right',
           hideProgressBar: true,
           style: toastErrorStyle
@@ -118,11 +130,12 @@ const Login = () => {
       })
         .then((response) => {
 
-          console.log(response);
+          // console.log(response);
 
           // store the authorization token
-          setToken(response.data.access_token);
-          // // navigate to the Home screen
+          // setToken(response.data.access_token);
+
+          // navigate to the Home screen
           history.push('/home');
         })
         .catch((error) => {

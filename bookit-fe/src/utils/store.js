@@ -9,19 +9,32 @@ const ContextStore = ({ children }) => {
   const [token, setToken] = React.useState(null);
   // the page variable stores the current page as a string
   const [page, setPage] = React.useState('/login');
+  // concerned with page rendering
+  const [updated, setUpdated] = React.useState(false);
+
+  const [mylistings, setMylistings] = React.useState([]);
+  
   // object containing all of the users a user is following from a GET API request
   const [following, setFollowing] = React.useState({});
 
   // another option is simply storing the user info from the GET request
-  const [userinfo, setUserinfo] = React.useState({});
+  // const [userinfo, setUserinfo] = React.useState({});
+
+  // *** TESTING PURPOSES
+  const [username, setUsername] = React.useState(null);
+  const [password, setPassword] = React.useState(null);
+  // *** END TEST
 
   const store = {
     baseUrl: `http://localhost:${port}`,
     token: [token, setToken],
     pageState: [page, setPage],
+    updates: [updated, setUpdated],
+    mylistings: [mylistings, setMylistings],
     following: [following, setFollowing],
 
-    userinfo: [userinfo, setUserinfo],
+    username: [username, setUsername],
+    password: [password, setPassword],
     
   }
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
