@@ -17,29 +17,33 @@ def test_register_user():
 
 
 def test_authenticate():
-    with requests.session() as s:
-        # Access the login endpoint
-        login_response = s.post(
-            f"{API_URL}/auth/login",
-            json={
-                "username": TEST_USER["username"],
-                "password": TEST_USER["password"],
-            },
-        )
-        assert login_response.status_code == 200
-        assert login_response.text == "true\n"
+    # Access the login endpoint
+    login_response = requests.post(
+        f"{API_URL}/auth/login",
+        json={
+            "username": TEST_USER["username"],
+            "password": TEST_USER["password"],
+        },
+    )
+    assert login_response.status_code == 200
 
+    token = login_response.json()["accessToken"]
 
-    # FIXME! Use tokens!
     protected_url = f"{API_URL}/auth/me"
     protected_response = requests.get(
         protected_url,
         headers={
-            "Authorization": f"Password {TEST_USER['password']}",
-            "Username": TEST_USER["username"],
+            "Authorization": f"JWT {token}",
         },
     )
-    print(protected_response.text)
     assert protected_response.status_code == 200
+    assert protected_response.json()["username"] == TEST_USER["username"]
+    assert protected_response.json()["email"] == TEST_USER["email"]
 
-    # TODO: logout
+    logout_response = requests.post(
+        f"{API_URL}/auth/logout",
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    assert logout_response.status_code == 200

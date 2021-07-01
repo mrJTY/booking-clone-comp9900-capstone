@@ -22,6 +22,7 @@ check_prerequisites() {
 install_backend() {
   echo "Installing the backend..."
   pip3 install virtualenv
+  rm -rf "${REPO_ROOT}"/.venv
   python3 -m virtualenv "${REPO_ROOT}"/.venv
   "${REPO_ROOT}"/.venv/bin/pip install -r "${REPO_ROOT}"/api/requirements.txt
 }

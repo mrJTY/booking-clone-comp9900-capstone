@@ -1,12 +1,15 @@
-import logging
+from datetime import datetime, timedelta
 import hashlib
+import logging
 
-from api import db
+from api import db, login_manager
+from api.config import Config
 from api.resources.user import UserModel
+from api.utils.req_handling import *
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_restplus import Resource, fields
 import api
-from api.utils.req_handling import *
+import jwt
 
 auth = api.api.namespace("auth", description="Auth operations")
 
@@ -37,7 +40,6 @@ class AuthLogin(Resource):
             password = content["password"]
             # Find the user
             user = UserModel.query.filter_by(username=username).first()
-
             stored_password_hash = user.password_hash.encode("utf-8").decode("utf-8")
             given_password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
 
@@ -46,8 +48,27 @@ class AuthLogin(Resource):
                 user.authenticated = True
                 db.session.add(user)
                 db.session.commit()
+                # Flask-Login logs the user in the db
                 login_user(user, remember=True)
-                return True
+                # Generate token to pass back to client with JWT
+                # https://medium.com/@apcelent/json-web-token-tutorial-with-example-in-python-df7dda73b579
+                iat = datetime.utcnow()
+                exp = datetime.utcnow() + timedelta(
+                    minutes=Config.JWT_ACCESS_LIFESPAN["minutes"]
+                )
+                token = jwt.encode(
+                    {
+                        "sub": user.username,
+                        "iat": iat,
+                        "exp": exp,
+                    },
+                    Config.SECRET_KEY,
+                    algorithm="HS256",
+                )
+                # Return the access token
+                return {
+                    "accessToken": token.decode("utf-8"),
+                }
             return False
         except Exception as e:
             logging.error(e)
@@ -60,7 +81,6 @@ class AuthLogout(Resource):
     @auth.doc(description="Logs a user out")
     def post(self):
         try:
-            # Log the user out
             user = current_user
             user.authenticated = False
             db.session.add(user)
@@ -72,14 +92,50 @@ class AuthLogout(Resource):
             api.api.abort(500, f"{e}")
 
 
-# FIXME! This fails
 @auth.route("/me")
 @auth.response(404, "User not logged in")
 class AuthMe(Resource):
     @auth.doc(
         description="Access a protected endpoint and show details of the current user"
     )
-    @login_required
     def get(self):
-        logging.info(current_user)
-        return current_user.username
+        try:
+            logging.info(current_user)
+            return current_user.to_dict()
+        except Exception as e:
+            logging.error(e)
+            api.api.abort(500, f"{e}")
+
+
+# Add a user loader:
+# https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
+@login_manager.user_loader
+def load_user(user_id):
+    return UserModel.query.get(user_id)
+
+
+# Flask login and Flask JWT integration
+# https://stackoverflow.com/questions/50856038/using-flask-login-and-flask-jwt-together-in-a-rest-api
+@login_manager.request_loader
+def load_user_from_request(request):
+    # Get the authorization header
+    auth_headers = request.headers.get("Authorization", "").split()
+    if len(auth_headers) != 2:
+        return None
+    try:
+        token = auth_headers[1]
+        # If user found and token not expired, return user
+        # Decode JWT
+        data = jwt.decode(token, Config.SECRET_KEY)
+        # Fetch the username in the JWT
+        username = data["sub"]
+        user = UserModel.query.filter_by(username=username).first()
+        if user:
+            return user
+    except jwt.ExpiredSignatureError as e:
+        logging.error(e)
+        return None
+    except (jwt.InvalidTokenError, Exception) as e:
+        logging.error(e)
+        return None
+    return None

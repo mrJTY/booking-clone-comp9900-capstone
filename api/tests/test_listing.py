@@ -38,36 +38,45 @@ def test_register_user():
 
 
 def test_create_listing():
+    # Login first
+    login_response = requests.post(
+        f"{API_URL}/auth/login",
+        json={
+            "username": TEST_LISTING_USER["username"],
+            "password": TEST_LISTING_USER["password"],
+        },
+    )
+    assert login_response.status_code == 200
+    token = login_response.json()["accessToken"]
 
-    with requests.session() as s:
-        # Login first
-        login_response = s.post(
-            f"{API_URL}/auth/login",
-            json={
-                "username": TEST_LISTING_USER["username"],
-                "password": TEST_LISTING_USER["password"],
-            },
-        )
-        assert login_response.status_code == 200
-        assert login_response.text == "true\n"
+    url = f"{API_URL}/listings"
+    response = requests.post(
+        url,
+        json=TEST_LISTING,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual = response.json()
+    assert actual["listing_name"] == TEST_LISTING["listing_name"]
+    assert actual["address"] == TEST_LISTING["address"]
+    assert actual["category"] == TEST_LISTING["category"]
+    assert actual["description"] == TEST_LISTING["description"]
 
-        # Create a listing
-        url = f"{API_URL}/listings"
-        response = s.post(url, json=TEST_LISTING)
-        actual = response.json()
-        assert actual["listing_name"] == TEST_LISTING["listing_name"]
-        assert actual["address"] == TEST_LISTING["address"]
-        assert actual["category"] == TEST_LISTING["category"]
-        assert actual["description"] == TEST_LISTING["description"]
-
-        # Test update
-        listing_url = f"{API_URL}/listings/{actual['listing_id']}"
-        response = s.put(listing_url, json=TEST_2_LISTING)
-        actual = response.json()
-        assert actual["listing_name"] == TEST_2_LISTING["listing_name"]
-        assert actual["address"] == TEST_2_LISTING["address"]
-        assert actual["category"] == TEST_2_LISTING["category"]
-        assert actual["description"] == TEST_2_LISTING["description"]
+    # Test update
+    listing_url = f"{API_URL}/listings/{actual['listing_id']}"
+    response = requests.put(
+        listing_url,
+        json=TEST_2_LISTING,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual = response.json()
+    assert actual["listing_name"] == TEST_2_LISTING["listing_name"]
+    assert actual["address"] == TEST_2_LISTING["address"]
+    assert actual["category"] == TEST_2_LISTING["category"]
+    assert actual["description"] == TEST_2_LISTING["description"]
 
         #Test delete
         listing_url = f"{API_URL}/listings/{actual['listing_id']}"
@@ -75,19 +84,24 @@ def test_create_listing():
         assert response.status_code == 200
 
 def test_get_my_listings():
-    with requests.session() as s:
-        # Login first
-        login_response = s.post(
-            f"{API_URL}/auth/login",
-            json={
-                "username": TEST_LISTING_USER["username"],
-                "password": TEST_LISTING_USER["password"],
-            },
-        )
-        assert login_response.status_code == 200
-        assert login_response.text == "true\n"
+    # Login first
+    login_response = requests.post(
+        f"{API_URL}/auth/login",
+        json={
+            "username": TEST_LISTING_USER["username"],
+            "password": TEST_LISTING_USER["password"],
+        },
+    )
+    assert login_response.status_code == 200
+    token = login_response.json()["accessToken"]
 
-        # Get my listings
-        url = f"{API_URL}/listings/mylistings"
-        response = s.get(url)
-        assert response.status_code == 200
+    # Get my listings
+    url = f"{API_URL}/listings/mylistings"
+    mylistings_response = requests.get(
+        url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    assert mylistings_response.status_code == 200
+    assert "mylistings" in mylistings_response.json().keys()

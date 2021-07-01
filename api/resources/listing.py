@@ -67,7 +67,6 @@ class Listing(Resource):
 
     @listing.doc(description=f"listing_id must be provided")
     @listing.marshal_with(listing_details)
-    @login_required
     def delete(self, listing_id):
         logging.info(f"Deleting listing {listing_id}")
         listing = ListingModel.query.filter(ListingModel.listing_id == listing_id)
@@ -78,7 +77,6 @@ class Listing(Resource):
     # Need to see what updates are made
     @listing.doc(description=f"listing_id must be provided")
     @listing.marshal_with(listing_details)
-    @login_required
     def put(self, listing_id):
         logging.info(f"Updating listing {listing_id}")
         # get listing id
@@ -102,41 +100,38 @@ class ListingList(Resource):
     @listing.doc(description=f"Creates a new listing")
     @listing.expect(listing_details)
     @listing.marshal_with(listing_details)
-    @login_required
     def post(self):
         logging.info("Registering a listing")
         content = get_request_json()
-        if request.method == "POST":
-            try:
-                # Receive contents from request
-                logging.info(content)
-                listing_name = content["listing_name"]
-                address = content["address"]
-                description = content["description"]
-                category = content["category"]
-                v = ListingModel(
-                    listing_name=listing_name,
-                    address=address,
-                    description=description,
-                    category=category,
-                    user_id=current_user.user_id,
-                )
-                db.session.add(v)
-                db.session.commit()
-                listing_id = v.listing_id
-                logging.info(f"listing_id created: {listing_id}")
-                return ListingModel.query.get_or_404(listing_id).to_dict()
+        try:
+            # Receive contents from request
+            logging.info(content)
+            listing_name = content["listing_name"]
+            address = content["address"]
+            description = content["description"]
+            category = content["category"]
+            v = ListingModel(
+                listing_name=listing_name,
+                address=address,
+                description=description,
+                category=category,
+                user_id=current_user.user_id,
+            )
+            db.session.add(v)
+            db.session.commit()
+            listing_id = v.listing_id
+            logging.info(f"listing_id created: {listing_id}")
+            return ListingModel.query.get_or_404(listing_id).to_dict()
 
-            except Exception as e:
-                logging.error(e)
-                api.api.abort(500, f"{e}")
+        except Exception as e:
+            logging.error(e)
+            api.api.abort(500, f"{e}")
 
 
 # TODO: Paginate this and add docs
 @listing.route("/mylistings")
 class MyListings(Resource):
     @listing.doc(description=f"Fetch my listings")
-    @login_required
     def get(self):
         my_listings = ListingModel.query.filter_by(user_id=current_user.user_id).all()
         my_listings = [l.to_dict() for l in my_listings]

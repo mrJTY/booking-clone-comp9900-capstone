@@ -1,7 +1,6 @@
 import logging
 import json
 
-from api import login_manager
 from api import db
 from api.utils.req_handling import *
 from flask_restplus import Resource, fields
@@ -100,51 +99,24 @@ class UserList(Resource):
     def post(self):
         logging.info("Registering a user")
         content = get_request_json()
-        if request.method == "POST":
-            try:
-                # Receive contents from request
-                logging.info(content)
-                username = content["username"]
-                password = content["password"]
-                email = content["email"]
-                password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
-                u = UserModel(
-                    username=username,
-                    email=email,
-                    password_hash=password_hash,
-                )
-                logging.info(u)
-                db.session.add(u)
-                db.session.commit()
-                logging.info(f"UserID created: {u}")
-                return UserModel.query.filter_by(user_id=u.user_id).first()
+        try:
+            # Receive contents from request
+            logging.info(content)
+            username = content["username"]
+            password = content["password"]
+            email = content["email"]
+            password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+            u = UserModel(
+                username=username,
+                email=email,
+                password_hash=password_hash,
+            )
+            logging.info(u)
+            db.session.add(u)
+            db.session.commit()
+            logging.info(f"UserID created: {u}")
+            return UserModel.query.filter_by(user_id=u.user_id).first()
 
-            except Exception as e:
-                logging.error(e)
-                api.api.abort(500, f"{e}")
-
-
-# Add a user loader:
-# https://www.digitalocean.com/community/tutorials/how-to-add-authentication-to-your-app-with-flask-login
-@login_manager.user_loader
-def load_user(user_id):
-    return UserModel.query.get(user_id)
-
-
-@login_manager.request_loader
-def load_user_from_request(request):
-    # Get the authorization header
-    username = request.headers.get("Username")
-    token = request.headers.get("Authorization")
-    if token:
-        # TODO: convert me to use tokens!
-        token = token.replace(f"Password ", "", 1)
-        user = UserModel.query.filter_by(username=username).first()
-
-        stored_password_hash = user.password_hash.encode("utf-8").decode("utf-8")
-        given_password_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
-        if user and stored_password_hash == given_password_hash:
-            return user
-
-    # finally, return None if it did not login the user
-    return None
+        except Exception as e:
+            logging.error(e)
+            api.api.abort(500, f"{e}")
