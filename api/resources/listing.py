@@ -70,8 +70,8 @@ class Listing(Resource):
     @login_required
     def delete(self, listing_id):
         logging.info(f"Deleting listing {listing_id}")
-        listing = ListingModel.query.get_or_404(listing_id)
-        ListingModel.query.filter(ListingModel.listing_id == listing_id).delete()
+        listing = ListingModel.query.filter(ListingModel.listing_id == listing_id)
+        listing.delete()
         db.session.commit()
         return listing
 

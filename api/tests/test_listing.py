@@ -69,16 +69,10 @@ def test_create_listing():
         assert actual["category"] == TEST_2_LISTING["category"]
         assert actual["description"] == TEST_2_LISTING["description"]
 
-
-# def test_delete_listing():
-#    listing_url = f"{API_URL}/listings/1"
-#    response = requests.delete(listing_url,json=TEST_2_LISTING)
-#    actual = response.json()
-#    print("What is coming from the actual:")
-#    print(actual)
-#    expected = {""}
-#    assert actual == expected
-
+        #Test delete
+        listing_url = f"{API_URL}/listings/{actual['listing_id']}"
+        response = s.delete(listing_url,json=TEST_2_LISTING)
+        assert response.status_code == 200
 
 def test_get_my_listings():
     with requests.session() as s:
