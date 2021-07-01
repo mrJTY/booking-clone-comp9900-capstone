@@ -1,0 +1,155 @@
+from datetime import datetime
+from dateutil.parser import parse
+import json
+import logging
+import pytz
+
+from api import db
+from api.resources.listing import ListingModel
+from api.utils.req_handling import *
+from flask_login import current_user
+from flask_restplus import Resource, fields
+from sqlalchemy.orm.attributes import flag_modified
+import api
+
+availability = api.api.namespace(
+    "availabilities", description="availability operations"
+)
+
+availability_details = api.api.model(
+    "availability",
+    {
+        "availability_id": fields.Integer(
+            required=True, description="The ID of the availability"
+        ),
+        "listing_id": fields.Integer(required=True, description="The listing id"),
+        "start_time": fields.DateTime(
+            required=True, description="The start time of the availability"
+        ),
+        "end_time": fields.DateTime(
+            required=True, description="The start time of the availability"
+        ),
+    },
+)
+
+
+class AvailabilityModel(db.Model):
+    __tablename__ = "availabilities"
+    availability_id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(
+        db.Integer, db.ForeignKey("listings.listing_id"), nullable=False
+    )
+    # Store them in Unix Time
+    start_time = db.Column(db.Integer)
+    end_time = db.Column(db.Integer)
+    is_available = db.Column(db.Boolean)
+
+    def __repr__(self):
+        return json.dumps(self.to_dict())
+
+    def to_dict(self):
+        data = {
+            "availability_id": self.availability_id,
+            "listing_id": self.listing_id,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "is_available": self.is_available,
+        }
+        return data
+
+
+# See example: https://github.com/noirbizarre/flask-restplus/blob/master/examples/todo.py
+@availability.route("/<int:availability_id>")
+@availability.param("availability_id", "The availability identifier")
+@availability.response(404, "availability not found")
+class Availability(Resource):
+    @availability.doc(description=f"Gets the availability slot")
+    @availability.marshal_with(availability_details)
+    def get(self, availability_id):
+        logging.info(f"Getting availability {availability_id}")
+        a = AvailabilityModel.query.get_or_404(availability_id).to_dict()
+        a["start_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["start_time"]))
+        a["end_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["end_time"]))
+        return a
+
+    @availability.doc(description=f"availability_id must be provided")
+    @availability.marshal_with(availability_details)
+    def delete(self, availability_id):
+        logging.info(f"Deleting availability {availability_id}")
+        a = AvailabilityModel.query.filter(
+            AvailabilityModel.availability_id == availability_id
+        )
+        a.delete()
+        db.session.commit()
+        return availability
+
+    # Need to see what updates are made
+    @availability.doc(description=f"availability_id must be provided")
+    @availability.marshal_with(availability_details)
+    def put(self, availability_id):
+        logging.info(f"Updating availability {availability_id}")
+        # get availability id
+        content = get_request_json()
+        a = AvailabilityModel.query.get_or_404(availability_id)
+        # update the availability data
+        a.listing_id = content["listing_id"]
+        a.start_time = parse(content["start_time"]).timestamp()
+        a.end_time = parse(content["end_time"]).timestamp()
+        flag_modified(a, "listing_id")
+        db.session.merge(a)
+        db.session.flush()
+        db.session.commit()
+        a["start_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["start_time"]))
+        a["end_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["end_time"]))
+        return a
+
+
+@availability.route("")
+class AvailabilityList(Resource):
+    @availability.doc(description=f"Creates a new availability")
+    @availability.expect(availability_details)
+    @availability.marshal_with(availability_details)
+    def post(self):
+        logging.info("Registering a availability")
+        content = get_request_json()
+        try:
+            # Receive contents from request
+            logging.info(content)
+            listing_id = content["listing_id"]
+
+            # Save them in unix time
+            start_time = parse(content["start_time"]).timestamp()
+            end_time = parse(content["end_time"]).timestamp()
+
+            # You can only create an availability if you own the listing
+            listing = ListingModel.query.filter(
+                ListingModel.listing_id == listing_id
+            ).first()
+            if listing is None:
+                raise Exception("Listing not found")
+            if listing.user_id != current_user.user_id:
+                raise Exception("You are not the owner, can't create availability")
+
+            # Continue creating the availability
+            a = AvailabilityModel(
+                listing_id=listing_id,
+                start_time=start_time,
+                end_time=end_time,
+                is_available=True,
+            )
+            db.session.add(a)
+            db.session.commit()
+            availability_id = a.availability_id
+            logging.info(f"availability_id created: {availability_id}")
+
+            # Return what you just created
+            a = AvailabilityModel.query.get_or_404(availability_id).to_dict()
+            a["start_time"] = pytz.utc.localize(
+                datetime.utcfromtimestamp(a["start_time"])
+            )
+            a["end_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["end_time"]))
+            return a
+
+        except Exception as e:
+            logging.error(e)
+            api.api.abort(500, f"{e}")

@@ -1,6 +1,6 @@
 from api import db
 from api.utils.req_handling import *
-from flask_login import current_user, login_required
+from flask_login import current_user
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
 import api

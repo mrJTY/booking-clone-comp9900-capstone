@@ -6,6 +6,7 @@ if __name__ == "__main__":
     import api.resources.user
     import api.resources.listing
     import api.resources.auth
+    import api.resources.availability
 
     # Create all database tables
     db.create_all()
