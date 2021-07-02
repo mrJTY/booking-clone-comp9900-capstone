@@ -9,7 +9,7 @@ import axios from 'axios';
 //   fontSize: '18px'
 // };
 
-export async function fetchMyListings (baseUrl, username, password, setMylistings)
+export async function fetchMyListings (baseUrl, token, setMylistings)
 {
   const response = await axios({
     method: 'GET',
@@ -17,8 +17,7 @@ export async function fetchMyListings (baseUrl, username, password, setMylisting
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      Authorization: `Password ${password}`,
-      Username: `${username}`,
+      "Authorization": `JWT ${token}`,
     },
   })
   await setMylistings(response.data.mylistings);

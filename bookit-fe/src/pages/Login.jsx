@@ -69,10 +69,9 @@ const useStyles = makeStyles((theme) => ({
 const Login = () => {
   // context variables used throughout the page
   const context = React.useContext(StoreContext);
-  // const setToken = context.token[1];
+  const setToken = context.token[1];
 
   const setUsername = context.username[1];
-  const setPassword = context.password[1];
 
   const baseUrl = context.baseUrl;
   const setPage = context.pageState[1];
@@ -88,15 +87,7 @@ const Login = () => {
   // and controls form submission
   const { handleSubmit, control } = useForm();
   const onSubmit = (data) => {
-
-    console.log('entered data is:');
-    console.log(data);
-
-    // *** TESTING
     setUsername(data.username);
-    setPassword(data.password);
-    // *** END TEST
-
     // Check for empty fields
     if (data.username === '') {
       toast.error(
@@ -129,12 +120,8 @@ const Login = () => {
         }
       })
         .then((response) => {
-
-          // console.log(response);
-
           // store the authorization token
-          // setToken(response.data.access_token);
-
+          setToken(response.data.accessToken);
           // navigate to the Home screen
           history.push('/home');
         })

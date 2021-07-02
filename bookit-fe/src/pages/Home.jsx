@@ -65,10 +65,7 @@ const Home = () => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // *** TESTING
   const username = context.username[0];
-  // const password = context.password[0];
-  // END TEST
 
   // object containing all of the users a user is following from a GET API request
   // const [following, setFollowing] = context.following;

@@ -38,9 +38,9 @@ const Logout = () => {
       method: 'POST',
       url: `${baseUrl}/auth/logout`,
       headers: {
-        accept: 'application/json',
+        'accept': 'application/json',
         'content-type': 'application/json',
-        // Authorization: `Bearer ${token}`
+        'Authorization': `JWT ${token}`
       }
     })
       .then(() => {

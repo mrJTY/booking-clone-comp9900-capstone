@@ -85,11 +85,7 @@ const MyListings = () => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // *** TESTING
   const username = context.username[0];
-  const password = context.password[0];
-  // END TEST
-
   const [mylistings, setMylistings] = context.mylistings;
 
   // object containing all of the users a user is following from a GET API request
@@ -118,7 +114,7 @@ const MyListings = () => {
     setPage('/mylistings');
     async function setupMyListings () {
       setLoadingState('loading');
-      await fetchMyListings(baseUrl, username, password, setMylistings);
+      await fetchMyListings(baseUrl, token, setMylistings);
       setLoadingState('success');
     }
     setupMyListings();
@@ -134,7 +130,6 @@ const MyListings = () => {
         {
           loadingState !== 'success' &&
           <div>
-            {/* Loading... */}
             <CircularProgress color="secondary" />
           </div>
         }

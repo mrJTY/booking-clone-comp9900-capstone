@@ -8,12 +8,7 @@ import {
   Box,
   Button,
   ButtonGroup,
-  // Typography,
 } from '@material-ui/core';
-// import {
-//   AccountCircle,
-// } from '@material-ui/icons';
-// import { StoreContext } from '../utils/store';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import PropTypes from 'prop-types';
@@ -59,16 +54,11 @@ const Navbar = ({ page }) => {
   const history = useHistory();
   const classes = useStyles();
   const theme = useTheme();
+  const token = context.token[0];
   // also need own username to navigate to own profile page
   const user = 'me';
-
-  // *** TESTING
-  const [username, setUsername] = context.username;
-  const [password, setPassword] = context.password;
-  // END TEST
-
+  const setUsername = context.username[1];
   const setToken = context.token[1];
-
   const baseUrl = context.baseUrl;
   // sends a POST API request confirming an admin logging out
   const logoutButton = () => {
@@ -78,21 +68,16 @@ const Navbar = ({ page }) => {
       headers: {
         accept: 'application/json',
         'content-type': 'application/json',
-        // Authorization: `Bearer ${token}`
-        Authorization: `Password ${password}`,
-        Username: `${username}`,
+        "Authorization": `JWT ${token}`,
       }
     })
       .then(() => {
         // unset the authorization token
         setToken(null);
-
         // navigate to the Login screen
         history.push('/login');
-
-        // *** TEST unset the username / password
+        // unset the username
         setUsername(null);
-        setPassword(null);
       })
       .catch((error) => {
         let errorText = '';
@@ -113,9 +98,8 @@ const Navbar = ({ page }) => {
         );
         setToken(null);
         history.push('/login');
-        // *** TEST unset the username / password
+        // unset the username
         setUsername(null);
-        setPassword(null);
       })
   }
 

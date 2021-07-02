@@ -18,15 +18,8 @@ import { toast } from 'react-toastify';
 // and upon confirmation an API DELETE request is sent.
 const DeleteListing = ({ open, handleClose, listingId }) => {
   const context = React.useContext(StoreContext);
-  // const token = context.token[0];
-
-  // *** TESTING
-  const username = context.username[0];
-  const password = context.password[0];
-  // END TEST
-
+  const token = context.token[0];
   const baseUrl = context.baseUrl;
-
   const [updated, setUpdate] = context.updates;
 
   return (
@@ -53,9 +46,7 @@ const DeleteListing = ({ open, handleClose, listingId }) => {
               headers: {
                 accept: 'application/json',
                 'content-type': 'application/json',
-                // Authorization: `Bearer ${token}`
-                Authorization: `Password ${password}`,
-                Username: `${username}`,
+                "Authorization": `JWT ${token}`,
               },
             })
               .catch((error) => {

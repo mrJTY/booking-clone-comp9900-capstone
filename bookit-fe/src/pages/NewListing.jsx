@@ -4,8 +4,7 @@ import { StoreContext } from '../utils/store';
 import Navbar from '../components/Navbar';
 import {
   useHistory,
-  // useLocation,
-  // Redirect
+  Redirect,
 } from 'react-router-dom';
 import {
   makeStyles,
@@ -92,11 +91,8 @@ const useStyles = makeStyles((theme) => ({
   thumbnailContainer: {
     display: 'flex',
     flexDirection: 'row',
-    // margin: '20px',
     paddingBottom: '20px',
     justifyContent: 'center',
-    // maxHeight: '128px',
-    // maxWidth: '128px',
     width: '100%',
   },
   img: {
@@ -108,28 +104,20 @@ const useStyles = makeStyles((theme) => ({
 // The NewListing page allows a user to create a new listing.
 const NewListing = () => {
   const context = React.useContext(StoreContext);
-  // const token = context.token[0];
+  const token = context.token[0];
   const history = useHistory();
-  // unauthorized users are redirected to the landing page
-  // if (token === null) {
-  //   return <Redirect to={{ pathname: '/login' }} />
-  // }
-  // const location = useLocation();
-  // the givenId refers to the selected game Id as a parameter in the URL
-  // const givenId = location.state;
-  // if (!location) {
-  //   return <Redirect to={{ pathname: '/home' }} />
-  // }
+
+  React.useEffect(() => {
+    // unauthorized users are redirected to the landing page
+    if (token === null) {
+      return <Redirect to={{ pathname: '/login' }} />
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  
   const [loadingState, setLoadingState] = React.useState('idle');
   // context variables used throughout the page
   const baseUrl = context.baseUrl;
   const [page, setPage] = context.pageState;
-
-  // *** TESTING
-  const username = context.username[0];
-  const password = context.password[0];
-  // END TEST
-  
   // class used for the Toastify error component styling
   const toastErrorStyle = {
     backgroundColor: '#cc0000',
@@ -163,7 +151,6 @@ const NewListing = () => {
       })
     );
   }
-
   // validates the New Listing input fields & sends a POST API request
   // upon a valid listing submission, creating a new Listing.
   const onSubmit = (btn) => {
@@ -186,8 +173,7 @@ const NewListing = () => {
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          Authorization: `Password ${password}`,
-          Username: `${username}`,
+          "Authorization": `JWT ${token}`,
         },
         data: fields,
       })
@@ -222,10 +208,8 @@ const NewListing = () => {
         })
     }
   };
-
   // classes used for Material UI component styling
   const classes = useStyles();
-
   return (
     <Container>
       <Navbar page={page} />

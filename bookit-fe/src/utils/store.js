@@ -20,10 +20,7 @@ const ContextStore = ({ children }) => {
   // another option is simply storing the user info from the GET request
   // const [userinfo, setUserinfo] = React.useState({});
 
-  // *** TESTING PURPOSES
   const [username, setUsername] = React.useState(null);
-  const [password, setPassword] = React.useState(null);
-  // *** END TEST
 
   const store = {
     baseUrl: `http://localhost:${port}`,
@@ -32,10 +29,7 @@ const ContextStore = ({ children }) => {
     updates: [updated, setUpdated],
     mylistings: [mylistings, setMylistings],
     following: [following, setFollowing],
-
     username: [username, setUsername],
-    password: [password, setPassword],
-    
   }
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }

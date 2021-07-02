@@ -2,11 +2,11 @@ import React from 'react';
 import { StoreContext } from '../utils/store';
 import Navbar from '../components/Navbar';
 // import CustomButton from '../components/CustomButton';
-// import {
-//   useHistory,
-//   useLocation,
-//   Redirect
-// } from 'react-router-dom';
+import {
+  // useHistory,
+  // useLocation,
+  Redirect,
+} from 'react-router-dom';
 import {
   makeStyles,
   Container,
@@ -103,12 +103,14 @@ const useStyles = makeStyles((theme) => ({
 // The EditBooking page allows a user to create or modify a booking.
 const Listing = () => {
   const context = React.useContext(StoreContext);
-  // const token = context.token[0];
+  const token = context.token[0];
   // const history = useHistory();
-  // unauthorized users are redirected to the landing page
-  // if (token === null) {
-  //   return <Redirect to={{ pathname: '/login' }} />
-  // }
+
+  React.useEffect(() => {
+    if (token === null) {
+      return <Redirect to={{ pathname: '/login' }} />
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // context variables used throughout the page
   const [page, setPage] = context.pageState;
@@ -119,7 +121,7 @@ const Listing = () => {
     setPage('/listings/id');
     async function setupListing () {
       setLoadingState('loading');
-      // await fetchUserFeed(...);
+      // await fetchListing(...);
       setLoadingState('success');
     }
     setupListing();

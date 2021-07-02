@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 import {
   useHistory,
   useLocation,
-  // Redirect
+  Redirect,
 } from 'react-router-dom';
 import {
   makeStyles,
@@ -108,32 +108,24 @@ const useStyles = makeStyles((theme) => ({
 // The EditListing page allows a user to create a new listing.
 const EditListing = () => {
   const context = React.useContext(StoreContext);
-  // const token = context.token[0];
+  const token = context.token[0];
   const history = useHistory();
-  // unauthorized users are redirected to the landing page
-  // if (token === null) {
-  //   return <Redirect to={{ pathname: '/login' }} />
-  // }
-  // const location = useLocation();
-  // the givenId refers to the selected game Id as a parameter in the URL
-  // const givenId = location.state;
-  // if (!location) {
-  //   return <Redirect to={{ pathname: '/home' }} />
-  // }
+
+  React.useEffect(() => {
+    // unauthorized users are redirected to the landing page
+    if (token === null) {
+      return <Redirect to={{ pathname: '/login' }} />
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [loadingState, setLoadingState] = React.useState('idle');
   // context variables used throughout the page
   const baseUrl = context.baseUrl;
   const [page, setPage] = context.pageState;
-
   const location = useLocation();
   // the givenId refers to the selected listing Id as a parameter in the URL
   const givenId = location.state;
 
-  // *** TESTING
-  const username = context.username[0];
-  const password = context.password[0];
-  // END TEST
-  
   // class used for the Toastify error component styling
   const toastErrorStyle = {
     backgroundColor: '#cc0000',
@@ -163,13 +155,9 @@ const EditListing = () => {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `Password ${password}`,
-          Username: `${username}`,
+          Authorization: `JWT ${token}`,
         },
       })
-
-      console.log(response.data);
-
       const defaultVals = {
         listing_name: response.data.listing_name,
         address: response.data.address,
@@ -177,7 +165,6 @@ const EditListing = () => {
         description: response.data.description,
       }
       await setFields(defaultVals);
-
       setLoadingState('success');
     }
     setupEditListing()    
@@ -215,8 +202,7 @@ const EditListing = () => {
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          Authorization: `Password ${password}`,
-          Username: `${username}`,
+          "Authorization": `JWT ${token}`,
         },
         data: fields,
       })
@@ -251,10 +237,8 @@ const EditListing = () => {
         })
     }
   };
-
   // classes used for Material UI component styling
   const classes = useStyles();
-
   return (
     <Container>
       <Navbar page={page} />
