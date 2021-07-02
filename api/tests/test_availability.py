@@ -21,9 +21,9 @@ TEST_LISTING = {
 TEST_AVAILABILITY = {
     # Fill this later once you create a listing
     "listing_id": None,
-    # WATCH OUT for the format!
-    "start_time": "2021-07-01T14:00:00+00:00",
-    "end_time": "2021-07-01T15:00:00+00:00",
+    # Unix Epoch time
+    "start_time": 1625214000,
+    "end_time": 162521500,
 }
 
 

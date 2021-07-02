@@ -1,8 +1,5 @@
-from datetime import datetime
-from dateutil.parser import parse
 import json
 import logging
-import pytz
 
 from api import db
 from api.resources.listing import ListingModel
@@ -23,11 +20,13 @@ availability_details = api.api.model(
             required=True, description="The ID of the availability"
         ),
         "listing_id": fields.Integer(required=True, description="The listing id"),
-        "start_time": fields.DateTime(
-            required=True, description="The start time of the availability"
+        "start_time": fields.Integer(
+            required=True,
+            description="The start time of the availability in Unix epoch time",
         ),
-        "end_time": fields.DateTime(
-            required=True, description="The start time of the availability"
+        "end_time": fields.Integer(
+            required=True,
+            description="The end time of the availability in Unix epoch time",
         ),
     },
 )
@@ -68,8 +67,6 @@ class Availability(Resource):
     def get(self, availability_id):
         logging.info(f"Getting availability {availability_id}")
         a = AvailabilityModel.query.get_or_404(availability_id).to_dict()
-        a["start_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["start_time"]))
-        a["end_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["end_time"]))
         return a
 
     @availability.doc(description=f"availability_id must be provided")
@@ -93,14 +90,12 @@ class Availability(Resource):
         a = AvailabilityModel.query.get_or_404(availability_id)
         # update the availability data
         a.listing_id = content["listing_id"]
-        a.start_time = parse(content["start_time"]).timestamp()
-        a.end_time = parse(content["end_time"]).timestamp()
+        a.start_time = content["start_time"]
+        a.end_time = content["end_time"]
         flag_modified(a, "listing_id")
         db.session.merge(a)
         db.session.flush()
         db.session.commit()
-        a["start_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["start_time"]))
-        a["end_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["end_time"]))
         return a
 
 
@@ -118,8 +113,8 @@ class AvailabilityList(Resource):
             listing_id = content["listing_id"]
 
             # Save them in unix time
-            start_time = parse(content["start_time"]).timestamp()
-            end_time = parse(content["end_time"]).timestamp()
+            start_time = content["start_time"]
+            end_time = content["end_time"]
 
             # You can only create an availability if you own the listing
             listing = ListingModel.query.filter(
@@ -144,10 +139,6 @@ class AvailabilityList(Resource):
 
             # Return what you just created
             a = AvailabilityModel.query.get_or_404(availability_id).to_dict()
-            a["start_time"] = pytz.utc.localize(
-                datetime.utcfromtimestamp(a["start_time"])
-            )
-            a["end_time"] = pytz.utc.localize(datetime.utcfromtimestamp(a["end_time"]))
             return a
 
         except Exception as e:
