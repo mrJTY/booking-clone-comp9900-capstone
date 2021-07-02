@@ -69,34 +69,35 @@ class Availability(Resource):
         a = AvailabilityModel.query.get_or_404(availability_id).to_dict()
         return a
 
-    @availability.doc(description=f"availability_id must be provided")
-    @availability.marshal_with(availability_details)
-    def delete(self, availability_id):
-        logging.info(f"Deleting availability {availability_id}")
-        a = AvailabilityModel.query.filter(
-            AvailabilityModel.availability_id == availability_id
-        )
-        a.delete()
-        db.session.commit()
-        return availability
+    # TODO(Harris/Saksham): Update & Delete
+    # @availability.doc(description=f"availability_id must be provided")
+    # @availability.marshal_with(availability_details)
+    # def delete(self, availability_id):
+    #     logging.info(f"Deleting availability {availability_id}")
+    #     a = AvailabilityModel.query.filter(
+    #         AvailabilityModel.availability_id == availability_id
+    #     )
+    #     a.delete()
+    #     db.session.commit()
+    #     return availability
 
-    # Need to see what updates are made
-    @availability.doc(description=f"availability_id must be provided")
-    @availability.marshal_with(availability_details)
-    def put(self, availability_id):
-        logging.info(f"Updating availability {availability_id}")
-        # get availability id
-        content = get_request_json()
-        a = AvailabilityModel.query.get_or_404(availability_id)
-        # update the availability data
-        a.listing_id = content["listing_id"]
-        a.start_time = content["start_time"]
-        a.end_time = content["end_time"]
-        flag_modified(a, "listing_id")
-        db.session.merge(a)
-        db.session.flush()
-        db.session.commit()
-        return a
+    # TODO(Harris/Saksham): Update & Delete
+    # @availability.doc(description=f"availability_id must be provided")
+    # @availability.marshal_with(availability_details)
+    # def put(self, availability_id):
+    #     logging.info(f"Updating availability {availability_id}")
+    #     # get availability id
+    #     content = get_request_json()
+    #     a = AvailabilityModel.query.get_or_404(availability_id)
+    #     # update the availability data
+    #     a.listing_id = content["listing_id"]
+    #     a.start_time = content["start_time"]
+    #     a.end_time = content["end_time"]
+    #     flag_modified(a, "listing_id")
+    #     db.session.merge(a)
+    #     db.session.flush()
+    #     db.session.commit()
+    #     return a
 
 
 @availability.route("")
