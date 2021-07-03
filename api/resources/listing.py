@@ -3,6 +3,7 @@ from api.utils.req_handling import *
 from flask_login import current_user
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import or_
 import api
 import json
 import logging
@@ -96,6 +97,7 @@ class Listing(Resource):
 
 
 @listing.route("")
+@listing.param("search_query", "Keyword resource search")
 class ListingList(Resource):
     @listing.doc(description=f"Creates a new listing")
     @listing.expect(listing_details)
@@ -126,6 +128,21 @@ class ListingList(Resource):
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
+
+    @listing.doc(description=f"Returns a listing by search")
+    @listing.expect(listing_details)
+    @listing.marshal_with(listing_details)
+    def get(self):
+        keyword = request.args.get("search_query")
+        logging.info(f"Searching for {keyword}")
+        search_return = ListingModel.query.filter(
+            or_(
+                ListingModel.listing_name.ilike(f"%{keyword}%"),
+                ListingModel.description.ilike(f"%{keyword}%"),
+            )
+        ).all()
+        search_listings = [l.to_dict() for l in search_return]
+        return {"search": search_listings}
 
 
 # TODO: Paginate this and add docs

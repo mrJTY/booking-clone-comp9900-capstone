@@ -106,3 +106,51 @@ def test_get_my_listings():
     )
     assert mylistings_response.status_code == 200
     assert "mylistings" in mylistings_response.json().keys()
+
+
+def test_search_resource():
+    # Login first
+    login_response = requests.post(
+        f"{API_URL}/auth/login",
+        json={
+            "username": TEST_LISTING_USER["username"],
+            "password": TEST_LISTING_USER["password"],
+        },
+    )
+    assert login_response.status_code == 200
+    token = login_response.json()["accessToken"]
+
+    url = f"{API_URL}/listings"
+    response = requests.post(
+        url,
+        json=TEST_LISTING,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+
+    # Search for listings - No matching returns
+    search_url = f"{API_URL}/listings?search_query=UNSW"
+    search_response = requests.get(
+        search_url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual = search_response.json()
+    assert search_response.status_code == 200
+    assert actual["listing_name"] == None
+    assert actual["address"] == None
+    assert actual["category"] == None
+    assert actual["description"] == None
+
+    # Search for listings - One match
+    search_url_2 = f"{API_URL}/listings?search_query=Campus"
+    search_response_2 = requests.get(
+        search_url_2,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual_2 = search_response_2.json()
+    assert search_response_2.status_code == 200
