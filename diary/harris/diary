@@ -12,3 +12,11 @@ well, which means we reverted to a flask setup instead of an AWS setup which was
 Week 3
 Started doing the proposal, especially on the user stories part. Looked at the Jira backlog for all the list of possible user stories. Made descriptions on the user stories, looked at examples.
 Discussed with the team more potential use cases for the project, such as the followed and followers implementation and the NLP-based one. Proposal is now finished. 
+
+Week 4
+Created update and delete (CRUD) for the resource listings. User now has the ability to update and delete listings. 
+Learnt how to create unit tests for the listings, especially for update and delete. This way we know that we are on the right track.
+
+Week 5
+Went through extensive meetings, and now Blue Sprint 2 is finished (see Jira). Presented the Demonstration in that week with the first 2 user stories and showed that it was done 
+to Iwan. Then implemented a basic resource search function which returns the keywords for the listing name and its description.
