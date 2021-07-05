@@ -1,5 +1,6 @@
 import os
 
+import api.tests.utils as u
 import requests
 
 API_URL = os.environ["API_URL"]
@@ -28,59 +29,18 @@ TEST_AVAILABILITY = {
 
 
 def test_register_user():
-    url = f"{API_URL}/users"
-    response = requests.post(url, json=TEST_AVAILABILITY_USER)
-    actual = response.json()
-    expected = {
-        "email": TEST_AVAILABILITY_USER["email"],
-        "username": TEST_AVAILABILITY_USER["username"],
-    }
-    assert actual["email"] == expected["email"]
-    assert actual["username"] == expected["username"]
+    u.register_user(TEST_AVAILABILITY_USER)
 
 
 def test_create_availability():
     # Login first
-    login_response = requests.post(
-        f"{API_URL}/auth/login",
-        json={
-            "username": TEST_AVAILABILITY_USER["username"],
-            "password": TEST_AVAILABILITY_USER["password"],
-        },
-    )
-    assert login_response.status_code == 200
-    token = login_response.json()["accessToken"]
+    token = u.login_user(TEST_AVAILABILITY_USER)
 
     # Create a listing
-    url = f"{API_URL}/listings"
-    create_listing_response = requests.post(
-        url,
-        json=TEST_LISTING,
-        headers={
-            "Authorization": f"JWT {token}",
-        },
-    )
-    assert create_listing_response.status_code == 200
-    listing_id = create_listing_response.json()["listing_id"]
+    listing_id = u.create_listing(TEST_LISTING, token)
 
     # Create an availability
-    create_availability_payload = {**TEST_AVAILABILITY, "listing_id": listing_id}
-    url = f"{API_URL}/availabilities"
-    create_availability_response = requests.post(
-        url,
-        json=create_availability_payload,
-        headers={
-            "Authorization": f"JWT {token}",
-        },
-    )
-    assert create_availability_response.json()["listing_id"] == listing_id
-    assert (
-        create_availability_response.json()["start_time"]
-        == TEST_AVAILABILITY["start_time"]
-    )
-    assert (
-        create_availability_response.json()["end_time"] == TEST_AVAILABILITY["end_time"]
-    )
+    availability_id = u.create_availability(TEST_AVAILABILITY, listing_id, token)
 
     # TODO(Saksham/Harris): test update and delete
     # availability_url = f"{API_URL}/availabilities/{actual['availability_id']}"
