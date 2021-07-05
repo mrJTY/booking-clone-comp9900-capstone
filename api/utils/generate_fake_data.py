@@ -8,13 +8,14 @@ from api.resources.listing import ListingModel
 
 fake = Faker()
 fake_seed = 1
+users = []
+listings = []
 
 
 def create_fake_users():
     # Oh no! They all have the same password...
     dummy_password = "password"
     dummy_password_hash = hashlib.sha256(dummy_password.encode("utf-8")).hexdigest()
-    users = []
     for i in list(range(1, 5)):
         Faker.seed(fake_seed + i)
         username = fake.first_name().lower()
@@ -31,7 +32,6 @@ def create_fake_users():
 
 
 def create_fake_listings():
-    listings = []
 
     for i in list(range(1, 5)):
         Faker.seed(fake_seed + i)
@@ -43,7 +43,9 @@ def create_fake_listings():
         description = "Lorem ipsum dolor"
 
         # All belongs to user 1
-        user_id = 1
+        user_id = users[0].user_id
+        username = users[0].username
+
         l = ListingModel()
         l.listing_id = i
         l.listing_name = company
@@ -51,6 +53,7 @@ def create_fake_listings():
         l.address = address
         l.description = description
         l.user_id = user_id
+        l.username = username
         listings.append(l)
 
     db.session.add_all(listings)

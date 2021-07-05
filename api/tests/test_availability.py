@@ -42,6 +42,9 @@ def test_create_availability():
     # Create an availability
     availability_id = u.create_availability(TEST_AVAILABILITY, listing_id, token)
 
+    # Search for availabilities
+    avaibilities = u.get_availabilities(listing_id, token)
+
     # TODO(Saksham/Harris): test update and delete
     # availability_url = f"{API_URL}/availabilities/{actual['availability_id']}"
     # response = requests.put(

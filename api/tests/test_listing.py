@@ -139,10 +139,7 @@ def test_search_resource():
     )
     actual = search_response.json()
     assert search_response.status_code == 200
-    assert actual["listing_name"] == None
-    assert actual["address"] == None
-    assert actual["category"] == None
-    assert actual["description"] == None
+    assert "listings" in actual.keys()
 
     # Search for listings - One match
     search_url_2 = f"{API_URL}/listings?search_query=Campus"
@@ -154,3 +151,5 @@ def test_search_resource():
     )
     actual_2 = search_response_2.json()
     assert search_response_2.status_code == 200
+    assert "listings" in actual_2.keys()
+    assert len(actual_2["listings"]) == 1

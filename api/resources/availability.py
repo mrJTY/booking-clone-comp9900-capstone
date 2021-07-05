@@ -145,3 +145,18 @@ class AvailabilityList(Resource):
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
+
+    @availability.doc(
+        description=f"Returns a list of availabilities given a listing_id. For example: /availabilities?listing_id=1."
+    )
+    @availability.param(
+        "listing_id", "The listing_id you want to search availabilities for"
+    )
+    def get(self):
+        listing_id = request.args.get("listing_id")
+        logging.info(f"Searching for availabilities under listing_id: {listing_id}")
+        availabilities = AvailabilityModel.query.filter(
+            AvailabilityModel.listing_id == listing_id
+        ).all()
+        search_results = [a.to_dict() for a in availabilities]
+        return {"availabilities": search_results}

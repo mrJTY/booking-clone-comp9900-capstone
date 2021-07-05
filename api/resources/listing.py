@@ -27,6 +27,7 @@ listing_details = api.api.model(
         "user_id": fields.Integer(
             required=True, description="The owner of the listing"
         ),
+        "username": fields.String(required=True, description="Username of the user"),
     },
 )
 
@@ -39,6 +40,7 @@ class ListingModel(db.Model):
     category = db.Column(db.Text)
     description = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    username = db.Column(db.Text, db.ForeignKey("users.username"), nullable=False)
 
     def __repr__(self):
         return json.dumps(self.to_dict())
@@ -51,6 +53,7 @@ class ListingModel(db.Model):
             "category": self.category,
             "description": self.description,
             "user_id": self.user_id,
+            "username": self.username,
         }
         return data
 
@@ -89,6 +92,7 @@ class Listing(Resource):
         listing.category = content["category"]
         listing.description = content["description"]
         listing.user_id = current_user.user_id
+        listing.username = current_user.username
         flag_modified(listing, "description")
         db.session.merge(listing)
         db.session.flush()
@@ -118,6 +122,7 @@ class ListingList(Resource):
                 description=description,
                 category=category,
                 user_id=current_user.user_id,
+                username=current_user.username,
             )
             db.session.add(v)
             db.session.commit()
@@ -131,7 +136,6 @@ class ListingList(Resource):
 
     @listing.doc(description=f"Returns a listing by search")
     @listing.expect(listing_details)
-    @listing.marshal_with(listing_details)
     def get(self):
         keyword = request.args.get("search_query")
         logging.info(f"Searching for {keyword}")
@@ -142,7 +146,7 @@ class ListingList(Resource):
             )
         ).all()
         search_listings = [l.to_dict() for l in search_return]
-        return {"search": search_listings}
+        return {"listings": search_listings}
 
 
 # TODO: Paginate this and add docs

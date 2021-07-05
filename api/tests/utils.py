@@ -87,3 +87,20 @@ def create_booking(
     assert actual["availability_id"] == create_booking_payload["availability_id"]
     booking_id = actual["booking_id"]
     return booking_id
+
+
+def get_availabilities(listing_id: int, token: str):
+    url = f"{API_URL}/availabilities?listing_id={listing_id}"
+    response = requests.get(
+        url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+
+    actual = response.json()
+    assert "availabilities" in actual.keys()
+    assert type(actual["availabilities"]) == list
+    assert actual["availabilities"][0]["listing_id"] == listing_id
+
+    return actual
