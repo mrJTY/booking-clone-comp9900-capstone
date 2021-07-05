@@ -19,3 +19,9 @@
 - Added `flask_login` to manager user sessions
 - Generated some fake data
 - Created `/mylistings` endpoint that returns listings owned by the currently logged in user
+
+# Week 04-05
+- Added create availabilities backend endpoint
+- Added create bookings backend endpoint
+- Refactored some quality of life improvements to tests, made tests a little bit more readable
+- Added a search endpoint for availabilities
