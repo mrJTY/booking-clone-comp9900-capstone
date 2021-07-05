@@ -28,6 +28,9 @@ availability_details = api.api.model(
             required=True,
             description="The end time of the availability in Unix epoch time",
         ),
+        "is_available": fields.Boolean(
+            required=True, description="Resource is available or not"
+        ),
     },
 )
 
@@ -81,23 +84,26 @@ class Availability(Resource):
     #     db.session.commit()
     #     return availability
 
-    # TODO(Harris/Saksham): Update & Delete
-    # @availability.doc(description=f"availability_id must be provided")
-    # @availability.marshal_with(availability_details)
-    # def put(self, availability_id):
-    #     logging.info(f"Updating availability {availability_id}")
-    #     # get availability id
-    #     content = get_request_json()
-    #     a = AvailabilityModel.query.get_or_404(availability_id)
-    #     # update the availability data
-    #     a.listing_id = content["listing_id"]
-    #     a.start_time = content["start_time"]
-    #     a.end_time = content["end_time"]
-    #     flag_modified(a, "listing_id")
-    #     db.session.merge(a)
-    #     db.session.flush()
-    #     db.session.commit()
-    #     return a
+    @availability.doc(description=f"availability_id must be provided")
+    @availability.expect(availability_details)
+    @availability.marshal_with(availability_details)
+    def put(self, availability_id):
+        logging.info(f"Updating availability {availability_id}")
+        # get availability id
+        content = get_request_json()
+        a = AvailabilityModel.query.get_or_404(availability_id)
+        # update the availability data
+        a.listing_id = content["listing_id"]
+        a.start_time = content["start_time"]
+        a.end_time = content["end_time"]
+        a.is_available = content["is_available"]
+        flag_modified(a, "start_time")
+        flag_modified(a, "end_time")
+        flag_modified(a, "is_available")
+        db.session.merge(a)
+        db.session.flush()
+        db.session.commit()
+        return a
 
 
 @availability.route("")
