@@ -104,3 +104,26 @@ def get_availabilities(listing_id: int, token: str):
     assert actual["availabilities"][0]["listing_id"] == listing_id
 
     return actual
+
+
+def create_rating(payload: dict, token: str):
+    create_rating_payload = {
+        "booking_id": payload["booking_id"],
+        "user_id": payload["user_id"],
+        "rating": payload["rating"],
+        "comment": payload["comment"],
+    }
+    url = f"{API_URL}/ratings"
+    response = requests.post(
+        url,
+        json=create_rating_payload,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual = response.json()
+    assert actual["user_id"] == create_rating_payload["user_id"]
+    assert actual["booking_id"] == create_rating_payload["booking_id"]
+    assert actual["rating"] == create_rating_payload["rating"]
+    assert actual["comment"] == create_rating_payload["comment"]
+    return actual

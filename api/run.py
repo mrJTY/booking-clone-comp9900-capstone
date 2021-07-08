@@ -8,6 +8,7 @@ if __name__ == "__main__":
     import api.resources.auth
     import api.resources.availability
     import api.resources.booking
+    import api.resources.rating
 
     # Create all database tables
     db.create_all()
