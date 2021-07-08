@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { StoreContext } from '../utils/store';
+import BookitLogo from '../assets/bookit-logo.png';
 import {
   ThemeProvider,
   makeStyles,
@@ -8,6 +9,9 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Tooltip,
+  Typography,
+  Grid,
 } from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -44,6 +48,27 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.button,
     width: '100%',
     justifyContent: 'space-between',
+  },
+  backDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    backgroundColor: theme.palette.background.button,
+    justifyContent: 'flex-start',
+    width: '100%',
+  },
+  navHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  navHeaderText: {
+    color: 'pink',
+    paddingLeft: '6px',
+  },
+  img: {
+    maxHeight: '24px',
+    maxWidth: '24px',
   },
 }));
 
@@ -107,78 +132,141 @@ const Navbar = ({ page }) => {
     <ThemeProvider theme={theme}>
       <Box className={classes.box}>
         <Box className={classes.container}>
-          <Box className={classes.buttonNav}>
-            <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
-              <Button
-                id="home-button"
-                variant="text"
-                color={page === '/home' ? "primary" : "default"}
-                className={classes.buttonText}
-                onClick={() => {
-                  history.push('/home')
-                }}
-              >
-                Home
-              </Button>
-              <Button
-                id="bookings-button"
-                variant="text"
-                color={page === '/mybookings' ? "primary" : "default"}
-                className={classes.buttonText}
-                onClick={() => {
-                  history.push('/mybookings')
-                }}
-              >
-                MyBookings
-              </Button>
-              <Button
-                id="listings-button"
-                variant="text"
-                color={page === '/mylistings' ? "primary" : "default"}
-                className={classes.buttonText}
-                onClick={() => {
-                  history.push('/mylistings')
-                }}
-              >
-                MyListings
-              </Button>
-              <Button
-                id="discover-button"
-                variant="text"
-                color={page === '/discover' ? "primary" : "default"}
-                className={classes.buttonText}
-                onClick={() => {
-                  history.push('/discover')
-                }}
-              >
-                Discover
-              </Button>
-            </ButtonGroup>
-            <ButtonGroup variant="text" color="primary" aria-label="text profile button group">
-              <Button
-                id="profile-button"
-                variant="text"
-                color={page === '/profile/me' ? "primary" : "default"}
-                className={classes.buttonText}
-                onClick={() => {
-                  history.push(`/profile/${user}`)
-                }}
-              >
-                Profile
-              </Button>
-              <Button
-                id="logout-button"
-                variant="text"
-                color="default"
-                className={classes.buttonText}
-                onClick={() => {
-                  logoutButton()
-                }}
-              >
-                Logout
-              </Button>
-            </ButtonGroup>
-          </Box>
+
+          {/* <Box className={classes.buttonNav}> */}
+          <Grid
+            container
+            spacing={0}
+            // direction="row"
+            alignItems="center"
+            justify="center"
+            align="center"
+          >
+
+
+            <Grid container item xs={4} align="center" justify="flex-start">
+              <Box className={classes.backDiv}>
+                <Tooltip title="Go Back">
+                  <Button
+                    id="back-button"
+                    variant="outlined"
+                    color="default"
+                    className={classes.buttonText}
+                    onClick={() => {
+                      history.goBack()
+                    }}
+                  >
+                    Back
+                  </Button>
+                </Tooltip>
+                <Box className={classes.navHeader}>
+                  <Box>
+                    <img className={classes.img} src={BookitLogo} alt="Book it logo" />
+                  </Box>
+                  <Box>
+                    <Typography
+                      className={classes.navHeaderText}
+                      variant="subtitle1" align="left"
+                    >
+                      BookIt
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            </Grid>
+
+
+            <Grid item xs={4} align="center">
+              <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
+                <Tooltip title="Home">
+                  <Button
+                    id="home-button"
+                    variant="text"
+                    color={page === '/home' ? "primary" : "default"}
+                    className={classes.buttonText}
+                    onClick={() => {
+                      history.push('/home')
+                    }}
+                  >
+                    Home
+                  </Button>
+                </Tooltip>
+                <Tooltip title="My Bookings">
+                  <Button
+                    id="bookings-button"
+                    variant="text"
+                    color={page === '/mybookings' ? "primary" : "default"}
+                    className={classes.buttonText}
+                    onClick={() => {
+                      history.push('/mybookings')
+                    }}
+                  >
+                    My Bookings
+                  </Button>
+                </Tooltip>
+                <Tooltip title="My Listings">
+                  <Button
+                    id="listings-button"
+                    variant="text"
+                    color={page === '/mylistings' ? "primary" : "default"}
+                    className={classes.buttonText}
+                    onClick={() => {
+                      history.push('/mylistings')
+                    }}
+                  >
+                    My Listings
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Discover">
+                  <Button
+                    id="discover-button"
+                    variant="text"
+                    color={page === '/discover' ? "primary" : "default"}
+                    className={classes.buttonText}
+                    onClick={() => {
+                      history.push('/discover')
+                    }}
+                  >
+                    Discover
+                  </Button>
+                </Tooltip>
+              </ButtonGroup>
+            </Grid>
+
+
+            <Grid container item xs={4} align="flex-end" justify="flex-end">
+              <ButtonGroup variant="text" color="primary" aria-label="text profile button group">
+                <Tooltip title="Profile">
+                  <Button
+                    id="profile-button"
+                    variant="text"
+                    color={page === '/profile/me' ? "primary" : "default"}
+                    className={classes.buttonText}
+                    onClick={() => {
+                      history.push(`/profile/${user}`)
+                    }}
+                  >
+                    Profile
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Logout">
+                  <Button
+                    id="logout-button"
+                    variant="text"
+                    color="default"
+                    className={classes.buttonText}
+                    onClick={() => {
+                      logoutButton()
+                    }}
+                  >
+                    Logout
+                  </Button>
+                </Tooltip>
+              </ButtonGroup>
+            </Grid>
+
+          </Grid>
+          {/* </Box> */}
         </Box>
       </Box>
     </ThemeProvider>

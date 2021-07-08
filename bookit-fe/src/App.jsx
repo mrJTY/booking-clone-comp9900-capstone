@@ -20,7 +20,7 @@ import {
 } from 'react-router-dom';
 import StoreProvider from './utils/store';
 import { makeStyles } from '@material-ui/core/styles';
-import styled from 'styled-components'
+import styled from 'styled-components';
 import {
   ToastContainer,
   Slide

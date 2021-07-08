@@ -99,7 +99,7 @@ const Profile = () => {
             <Box className={classes.mytitleDiv}>
               <Box>
                 <Typography paragraph align="left" variant="h4">
-                  Your Profile
+                  Profile
                 </Typography>
               </Box>
             </Box>

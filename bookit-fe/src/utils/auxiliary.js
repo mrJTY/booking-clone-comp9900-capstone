@@ -30,7 +30,7 @@ export const fileToDataUrl = (file) => {
   } else {
     const validFileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     const valid = validFileTypes.find(type => type === file.type);
-    // Bad data, let's walk away.
+    // Invalid input
     if (!valid) {
       return -1;
     } else {

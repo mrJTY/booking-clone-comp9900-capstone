@@ -14,6 +14,7 @@ import {
   Box,
   Tooltip,
   TextField,
+  CircularProgress,
 } from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -124,7 +125,8 @@ const EditListing = () => {
   const [page, setPage] = context.pageState;
   const location = useLocation();
   // the givenId refers to the selected listing Id as a parameter in the URL
-  const givenId = location.state;
+  const givenId = location.state.givenId;
+  const prevPage = location.state.prevPage;
 
   // class used for the Toastify error component styling
   const toastErrorStyle = {
@@ -219,8 +221,16 @@ const EditListing = () => {
               }
             }
           );
-          // redirect back to mylistings page
-          history.push('/mylistings');
+          if (prevPage === '/mylistings') {
+            history.push('/mylistings');
+          } else {
+            history.push({
+              pathname: `/listings/${givenId}`,
+              state: {
+                givenId: parseInt(givenId),
+              }
+            });
+          }
         })
         .catch((error) => {
           let errorText = '';
@@ -246,9 +256,9 @@ const EditListing = () => {
         <Box className={classes.box}>
         {
           loadingState !== 'success' &&
-          <Box>
-            <h1>Loading Edit Listing screen...</h1>
-          </Box>
+          <div>
+            <CircularProgress color="secondary" />
+          </div>
         }
         {
           loadingState === 'success' &&
@@ -347,7 +357,18 @@ const EditListing = () => {
                   className={classes.button}
                   variant="outlined"
                   color="secondary"
-                  onClick={() => {history.push('/mylistings')}}
+                  onClick={() => {
+                    if (prevPage === '/mylistings') {
+                      history.push('/mylistings');
+                    } else {
+                      history.push({
+                        pathname: `/listings/${givenId}`,
+                        state: {
+                          givenId: parseInt(givenId),
+                        }
+                      });
+                    }
+                  }}
                 >
                   Cancel
                 </Button>

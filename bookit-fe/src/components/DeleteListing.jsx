@@ -1,5 +1,6 @@
 import React from 'react';
 import { StoreContext } from '../utils/store';
+import { useHistory } from 'react-router-dom';
 import {
   Button,
   Dialog,
@@ -16,11 +17,12 @@ import { toast } from 'react-toastify';
 // props as state handlers, and a relevant listing id. The user is promtped
 // whether they would like to confirm the deletion of a particular listing,
 // and upon confirmation an API DELETE request is sent.
-const DeleteListing = ({ open, handleClose, listingId }) => {
+const DeleteListing = ({ open, handleClose, listingId, page }) => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
   const [updated, setUpdate] = context.updates;
+  const history = useHistory();
 
   return (
     <Dialog
@@ -69,6 +71,9 @@ const DeleteListing = ({ open, handleClose, listingId }) => {
               })
             setUpdate(!updated);
             handleClose();
+            if (page !== '/mylistings') {
+              history.push('/mylistings');
+            }
           }}
         >
           Delete
@@ -85,6 +90,7 @@ DeleteListing.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   listingId: PropTypes.number,
+  page: PropTypes.string,
 };
 
 export default DeleteListing;

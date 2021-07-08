@@ -1,12 +1,15 @@
 import React from 'react';
-import { Button, Tooltip } from '@material-ui/core';
+import {
+  Button,
+  Tooltip
+} from '@material-ui/core';
 import PropTypes from 'prop-types';
 
 // The CustomButton component takes in props as button subcomponents
 // and populates the necessary fields with appropriate metadata
 // and the onClick function(s).
 const CustomButton = ({
-  title, ariaLabel, id, variant, color, onClick, className, startIcon
+  title, ariaLabel, id, variant, color, onClick, className, startIcon, endIcon
 }) => {
   return (
     <Tooltip title={title} aria-label={ariaLabel}>
@@ -16,7 +19,8 @@ const CustomButton = ({
         color={color}
         onClick={onClick}
         className={className}
-        startIcon={startIcon}
+        startIcon={startIcon || null}
+        endIcon={endIcon || null}
       >
         {title}
       </Button>
@@ -33,6 +37,7 @@ CustomButton.propTypes = {
   onClick: PropTypes.func.isRequired,
   className: PropTypes.string,
   startIcon: PropTypes.object,
+  endIcon: PropTypes.object,
 };
 
 export default CustomButton;

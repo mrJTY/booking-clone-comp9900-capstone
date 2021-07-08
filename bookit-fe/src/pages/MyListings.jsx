@@ -15,8 +15,10 @@ import {
   Button,
   Grid,
   Typography,
+  Tooltip,
   CircularProgress,
 } from '@material-ui/core';
+import Add from '@material-ui/icons/Add';
 
 // Page styling used on the MyListings screen and its subcomponents
 const useStyles = makeStyles((theme) => ({
@@ -46,11 +48,24 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     justifyContent: 'center',
   },
+  outerContainerBtns: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
   mytitleDiv: {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
     margin: theme.spacing(1),
+  },
+  titleSubcontainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  titleHeadingDiv: {
+    paddingRight: '10px',
   },
   button: {
     margin: theme.spacing(1),
@@ -69,6 +84,21 @@ const useStyles = makeStyles((theme) => ({
     height: '128px',
     width: '128px',
     margin: 'auto',
+  },
+  resourceCardActions: {
+    justifyContent: 'space-between',
+  },
+  resourceCardCentered: {
+    justifyContent: 'center',
+  },
+  locationDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  locationIcon: {
+    paddingRight: '4px',
+    width: '16px',
+    height: '16px',
   },
 }));
 
@@ -137,22 +167,28 @@ const MyListings = () => {
           loadingState === 'success' &&
           <Box className={classes.containerDiv}>
             <Box className={classes.mytitleDiv}>
-              <Box>
-                <Typography paragraph align="left" variant="h4">
-                  Your Listings
-                </Typography>
-              </Box>
-              <Box className={classes.button}>
-                <Button
-                  id="new-listing-button"
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    history.push(`/listings/create`)
-                  }}
-                >
-                  New Listing
-                </Button>
+              <Box className={classes.titleSubcontainer}>
+                <Box className={classes.titleHeadingDiv}>
+                  <Typography gutterBottom paragraph align="left" variant="h4">
+                    Your Listings
+                  </Typography>
+                </Box>
+                <Box className={classes.outerContainerBtns}>
+                  <Tooltip title="New Listing" aria-label="new listing">
+                    <Button
+                      id="new-listing-button"
+                      className={classes.button}
+                      variant="contained"
+                      color="primary"
+                      endIcon={<Add />}
+                      onClick={() => {
+                        history.push(`/listings/create`)
+                      }}
+                    >
+                      New Listing
+                    </Button>
+                  </Tooltip>
+                </Box>
               </Box>
             </Box>
             <br />
@@ -169,6 +205,7 @@ const MyListings = () => {
                         />
                         <DeleteListing
                           open={open} handleClose={handleClose} listingId={listid}
+                          page="/mylistings"
                         />
                       </Grid>
                     ))}

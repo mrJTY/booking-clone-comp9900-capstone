@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { StoreContext } from '../utils/store';
 import PlaceholderImage from '../assets/mountaindawn.png';
 import CustomButton from './CustomButton';
 import {
-  // Box,
   Tooltip,
   Card,
   CardHeader,
@@ -12,11 +12,16 @@ import {
   CardActions,
   Avatar,
   Typography,
-  // IconButton,
+  Box,
+  Link,
+  IconButton,
 } from '@material-ui/core';
+import { Link as RouterLink } from 'react-router-dom';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-// import AccountIcon from '@material-ui/icons/AccountCircle';
+import ArrowRight from '@material-ui/icons/ArrowRight';
+import RoomIcon from '@material-ui/icons/Room';
+import axios from 'axios';
 
 // The ResourceCard component is a subcomponent of representing a resource
 // and contains various information about a particular resource.
@@ -26,6 +31,40 @@ const ResourceCard = (
   {
     resource, owner, history, classes, handleClickOpen
   }) => {
+  const context = React.useContext(StoreContext);
+  const token = context.token[0];
+  const baseUrl = context.baseUrl;
+  const currPage = context.pageState[0];
+  const user = context.username[0];
+  const [availabilities, setAvailabilities] = React.useState([]);
+
+  React.useEffect(() => {
+    async function fetchAvailabilities () {
+      try {
+        const response = await axios({
+          method: 'GET',
+          url: `${baseUrl}/availabilities?listing_id=${resource.listing_id}`,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            "Authorization": `JWT ${token}`,
+          },
+        })
+
+        console.log(response);
+
+        await setAvailabilities(response.data.availabilities);
+
+      } catch(error) {
+        
+        console.log(error.response);
+
+        await setAvailabilities([]);
+      }
+    }
+    fetchAvailabilities();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <Card className={classes.cardRoot}>
       <CardHeader
@@ -41,7 +80,12 @@ const ResourceCard = (
         }
         subheader={
           <Typography variant="subtitle2" color="textSecondary" align="left">
-            {owner}
+            <Link
+              component={RouterLink}
+              to={`/profile/${resource.username}`}
+            >
+              {resource.username}
+            </Link>
           </Typography>
         }
       />
@@ -75,36 +119,83 @@ const ResourceCard = (
       {/* } */}
 
       <CardContent>
+        <Box className={classes.locationDiv}>
+          <RoomIcon className={classes.locationIcon} />
+          <Typography paragraph align="left" variant="caption" component="p">
+            {resource.address}
+          </Typography>
+        </Box>
+      </CardContent>
+
+      <CardContent>
         <Typography paragraph align="left" variant="body2" color="textSecondary" component="p">
           {resource.description}
         </Typography>
       </CardContent>
-      <CardActions>
-        <CustomButton
-          title={'Edit'}
-          ariaLabel={'edit'}
-          id={'resource-card-edit-button'}
-          variant={'outlined'}
-          color={'primary'}
-          className={classes.button}
-          startIcon={<EditIcon />}
-          onClick={() => {
-            history.push({
-              pathname: `/listings/edit/${resource.listing_id}`,
-              state: parseInt(resource.listing_id)
-            })
-          }}
-        />
-        <CustomButton
-          title={'Delete'}
-          ariaLabel={'delete'}
-          id={'resource-card-delete-button'}
-          variant={'outlined'}
-          color={'secondary'}
-          className={classes.button}
-          startIcon={<DeleteIcon />}
-          onClick={() => handleClickOpen(resource.listing_id)}
-        />
+
+      <CardContent className={classes.resourceCardCentered}>
+        <Typography variant="overline" align="center" color="textPrimary" component="p">
+        Availabilities: {availabilities.length}
+        </Typography>
+      </CardContent>
+
+      <CardActions className={user === owner ? classes.resourceCardActions : classes.resourceCardCentered}>
+        <Box>
+          <CustomButton
+            title={'View Listing'}
+            ariaLabel={'listing'}
+            id={'resource-card-listing-button'}
+            variant={'contained'}
+            color={'primary'}
+            className={classes.button}
+            endIcon={<ArrowRight />}
+            onClick={() => {
+              history.push({
+                pathname: `/listings/${resource.listing_id}`,
+                state: {
+                  givenId: parseInt(resource.listing_id),
+                  resource: resource,
+                  availabilities: availabilities,
+                }
+              })
+            }}
+          />
+        </Box>
+
+        {
+          user === owner &&
+          <Box>
+            <Tooltip title={'Edit'} aria-label={'edit'}>
+              <IconButton
+                id={'resource-card-edit-button'}
+                color={'primary'}
+                className={classes.button}
+                onClick={() => {
+                  history.push({
+                    pathname: `/listings/edit/${resource.listing_id}`,
+                    state: {
+                      givenId: parseInt(resource.listing_id),
+                      prevPage: currPage,
+                    }
+                  })
+                }}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title={'Delete'} aria-label={'delete'}>
+              <IconButton
+                id={'resource-card-delete-button'}
+                color={'secondary'}
+                className={classes.button}
+                onClick={() => handleClickOpen(resource.listing_id)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        }
       </CardActions>
     </Card>
   );
