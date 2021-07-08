@@ -68,7 +68,7 @@ def test_create_availability():
     assert actual["end_time"] == TEST_2_AVAILABILITY["end_time"]
     assert actual["is_available"] == TEST_2_AVAILABILITY["is_available"]
 
-    # # Test delete
-    # availability_url = f"{API_URL}/availabilitys/{actual['availability_id']}"
-    # response = requests.delete(availability_url, json=TEST_2_AVAILABILITY)
-    # assert response.status_code == 200
+    # Test delete
+    availability_url = f"{API_URL}/availabilities/{actual['availability_id']}"
+    response = requests.delete(availability_url, json=TEST_2_AVAILABILITY)
+    assert response.status_code == 204

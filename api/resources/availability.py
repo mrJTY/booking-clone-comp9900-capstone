@@ -72,17 +72,16 @@ class Availability(Resource):
         a = AvailabilityModel.query.get_or_404(availability_id).to_dict()
         return a
 
-    # TODO(Harris/Saksham): Update & Delete
-    # @availability.doc(description=f"availability_id must be provided")
-    # @availability.marshal_with(availability_details)
-    # def delete(self, availability_id):
-    #     logging.info(f"Deleting availability {availability_id}")
-    #     a = AvailabilityModel.query.filter(
-    #         AvailabilityModel.availability_id == availability_id
-    #     )
-    #     a.delete()
-    #     db.session.commit()
-    #     return availability
+    @availability.doc(description=f"availability_id must be provided")
+    @availability.marshal_with(availability_details)
+    def delete(self, availability_id):
+        logging.info(f"Deleting availability {availability_id}")
+        a = AvailabilityModel.query.filter(
+            AvailabilityModel.availability_id == availability_id
+        )
+        a.delete()
+        db.session.commit()
+        return a, 204
 
     @availability.doc(description=f"availability_id must be provided")
     @availability.expect(availability_details)
