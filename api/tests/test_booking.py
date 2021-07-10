@@ -69,7 +69,8 @@ AVAILABILITY_5 = {
 def test_create_booking():
     # Register resouce owner
     owner_user_id = u.register_user(OWNER)
-    consumer_user = u.register_user(CONSUMER)
+    consumer_user_id = u.register_user(CONSUMER)
+
     # Login
     owner_token = u.login_user(OWNER)
     consumer_token = u.login_user(CONSUMER)
@@ -83,18 +84,13 @@ def test_create_booking():
     availability_id_5 = u.create_availability(AVAILABILITY_5, listing_id, owner_token)
     # Consumer makes a booking
     booking_id = u.create_booking(
-        consumer_user["user_id"],
-        consumer_user["username"],
-        listing_id,
-        availability_id,
-        consumer_token,
+        consumer_user_id, listing_id, availability_id, consumer_token
     )
     assert type(booking_id) == int
     # Changed their mind - they want the other timeslot (10am-11am). But since its inside 3 days they cannot do it
     BOOKING_CHANGE_ATTEMPT = {
         "booking_id": booking_id,
-        "user_id": consumer_user["user_id"],
-        "username": consumer_user["username"],
+        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_2,
     }
@@ -109,17 +105,12 @@ def test_create_booking():
     assert response.status_code == 500
     # Also need to test for over 10 hours a month - they cannot proceed as well. Requires a different booking ID
     booking_id_2 = u.create_booking(
-        consumer_user["user_id"],
-        consumer_user["username"],
-        listing_id,
-        availability_id_3,
-        consumer_token,
+        consumer_user_id, listing_id, availability_id_3, consumer_token
     )
 
     BOOKING_CHANGE_ATTEMPT_2 = {
         "booking_id": booking_id_2,
-        "user_id": consumer_user["user_id"],
-        "username": consumer_user["username"],
+        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_4,
     }
@@ -136,8 +127,7 @@ def test_create_booking():
     # Now this one should be approved
     BOOKING_CHANGE_ATTEMPT_3 = {
         "booking_id": booking_id_2,
-        "user_id": consumer_user["user_id"],
-        "username": consumer_user["username"],
+        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_5,
     }
