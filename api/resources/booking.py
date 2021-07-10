@@ -21,6 +21,9 @@ booking_details = api.api.model(
         "user_id": fields.Integer(
             required=True, description="The user_id who owns the booking"
         ),
+        "username": fields.String(
+            required=True, description="The username who owns the booking"
+        ),
         "listing_id": fields.Integer(
             required=True, description="The listing_id that the booking is for"
         ),
@@ -36,6 +39,7 @@ class BookingModel(db.Model):
     __tablename__ = "bookings"
     booking_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
+    username = db.Column(db.String, db.ForeignKey("users.username"), nullable=False)
     listing_id = db.Column(
         db.Integer, db.ForeignKey("listings.listing_id"), nullable=False
     )
@@ -50,6 +54,7 @@ class BookingModel(db.Model):
         data = {
             "booking_id": self.booking_id,
             "user_id": self.user_id,
+            "username": self.username,
             "listing_id": self.listing_id,
             "availability_id": self.availability_id,
         }
@@ -163,6 +168,7 @@ class BookingList(Resource):
             # Receive contents from request
             logging.info(content)
             user_id = content["user_id"]
+            username = content["username"]
             listing_id = content["listing_id"]
             availability_id = content["availability_id"]
 
@@ -181,6 +187,7 @@ class BookingList(Resource):
             # 1. Make a booking
             b = BookingModel(
                 user_id=user_id,
+                username=username,
                 listing_id=listing_id,
                 availability_id=availability_id,
             )
