@@ -1,8 +1,9 @@
 import React from 'react';
 import { StoreContext } from '../utils/store';
 import Navbar from '../components/Navbar';
+import SearchResults from '../components/SearchResults';
 import {
-  // useHistory,
+  useHistory,
   Redirect,
 } from 'react-router-dom';
 import {
@@ -56,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 const Home = () => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
-  // const history = useHistory();
+  const history = useHistory();
   // const baseUrl = context.baseUrl;
   
   React.useEffect(() => {
@@ -114,6 +115,7 @@ const Home = () => {
                   Welcome, {username}.
                 </Typography>
               </Box>
+              <SearchResults context={context} username={username} history={history}/>
             </Box>
             <br />
             <br />

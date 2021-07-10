@@ -10,6 +10,8 @@ import logging
 
 listing = api.api.namespace("listings", description="Listing operations")
 
+RESULT_LIMIT = 20
+
 listing_details = api.api.model(
     "Listing",
     {
@@ -144,7 +146,7 @@ class ListingList(Resource):
                 ListingModel.listing_name.ilike(f"%{keyword}%"),
                 ListingModel.description.ilike(f"%{keyword}%"),
             )
-        ).all()
+        ).limit(RESULT_LIMIT)
         search_listings = [l.to_dict() for l in search_return]
         return {"listings": search_listings}
 
@@ -154,6 +156,8 @@ class ListingList(Resource):
 class MyListings(Resource):
     @listing.doc(description=f"Fetch my listings")
     def get(self):
-        my_listings = ListingModel.query.filter_by(user_id=current_user.user_id).all()
+        my_listings = ListingModel.query.filter_by(user_id=current_user.user_id).limit(
+            RESULT_LIMIT
+        )
         my_listings = [l.to_dict() for l in my_listings]
         return {"mylistings": my_listings}

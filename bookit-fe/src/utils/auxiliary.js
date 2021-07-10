@@ -23,6 +23,19 @@ export async function fetchMyListings (baseUrl, token, setMylistings)
   await setMylistings(response.data.mylistings);
 }
 
+export async function fetchSearchListings(baseUrl, token, searchQuery, setSearchListings){
+  const response = await axios({
+    method: 'GET',
+    url: `${baseUrl}/listings?search_query=${searchQuery}`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      "Authorization": `JWT ${token}`,
+    },
+  })
+  await setSearchListings(response.data.listings);
+}
+
 // validate an image upload
 export const fileToDataUrl = (file) => {
   if (file === null) {

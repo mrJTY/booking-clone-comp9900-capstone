@@ -8,6 +8,8 @@ export REPO_ROOT="${repo_root}"
 check_prerequisites() {
   echo "If these fail, run:"
   echo "sudo apt install python3 python3-pip npm"
+  echo "sudo npm install --global yarn"
+  echo ""
   echo "Checking if you have python..."
   hash python3
   echo "OK"
