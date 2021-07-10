@@ -1,5 +1,5 @@
 import os
-
+from datetime import datetime, timedelta
 import api.tests.utils as u
 import requests
 
@@ -24,45 +24,101 @@ LISTING = {
     "category": "Burgers",
     "description": "Best burgers down in Bikini Bottom",
 }
+# We will need to change the times as it goes along - static.
+# Need to create rolling times
+now = datetime.now().strftime("%Y-%m-%d-00:00:00")
+current_date = datetime.strptime(now, "%Y-%m-%d-00:00:00")
+
+avaliability_date = current_date + timedelta(2)
+avaliability_date_start = avaliability_date.strftime("%Y-%m-%d 09:00:00")
+avaliability_date_finish = avaliability_date.strftime("%Y-%m-%d 10:00:00")
+
+avaliability_date_start_ue = datetime.strptime(
+    avaliability_date_start, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+avaliability_date_finish_ue = datetime.strptime(
+    avaliability_date_finish, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
 
 AVAILABILITY = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
     # Unix Epoch time (9am-10am)
-    "start_time": 1625612400,
-    "end_time": 1625616000,
+    "start_time": int(avaliability_date_start_ue),
+    "end_time": int(avaliability_date_finish_ue),
 }
+
+avaliability_date2 = current_date + timedelta(2)
+avaliability_date2_start = avaliability_date2.strftime("%Y-%m-%d 10:00:00")
+avaliability_date2_finish = avaliability_date2.strftime("%Y-%m-%d 11:00:00")
+
+avaliability_date2_start_ue = datetime.strptime(
+    avaliability_date2_start, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+avaliability_date2_finish_ue = datetime.strptime(
+    avaliability_date2_finish, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
 
 AVAILABILITY_2 = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
-    # Unix Epoch time (10am-11am) - 3 days start time
-    "start_time": 1625616000,
-    "end_time": 1625619600,
+    # Unix Epoch time (10am-11am) - 2 days start time
+    "start_time": int(avaliability_date2_start_ue),
+    "end_time": int(avaliability_date2_finish_ue),
 }
 
+avaliability_date3 = current_date + timedelta(4)
+avaliability_date3_start = avaliability_date3.strftime("%Y-%m-%d 10:00:00")
+avaliability_date3_finish = avaliability_date3.strftime("%Y-%m-%d 12:00:00")
+
+avaliability_date3_start_ue = datetime.strptime(
+    avaliability_date3_start, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+avaliability_date3_finish_ue = datetime.strptime(
+    avaliability_date3_finish, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
 AVAILABILITY_3 = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
-    # Unix Epoch time (10am-12pm) - 11th July 2021
-    "start_time": 1625961600,
-    "end_time": 1625968800,
+    # Unix Epoch time (10am-12pm)
+    "start_time": int(avaliability_date3_start_ue),
+    "end_time": int(avaliability_date3_finish_ue),
 }
 
+avaliability_date4 = current_date + timedelta(4)
+avaliability_date4_start = avaliability_date4.strftime("%Y-%m-%d 10:00:00")
+avaliability_date4_finish = avaliability_date4.strftime("%Y-%m-%d 22:00:00")
+
+avaliability_date4_start_ue = datetime.strptime(
+    avaliability_date4_start, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+avaliability_date4_finish_ue = datetime.strptime(
+    avaliability_date4_finish, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
 AVAILABILITY_4 = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
-    # Unix Epoch time (10am-10pm) - 12th July 2021 - 12 hour block
-    "start_time": 1626048000,
-    "end_time": 1626091200,
+    # Unix Epoch time (10am-10pm)
+    "start_time": int(avaliability_date4_start_ue),
+    "end_time": int(avaliability_date4_finish_ue),
 }
 
+avaliability_date5 = current_date + timedelta(4)
+avaliability_date5_start = avaliability_date5.strftime("%Y-%m-%d 20:00:00")
+avaliability_date5_finish = avaliability_date5.strftime("%Y-%m-%d 22:00:00")
+
+avaliability_date5_start_ue = datetime.strptime(
+    avaliability_date5_start, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+avaliability_date5_finish_ue = datetime.strptime(
+    avaliability_date5_finish, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
 AVAILABILITY_5 = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
-    # Unix Epoch time (8pm-10pm) - 13th July 2021 - 2 hour block but later - should be approved
-    "start_time": 1626170400,
-    "end_time": 1626177600,
+    # Unix Epoch time (8pm-10pm)
+    "start_time": int(avaliability_date5_start_ue),
+    "end_time": int(avaliability_date5_finish_ue),
 }
 
 
@@ -90,6 +146,7 @@ def test_create_booking():
     # Changed their mind - they want the other timeslot (10am-11am). But since its inside 3 days they cannot do it
     BOOKING_CHANGE_ATTEMPT = {
         "booking_id": booking_id,
+        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_2,
     }
@@ -109,6 +166,7 @@ def test_create_booking():
 
     BOOKING_CHANGE_ATTEMPT_2 = {
         "booking_id": booking_id_2,
+        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_4,
     }
@@ -125,6 +183,7 @@ def test_create_booking():
     # Now this one should be approved
     BOOKING_CHANGE_ATTEMPT_3 = {
         "booking_id": booking_id_2,
+        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_5,
     }
@@ -136,4 +195,8 @@ def test_create_booking():
             "Authorization": f"JWT {consumer_token}",
         },
     )
-    assert response.status_code == 500
+    assert response.status_code == 200
+
+    # Test delete
+    response = requests.delete(booking_url)
+    assert response.status_code == 204

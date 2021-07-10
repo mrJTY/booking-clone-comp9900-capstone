@@ -83,15 +83,30 @@ class Booking(Resource):
         logging.info(f"Getting booking {booking_id}")
         return BookingModel.query.get_or_404(booking_id).to_dict()
 
-    # TODO(Harris/Saksham): Update & Delete
-    # @booking.doc(description=f"booking_id must be provided")
-    # @booking.marshal_with(booking_details)
-    # def delete(self, booking_id):
-    #     logging.info(f"Deleting booking {booking_id}")
-    #     b = BookingModel.query.filter(BookingModel.booking_id == booking_id)
-    #     b.delete()
-    #     db.session.commit()
-    #     return b
+    @booking.doc(description=f"booking_id must be provided")
+    @booking.marshal_with(get_booking_details)
+    def delete(self, booking_id):
+        logging.info(f"Deleting booking {booking_id}")
+        try:
+            b = BookingModel.query.get_or_404(booking_id).to_dict()
+            current_unixtime = datetime.now().strftime("%s")
+            booking_time = AvailabilityModel.query.get_or_404(
+                b["availability_id"]
+            ).to_dict()
+            if (
+                (float(booking_time["start_time"]) - float(current_unixtime))
+                / (60 * 60 * 24)
+            ) < 3.0:
+                raise Exception(
+                    "Cannot delete less than 3 days after the start date of the existing booking"
+                )
+            b1 = BookingModel.query.filter(BookingModel.booking_id == booking_id)
+            b1.delete()
+            db.session.commit()
+            return b1, 204
+        except Exception as e:
+            logging.error(e)
+            api.api.abort(500, f"{e}")
 
     @booking.doc(description=f"booking_id must be provided")
     @booking.marshal_with(create_booking_details)
@@ -192,7 +207,38 @@ class BookingList(Resource):
                 raise ValueError(
                     "Token invalid, you can't request for a user that is not you!"
                 )
-
+            # New booking cannot allow a user more than 10 hours in a month
+            new_time = AvailabilityModel.query.get_or_404(
+                content["availability_id"]
+            ).to_dict()
+            new_time_month = datetime.fromtimestamp(new_time["start_time"]).strftime(
+                "%m"
+            )
+            list_bookings = BookingModel.query.filter_by(
+                user_id=current_user.user_id
+            ).all()
+            list_bookings = [l.to_dict() for l in list_bookings]
+            hours_booked = 0
+            ##Search through the existing bookings
+            for i in range(len(list_bookings)):
+                timeslot = AvailabilityModel.query.get_or_404(
+                    list_bookings[i]["availability_id"]
+                ).to_dict()
+                if (
+                    datetime.fromtimestamp(timeslot["start_time"]).strftime("%m")
+                    == new_time_month
+                ):
+                    get_interval = (
+                        float(timeslot["end_time"]) - float(timeslot["start_time"])
+                    ) / (60 * 60)
+                    hours_booked += get_interval
+            get_new_booking_interval = (
+                float(new_time["end_time"]) - float(new_time["start_time"])
+            ) / (60 * 60)
+            if (hours_booked + get_new_booking_interval) > 10.0:
+                raise Exception(
+                    "Not allowed to have more than 10 hours in a calendar month"
+                )
             # The following steps must be atomic
             # 1. Make a booking
             b = BookingModel(
