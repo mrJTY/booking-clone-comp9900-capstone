@@ -69,7 +69,6 @@ def create_booking(
     user_id: int, listing_id: int, availability_id: int, token: str
 ) -> int:
     create_booking_payload = {
-        "user_id": user_id,
         "listing_id": listing_id,
         "availability_id": availability_id,
     }
@@ -82,7 +81,7 @@ def create_booking(
         },
     )
     actual = create_booking_response.json()
-    assert actual["user_id"] == create_booking_payload["user_id"]
+    assert actual["user_id"] == user_id
     assert actual["listing_id"] == create_booking_payload["listing_id"]
     assert actual["availability_id"] == create_booking_payload["availability_id"]
     booking_id = actual["booking_id"]

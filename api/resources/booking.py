@@ -12,7 +12,23 @@ import api
 
 booking = api.api.namespace("bookings", description="booking operations")
 
-booking_details = api.api.model(
+create_booking_details = api.api.model(
+    "booking",
+    {
+        "booking_id": fields.Integer(
+            required=True, description="The ID of the booking"
+        ),
+        "listing_id": fields.Integer(
+            required=True, description="The listing_id that the booking is for"
+        ),
+        "availability_id": fields.Integer(
+            required=True,
+            description="The availability_id linked to the availabilities table",
+        ),
+    },
+)
+
+get_booking_details = api.api.model(
     "booking",
     {
         "booking_id": fields.Integer(
@@ -62,7 +78,7 @@ class BookingModel(db.Model):
 @booking.response(404, "booking not found")
 class Booking(Resource):
     @booking.doc(description=f"booking_id must be provided")
-    @booking.marshal_with(booking_details)
+    @booking.marshal_with(get_booking_details)
     def get(self, booking_id):
         logging.info(f"Getting booking {booking_id}")
         return BookingModel.query.get_or_404(booking_id).to_dict()
@@ -78,7 +94,7 @@ class Booking(Resource):
     #     return b
 
     @booking.doc(description=f"booking_id must be provided")
-    @booking.marshal_with(booking_details)
+    @booking.marshal_with(create_booking_details)
     def put(self, booking_id):
         logging.info(f"Updating booking {booking_id}")
         # get booking id
@@ -133,7 +149,7 @@ class Booking(Resource):
                 )
             b1 = BookingModel.query.get_or_404(booking_id)
             old_avail = AvailabilityModel.query.get_or_404(b["availability_id"])
-            b1.user_id = content["user_id"]
+            b1.user_id = current_user.user_id
             # update the booking data
             b1.listing_id = content["listing_id"]
             b1.availability_id = content["availability_id"]
@@ -155,14 +171,14 @@ class Booking(Resource):
 @booking.route("")
 class BookingList(Resource):
     @booking.doc(description=f"Creates a new booking")
-    @booking.expect(booking_details)
-    @booking.marshal_with(booking_details)
+    @booking.expect(create_booking_details)
+    @booking.marshal_with(get_booking_details)
     def post(self):
         content = get_request_json()
         try:
             # Receive contents from request
             logging.info(content)
-            user_id = content["user_id"]
+            user_id = current_user.user_id
             listing_id = content["listing_id"]
             availability_id = content["availability_id"]
 

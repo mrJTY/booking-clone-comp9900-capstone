@@ -90,7 +90,6 @@ def test_create_booking():
     # Changed their mind - they want the other timeslot (10am-11am). But since its inside 3 days they cannot do it
     BOOKING_CHANGE_ATTEMPT = {
         "booking_id": booking_id,
-        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_2,
     }
@@ -110,7 +109,6 @@ def test_create_booking():
 
     BOOKING_CHANGE_ATTEMPT_2 = {
         "booking_id": booking_id_2,
-        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_4,
     }
@@ -127,7 +125,6 @@ def test_create_booking():
     # Now this one should be approved
     BOOKING_CHANGE_ATTEMPT_3 = {
         "booking_id": booking_id_2,
-        "user_id": consumer_user_id,
         "listing_id": listing_id,
         "availability_id": availability_id_5,
     }
