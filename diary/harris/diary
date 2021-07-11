@@ -7,7 +7,7 @@ thanks to Justin.
 Week 2
 Justin implemented tasks for Jira and I got to work on all of my sectins, which included the design draft doc (the proposal). Got started on the design doc Got to work on creating the hashing for the password. 
 No password should be exposed in a POST statement, which is what happened. During the team meeting on Tuesday, the tutor said they needed to be able to execute the code on their end as
-well, which means we reverted to a flask setup instead of an AWS setup which was full cloud. Docker would be used for the container.
+well, which means we reverted to a flask setup instead of an AWS setup which was full cloud. Used bash and python scripts to start up the back end and test it. 
 
 Week 3
 Started doing the proposal, especially on the user stories part. Looked at the Jira backlog for all the list of possible user stories. Made descriptions on the user stories, looked at examples.
@@ -20,3 +20,16 @@ Learnt how to create unit tests for the listings, especially for update and dele
 Week 5
 Went through extensive meetings, and now Blue Sprint 2 is finished (see Jira). Presented the Demonstration in that week with the first 2 user stories and showed that it was done 
 to Iwan. Then implemented a basic resource search function which returns the keywords for the listing name and its description.
+
+Week 6 
+The start of Blue Sprint 3 and I was assigned the update/delete endpoints for both the bookings and avaliabilities.
+Creating the endpoints for the bookings was slightly more trickier than the listings as bookings could not be cancelled/deleted less then 3 days out and there was a 10 hour limit on 
+bookings each calendar month. 
+
+Any new booking which pushes the calendar month past 10 hours will not be allowed.
+
+So when updating the booking, it cannot be changed to a different timeslot if the original booking is less than 3 days out. Also any updated booking which pushes the calendar month limit
+past 10 hours will also not be allowed. 
+
+Also created a simple search functionality (so far), where if the search keyword was like the given name and description it will return the list of venues. Proposed the
+latitude and longitude framework but that is yet to come. 
