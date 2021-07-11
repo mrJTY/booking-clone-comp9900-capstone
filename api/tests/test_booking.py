@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import api.tests.utils as u
 import requests
 
+
 API_URL = os.environ["API_URL"]
 
 
@@ -143,6 +144,18 @@ def test_create_booking():
         consumer_user_id, listing_id, availability_id, consumer_token
     )
     assert type(booking_id) == int
+
+    # Access a protected endpoint
+    protected_url = f"{API_URL}/auth/me"
+    protected_response = requests.get(
+        protected_url,
+        headers={
+            "Authorization": f"JWT {consumer_token}",
+        },
+    )
+    assert protected_response.status_code == 200
+    assert protected_response.json()["hours_booked"] == 1.0
+
     # Changed their mind - they want the other timeslot (10am-11am). But since its inside 3 days they cannot do it
     BOOKING_CHANGE_ATTEMPT = {
         "booking_id": booking_id,
@@ -163,6 +176,16 @@ def test_create_booking():
     booking_id_2 = u.create_booking(
         consumer_user_id, listing_id, availability_id_3, consumer_token
     )
+
+    protected_url = f"{API_URL}/auth/me"
+    protected_response = requests.get(
+        protected_url,
+        headers={
+            "Authorization": f"JWT {consumer_token}",
+        },
+    )
+    assert protected_response.status_code == 200
+    assert protected_response.json()["hours_booked"] == 3.0
 
     BOOKING_CHANGE_ATTEMPT_2 = {
         "booking_id": booking_id_2,
@@ -200,3 +223,13 @@ def test_create_booking():
     # Test delete
     response = requests.delete(booking_url)
     assert response.status_code == 204
+
+    protected_url = f"{API_URL}/auth/me"
+    protected_response = requests.get(
+        protected_url,
+        headers={
+            "Authorization": f"JWT {consumer_token}",
+        },
+    )
+    assert protected_response.status_code == 200
+    assert protected_response.json()["hours_booked"] == 1.0

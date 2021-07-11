@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 import hashlib
 import logging
-
+from api.resources.availability import AvailabilityModel
+from api.resources.booking import BookingModel
 from api import db, login_manager
 from api.config import Config
 from api.resources.user import UserModel
@@ -101,7 +102,24 @@ class AuthMe(Resource):
     def get(self):
         try:
             logging.info(current_user)
-            return current_user.to_dict()
+            get_user_dict = current_user.to_dict()
+            # get existing bookings
+            list_bookings = BookingModel.query.filter_by(
+                user_id=get_user_dict["user_id"]
+            ).all()
+            list_bookings = [l.to_dict() for l in list_bookings]
+            hours_booked = 0.0
+            ##Search through the existing bookings
+            for i in range(len(list_bookings)):
+                timeslot = AvailabilityModel.query.get_or_404(
+                    list_bookings[i]["availability_id"]
+                ).to_dict()
+                get_interval = (
+                    float(timeslot["end_time"]) - float(timeslot["start_time"])
+                ) / (60 * 60)
+                hours_booked += get_interval
+            get_user_dict["hours_booked"] = hours_booked
+            return get_user_dict
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")

@@ -5,7 +5,12 @@ import requests
 
 API_URL = os.environ["API_URL"]
 
-TEST_USER = {"username": "test_user", "email": "test@test.com", "password": "test"}
+TEST_USER = {
+    "username": "test_user",
+    "email": "test@test.com",
+    "password": "test",
+    "hours_booked": 0.0,
+}
 
 
 def test_register_user():
@@ -27,6 +32,7 @@ def test_authenticate():
     assert protected_response.status_code == 200
     assert protected_response.json()["username"] == TEST_USER["username"]
     assert protected_response.json()["email"] == TEST_USER["email"]
+    assert protected_response.json()["hours_booked"] == TEST_USER["hours_booked"]
 
     # Logout
     logout_response = requests.post(
