@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import ResourceCard from '../components/ResourceCard';
-import DeleteListing from '../components/DeleteListing';
+import DeleteDialog from '../components/DeleteDialog';
 import { StoreContext } from '../utils/store';
 import { fetchMyListings } from '../utils/auxiliary';
 import {
@@ -130,7 +130,7 @@ const MyListings = () => {
   const [open, setOpen] = React.useState(false);
   // listid represents the current listing id which the user may want to delete
   const [listid, setListid] = React.useState(null);
-  // state variables used for the DeleteListing modal
+  // state variables used for the DeleteDialog modal
   const handleClickOpen = (id) => {
     setListid(id);
     setOpen(true);
@@ -199,13 +199,13 @@ const MyListings = () => {
                     {mylistings.map((listing) => (
                       <Grid key={listing.listing_id} item>
                         <ResourceCard
-                          resource={listing} owner={username}
-                          history={history} classes={classes}
+                          resource={listing} owner={username} history={history}
+                          parentPage={`/mylistings`}
                           handleClickOpen={handleClickOpen}
                         />
-                        <DeleteListing
-                          open={open} handleClose={handleClose} listingId={listid}
-                          page="/mylistings"
+                        <DeleteDialog
+                          open={open} handleClose={handleClose} deleteId={listid}
+                          page="/mylistings" item="Listing"
                         />
                       </Grid>
                     ))}

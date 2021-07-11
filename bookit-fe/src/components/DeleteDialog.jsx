@@ -13,16 +13,21 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-// The DeleteListing component is a Material UI dialog wrapper which takes in
+// The DeleteDialog component is a Material UI dialog wrapper which takes in
 // props as state handlers, and a relevant listing id. The user is promtped
 // whether they would like to confirm the deletion of a particular listing,
 // and upon confirmation an API DELETE request is sent.
-const DeleteListing = ({ open, handleClose, listingId, page }) => {
+const DeleteDialog = ({ open, handleClose, deleteId, page, item }) => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
   const [updated, setUpdate] = context.updates;
   const history = useHistory();
+
+  let deleteUrl = `${baseUrl}/listings/${deleteId}`;
+  if (item === "Availability") {
+    deleteUrl = `${baseUrl}/availabilities/${deleteId}`;
+  }
 
   return (
     <Dialog
@@ -31,10 +36,10 @@ const DeleteListing = ({ open, handleClose, listingId, page }) => {
       aria-labelledby="delete-dialog-title"
       aria-describedby="delete-dialog-description"
     >
-      <DialogTitle id="delete-dialog-title">{'Delete Listing'}</DialogTitle>
+      <DialogTitle id="delete-dialog-title">{`Delete ${item}`}</DialogTitle>
       <DialogContent>
         <DialogContentText id="delete-dialog-description">
-          Deleting this Listing is irreversible. Are you sure you want to delete it?
+          {`Deleting this ${item} is irreversible. Are you sure you want to delete it?`}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -44,7 +49,7 @@ const DeleteListing = ({ open, handleClose, listingId, page }) => {
           onClick={async () => {
             await axios({
               method: 'DELETE',
-              url: `${baseUrl}/listings/${listingId}`,
+              url: deleteUrl,
               headers: {
                 accept: 'application/json',
                 'content-type': 'application/json',
@@ -71,7 +76,7 @@ const DeleteListing = ({ open, handleClose, listingId, page }) => {
               })
             setUpdate(!updated);
             handleClose();
-            if (page !== '/mylistings') {
+            if (item !== "Availability" && page !== '/mylistings') {
               history.push('/mylistings');
             }
           }}
@@ -86,11 +91,12 @@ const DeleteListing = ({ open, handleClose, listingId, page }) => {
   )
 }
 
-DeleteListing.propTypes = {
+DeleteDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  listingId: PropTypes.number,
+  deleteId: PropTypes.number,
   page: PropTypes.string,
+  item: PropTypes.string.isRequired,
 };
 
-export default DeleteListing;
+export default DeleteDialog;

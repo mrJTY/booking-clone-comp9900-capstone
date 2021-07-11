@@ -21,6 +21,8 @@ const ContextStore = ({ children }) => {
   // const [userinfo, setUserinfo] = React.useState({});
 
   const [username, setUsername] = React.useState(null);
+  const [primaryUserId, setPrimaryUserId] = React.useState(null);
+
 
   const store = {
     baseUrl: `http://localhost:${port}`,
@@ -30,6 +32,7 @@ const ContextStore = ({ children }) => {
     mylistings: [mylistings, setMylistings],
     following: [following, setFollowing],
     username: [username, setUsername],
+    primaryUserId: [primaryUserId, setPrimaryUserId],
   }
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }

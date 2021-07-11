@@ -3,7 +3,7 @@ import { StoreContext } from '../utils/store';
 import Navbar from '../components/Navbar';
 import PlaceholderImage from '../assets/mountaindawn.png';
 import CustomButton from '../components/CustomButton';
-import DeleteListing from '../components/DeleteListing';
+import DeleteDialog from '../components/DeleteDialog';
 import ModalAvailability from '../components/ModalAvailability';
 import {
   useHistory,
@@ -150,13 +150,13 @@ const Listing = () => {
   const token = context.token[0];
   const history = useHistory();
   const location = useLocation();
-
-  console.log(location);
-
   // used for the delete dialog
   const [open, setOpen] = React.useState(false);
-  // state variables used for the DeleteListing modal
+  // determines which availability in particular to delete
+  const [deleteAvailId, setDeleteAvailId] = React.useState(null);
+  // state variables used for the DeleteDialog modal
   const handleClickOpen = (id) => {
+    setDeleteAvailId(id);
     setOpen(true);
   };
   const handleClose = () => {
@@ -211,11 +211,7 @@ const Listing = () => {
             "Authorization": `JWT ${token}`,
           },
         })
-
-        console.log(response);
-
         setResource(response.data);
-
       } catch(error) {
         
         console.log(error.response);
@@ -233,9 +229,6 @@ const Listing = () => {
             "Authorization": `JWT ${token}`,
           },
         })
-
-        // console.log(response);
-
         await setAvailabilities(response.data.availabilities);
 
       } catch(error) {
@@ -306,10 +299,11 @@ const Listing = () => {
                       onClick={() => handleClickOpen(location.state.givenId)}
                     />
 
-                    <DeleteListing
+                    <DeleteDialog
                       open={open} handleClose={handleClose}
-                      listingId={location.state.givenId}
+                      deleteId={location.state.givenId}
                       page={`/listings/${location.state.givenId}`}
+                      item="Listing"
                     />
                   </Box>
                 }
@@ -412,7 +406,9 @@ const Listing = () => {
                               id={'availability-delete-button'}
                               color={'secondary'}
                               className={classes.button}
-                              // onClick={() => handleClickOpen(parseInt(availability.availability_id)}
+                              onClick={() => {
+                                handleClickOpen(parseInt(availability.availability_id))
+                              }}
                             >
                               <DeleteIcon />
                             </IconButton>
@@ -447,6 +443,12 @@ const Listing = () => {
                       givenId={location.state.givenId}
                       newAvail={false}
                       availId={parseInt(modifyAvailId)}
+                    />
+                    <DeleteDialog
+                      open={open} handleClose={handleClose}
+                      deleteId={parseInt(deleteAvailId)}
+                      page={`/listings/${location.state.givenId}`}
+                      item="Availability"
                     />
                   </Box>
                 ))

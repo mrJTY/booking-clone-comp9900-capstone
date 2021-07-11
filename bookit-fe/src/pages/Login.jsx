@@ -70,9 +70,7 @@ const Login = () => {
   // context variables used throughout the page
   const context = React.useContext(StoreContext);
   const setToken = context.token[1];
-
   const setUsername = context.username[1];
-
   const baseUrl = context.baseUrl;
   const setPage = context.pageState[1];
   const history = useHistory();

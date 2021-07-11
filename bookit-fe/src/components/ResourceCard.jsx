@@ -4,6 +4,7 @@ import { StoreContext } from '../utils/store';
 import PlaceholderImage from '../assets/mountaindawn.png';
 import CustomButton from './CustomButton';
 import {
+  makeStyles,
   Tooltip,
   Card,
   CardHeader,
@@ -23,13 +24,49 @@ import ArrowRight from '@material-ui/icons/ArrowRight';
 import RoomIcon from '@material-ui/icons/Room';
 import axios from 'axios';
 
-// The ResourceCard component is a subcomponent of representing a resource
+// Page styling used on the ResourceCard component
+const useStyles = makeStyles((theme) => ({
+  cardRoot: {
+    maxWidth: 345,
+    minWidth: 345,
+  },
+  button: {
+    margin: theme.spacing(1),
+    paddingBottom: '8px',
+  },
+  resourceBorder: {
+    margin: theme.spacing(1),
+    border: '1px solid #000',
+    boxShadow: theme.shadows[5],
+  },
+  media: {
+    height: 0,
+    paddingTop: '56.25%', // 16:9 ratio
+  },
+  resourceCardActions: {
+    justifyContent: 'space-between',
+  },
+  resourceCardCentered: {
+    justifyContent: 'center',
+  },
+  locationDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  locationIcon: {
+    paddingRight: '4px',
+    width: '16px',
+    height: '16px',
+  },
+}));
+
+// The ResourceCard component is a subcomponent representing a resource
 // and contains various information about a particular resource.
 // The contents include a title, default thumbnail image, resource owner,
 // address and brief description and relevant interaction buttons.
 const ResourceCard = (
   {
-    resource, owner, history, classes, handleClickOpen
+    resource, owner, history,  parentPage, handleClickOpen
   }) => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
@@ -50,13 +87,9 @@ const ResourceCard = (
             "Authorization": `JWT ${token}`,
           },
         })
-
-        console.log(response);
-
         await setAvailabilities(response.data.availabilities);
-
       } catch(error) {
-        
+
         console.log(error.response);
 
         await setAvailabilities([]);
@@ -64,6 +97,8 @@ const ResourceCard = (
     }
     fetchAvailabilities();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const classes = useStyles();
 
   return (
     <Card className={classes.cardRoot}>
@@ -139,7 +174,13 @@ const ResourceCard = (
         </Typography>
       </CardContent>
 
-      <CardActions className={user === owner ? classes.resourceCardActions : classes.resourceCardCentered}>
+      <CardActions
+        className={
+          user === resource.username && parentPage === '/mylistings' ?
+            classes.resourceCardActions :
+            classes.resourceCardCentered
+        }
+      >
         <Box>
           <CustomButton
             title={'View Listing'}
@@ -163,7 +204,8 @@ const ResourceCard = (
         </Box>
 
         {
-          user === owner &&
+          user === resource.username &&
+          parentPage !== '/search' &&
           <Box>
             <Tooltip title={'Edit'} aria-label={'edit'}>
               <IconButton
@@ -205,8 +247,8 @@ ResourceCard.propTypes = {
   resource: PropTypes.object.isRequired,
   owner: PropTypes.string.isRequired,
   history: PropTypes.object.isRequired,
-  classes: PropTypes.object.isRequired,
-  handleClickOpen: PropTypes.func.isRequired,
+  parentPage: PropTypes.string.isRequired,
+  handleClickOpen: PropTypes.func,
 };
 
 export default ResourceCard;
