@@ -145,6 +145,7 @@ class ListingList(Resource):
             or_(
                 ListingModel.listing_name.ilike(f"%{keyword}%"),
                 ListingModel.description.ilike(f"%{keyword}%"),
+                ListingModel.address.ilike(f"%{keyword}%"),
             )
         ).limit(RESULT_LIMIT)
         search_listings = [l.to_dict() for l in search_return]
