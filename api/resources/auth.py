@@ -70,7 +70,8 @@ class AuthLogin(Resource):
                 return {
                     "accessToken": token.decode("utf-8"),
                 }
-            return False
+            # If wrong password, throw 403
+            return api.api.abort(403, "Incorrect user credentials")
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
