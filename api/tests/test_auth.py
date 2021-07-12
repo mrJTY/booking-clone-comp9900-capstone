@@ -9,7 +9,7 @@ TEST_USER = {
     "username": "test_user",
     "email": "test@test.com",
     "password": "test",
-    "hours_booked": 0.0,
+    "hours_booked": 0,
 }
 
 

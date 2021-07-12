@@ -72,6 +72,18 @@ class BookingModel(db.Model):
         return data
 
 
+# Current time vs start time
+def start_vs_current(start, current):
+    interval = (float(start) - float(current) * 1000.0) / (60.0 * 60.0 * 1000.0)
+    return int(interval)
+
+
+# start time vs end time
+def start_vs_end(end, start):
+    interval = round((float(end) - float(start)) / (60.0 * 60.0 * 1000.0))
+    return int(interval)
+
+
 # See example: https://github.com/noirbizarre/flask-restplus/blob/master/examples/todo.py
 @booking.route("/<int:booking_id>")
 @booking.param("booking_id", "The booking identifier")
@@ -93,10 +105,7 @@ class Booking(Resource):
             booking_time = AvailabilityModel.query.get_or_404(
                 b["availability_id"]
             ).to_dict()
-            if (
-                (float(booking_time["start_time"]) - float(current_unixtime))
-                / (60 * 60 * 24)
-            ) < 3.0:
+            if (start_vs_current(booking_time["start_time"], current_unixtime)) < 72:
                 raise Exception(
                     "Cannot delete less than 3 days after the start date of the existing booking"
                 )
@@ -119,19 +128,16 @@ class Booking(Resource):
                 content["availability_id"]
             ).to_dict()
 
-            new_time_month = datetime.fromtimestamp(new_time["start_time"]).strftime(
-                "%m"
-            )
+            new_time_month = datetime.fromtimestamp(
+                new_time["start_time"] / 1000
+            ).strftime("%m")
             b = BookingModel.query.get_or_404(booking_id).to_dict()
             old_time = AvailabilityModel.query.get_or_404(
                 b["availability_id"]
             ).to_dict()
             current_unixtime = datetime.now().strftime("%s")
             # No updated booking is allowed if the difference between now and start date is less than 3 days
-            if (
-                (float(old_time["start_time"]) - float(current_unixtime))
-                / (60 * 60 * 24)
-            ) < 3.0:
+            if (start_vs_current(old_time["start_time"], current_unixtime)) < 72:
                 raise Exception(
                     "Cannot make an updated booking less than 3 days after the start date of the existing booking"
                 )
@@ -148,17 +154,17 @@ class Booking(Resource):
                     list_bookings[i]["availability_id"]
                 ).to_dict()
                 if (
-                    datetime.fromtimestamp(timeslot["start_time"]).strftime("%m")
+                    datetime.fromtimestamp(timeslot["start_time"] / 1000).strftime("%m")
                     == new_time_month
                 ):
-                    get_interval = (
-                        float(timeslot["end_time"]) - float(timeslot["start_time"])
-                    ) / (60 * 60)
+                    get_interval = start_vs_end(
+                        timeslot["end_time"], timeslot["start_time"]
+                    )
                     hours_booked += get_interval
-            get_new_booking_interval = (
-                float(new_time["end_time"]) - float(new_time["start_time"])
-            ) / (60 * 60)
-            if (hours_booked + get_new_booking_interval) > 10.0:
+            get_new_booking_interval = start_vs_end(
+                new_time["end_time"], new_time["start_time"]
+            )
+            if (hours_booked + get_new_booking_interval) > 10:
                 raise Exception(
                     "Not allowed to have more than 10 hours in a calendar month"
                 )
@@ -211,9 +217,9 @@ class BookingList(Resource):
             new_time = AvailabilityModel.query.get_or_404(
                 content["availability_id"]
             ).to_dict()
-            new_time_month = datetime.fromtimestamp(new_time["start_time"]).strftime(
-                "%m"
-            )
+            new_time_month = datetime.fromtimestamp(
+                new_time["start_time"] / 1000
+            ).strftime("%m")
             list_bookings = BookingModel.query.filter_by(
                 user_id=current_user.user_id
             ).all()
@@ -225,17 +231,17 @@ class BookingList(Resource):
                     list_bookings[i]["availability_id"]
                 ).to_dict()
                 if (
-                    datetime.fromtimestamp(timeslot["start_time"]).strftime("%m")
+                    datetime.fromtimestamp(timeslot["start_time"] / 1000).strftime("%m")
                     == new_time_month
                 ):
-                    get_interval = (
-                        float(timeslot["end_time"]) - float(timeslot["start_time"])
-                    ) / (60 * 60)
+                    get_interval = start_vs_end(
+                        timeslot["end_time"], timeslot["start_time"]
+                    )
                     hours_booked += get_interval
-            get_new_booking_interval = (
-                float(new_time["end_time"]) - float(new_time["start_time"])
-            ) / (60 * 60)
-            if (hours_booked + get_new_booking_interval) > 10.0:
+            get_new_booking_interval = start_vs_end(
+                new_time["end_time"], new_time["start_time"]
+            )
+            if (hours_booked + get_new_booking_interval) > 10:
                 raise Exception(
                     "Not allowed to have more than 10 hours in a calendar month"
                 )
@@ -255,7 +261,7 @@ class BookingList(Resource):
             # Commit changes to db
             db.session.commit()
 
-            # Return the booking
+            # Return the bookingbooking_time
             booking_id = b.booking_id
             return BookingModel.query.get_or_404(booking_id).to_dict()
 

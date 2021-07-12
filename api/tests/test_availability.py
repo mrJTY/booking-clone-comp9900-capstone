@@ -1,5 +1,5 @@
 import os
-
+from datetime import datetime, timedelta
 import api.tests.utils as u
 import requests
 
@@ -19,19 +19,46 @@ TEST_LISTING = {
     "description": "Delicious selection of sandwiches and coffee",
 }
 
+now = datetime.now().strftime("%Y-%m-%d-00:00:00")
+current_date = datetime.strptime(now, "%Y-%m-%d-00:00:00")
+
+avaliability_date = current_date + timedelta(2)
+avaliability_date_start = avaliability_date.strftime("%Y-%m-%d 09:00:00")
+avaliability_date_finish = avaliability_date.strftime("%Y-%m-%d 10:00:00")
+
+avaliability_date_start_ue = datetime.strptime(
+    avaliability_date_start, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+avaliability_date_finish_ue = datetime.strptime(
+    avaliability_date_finish, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+
 TEST_AVAILABILITY = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
     # Unix Epoch time (9am-10am)
-    "start_time": 1625612400,
-    "end_time": 1625616000,
+    "start_time": int(avaliability_date_start_ue) * 1000,
+    "end_time": int(avaliability_date_finish_ue) * 1000,
     "is_available": True,
 }
 
+avaliability_date2 = current_date + timedelta(2)
+avaliability_date2_start = avaliability_date2.strftime("%Y-%m-%d 10:00:00")
+avaliability_date2_finish = avaliability_date2.strftime("%Y-%m-%d 11:00:00")
+
+avaliability_date2_start_ue = datetime.strptime(
+    avaliability_date2_start, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+avaliability_date2_finish_ue = datetime.strptime(
+    avaliability_date2_finish, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+
 TEST_2_AVAILABILITY = {
+    # Fill this later once you create a listing - 5
     "listing_id": 5,
-    "start_time": 1625616000,
-    "end_time": 1625619600,
+    # Unix Epoch time (10am-11am) - 2 days start time
+    "start_time": int(avaliability_date2_start_ue) * 1000,
+    "end_time": int(avaliability_date2_finish_ue) * 1000,
     "is_available": True,
 }
 

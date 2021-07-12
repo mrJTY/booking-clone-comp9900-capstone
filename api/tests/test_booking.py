@@ -45,8 +45,8 @@ AVAILABILITY = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
     # Unix Epoch time (9am-10am)
-    "start_time": int(avaliability_date_start_ue),
-    "end_time": int(avaliability_date_finish_ue),
+    "start_time": int(avaliability_date_start_ue) * 1000,
+    "end_time": int(avaliability_date_finish_ue) * 1000,
 }
 
 avaliability_date2 = current_date + timedelta(2)
@@ -64,8 +64,8 @@ AVAILABILITY_2 = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
     # Unix Epoch time (10am-11am) - 2 days start time
-    "start_time": int(avaliability_date2_start_ue),
-    "end_time": int(avaliability_date2_finish_ue),
+    "start_time": int(avaliability_date2_start_ue) * 1000,
+    "end_time": int(avaliability_date2_finish_ue) * 1000,
 }
 
 avaliability_date3 = current_date + timedelta(4)
@@ -82,8 +82,8 @@ AVAILABILITY_3 = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
     # Unix Epoch time (10am-12pm)
-    "start_time": int(avaliability_date3_start_ue),
-    "end_time": int(avaliability_date3_finish_ue),
+    "start_time": int(avaliability_date3_start_ue) * 1000,
+    "end_time": int(avaliability_date3_finish_ue) * 1000,
 }
 
 avaliability_date4 = current_date + timedelta(4)
@@ -100,8 +100,8 @@ AVAILABILITY_4 = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
     # Unix Epoch time (10am-10pm)
-    "start_time": int(avaliability_date4_start_ue),
-    "end_time": int(avaliability_date4_finish_ue),
+    "start_time": int(avaliability_date4_start_ue) * 1000,
+    "end_time": int(avaliability_date4_finish_ue) * 1000,
 }
 
 avaliability_date5 = current_date + timedelta(4)
@@ -118,8 +118,8 @@ AVAILABILITY_5 = {
     # Fill this later once you create a listing - 5
     "listing_id": 5,
     # Unix Epoch time (8pm-10pm)
-    "start_time": int(avaliability_date5_start_ue),
-    "end_time": int(avaliability_date5_finish_ue),
+    "start_time": int(avaliability_date5_start_ue) * 1000,
+    "end_time": int(avaliability_date5_finish_ue) * 1000,
 }
 
 
@@ -154,7 +154,7 @@ def test_create_booking():
         },
     )
     assert protected_response.status_code == 200
-    assert protected_response.json()["hours_booked"] == 1.0
+    assert protected_response.json()["hours_booked"] == 1
 
     # Changed their mind - they want the other timeslot (10am-11am). But since its inside 3 days they cannot do it
     BOOKING_CHANGE_ATTEMPT = {
@@ -185,7 +185,7 @@ def test_create_booking():
         },
     )
     assert protected_response.status_code == 200
-    assert protected_response.json()["hours_booked"] == 3.0
+    assert protected_response.json()["hours_booked"] == 3
 
     BOOKING_CHANGE_ATTEMPT_2 = {
         "booking_id": booking_id_2,
@@ -232,4 +232,4 @@ def test_create_booking():
         },
     )
     assert protected_response.status_code == 200
-    assert protected_response.json()["hours_booked"] == 1.0
+    assert protected_response.json()["hours_booked"] == 1

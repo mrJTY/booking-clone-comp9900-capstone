@@ -28,6 +28,11 @@ login_details_request = api.api.model(
     },
 )
 
+# start time vs end time
+def start_vs_end(end, start):
+    interval = round((float(end) - float(start)) / (60.0 * 60.0 * 1000.0))
+    return int(interval)
+
 
 @auth.route("/login")
 @auth.response(404, "User not found")
@@ -109,15 +114,15 @@ class AuthMe(Resource):
                 user_id=get_user_dict["user_id"]
             ).all()
             list_bookings = [l.to_dict() for l in list_bookings]
-            hours_booked = 0.0
+            hours_booked = 0
             ##Search through the existing bookings
             for i in range(len(list_bookings)):
                 timeslot = AvailabilityModel.query.get_or_404(
                     list_bookings[i]["availability_id"]
                 ).to_dict()
-                get_interval = (
-                    float(timeslot["end_time"]) - float(timeslot["start_time"])
-                ) / (60 * 60)
+                get_interval = start_vs_end(
+                    timeslot["end_time"], timeslot["start_time"]
+                )
                 hours_booked += get_interval
             get_user_dict["hours_booked"] = hours_booked
             return get_user_dict
