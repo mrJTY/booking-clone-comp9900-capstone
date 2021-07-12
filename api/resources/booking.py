@@ -3,14 +3,16 @@ import logging
 from datetime import datetime, timezone
 from api import db
 from api.resources.availability import AvailabilityModel
+from api.resources.listing import ListingModel
 from api.utils.req_handling import *
 from flask_login import current_user
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
 import api
 
-
 booking = api.api.namespace("bookings", description="booking operations")
+
+RESULT_LIMIT = 20
 
 create_booking_details = api.api.model(
     "booking",
@@ -270,13 +272,22 @@ class BookingList(Resource):
             api.api.abort(500, f"{e}")
 
 
-# TODO: Paginate this and add docs
 @booking.route("/mybookings")
 class MyBookings(Resource):
     @booking.doc(description=f"Fetch my bookings")
     def get(self):
-        my_bookings = BookingModel.query.filter_by(user_id=current_user.user_id).all()
-        my_bookings = [l.to_dict() for l in my_bookings]
+        query = (
+            db.session.query(BookingModel, ListingModel, AvailabilityModel)
+            .filter(BookingModel.user_id == current_user.user_id)
+            .filter(BookingModel.listing_id == ListingModel.listing_id)
+            .filter(BookingModel.availability_id == AvailabilityModel.availability_id)
+            .limit(RESULT_LIMIT)
+        )
+        unpacked_query = [q for q in query]
+        my_bookings = [
+            {**b.to_dict(), **l.to_dict(), **a.to_dict()}
+            for (b, l, a) in unpacked_query
+        ]
         return {"mybookings": my_bookings}
 
 

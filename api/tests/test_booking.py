@@ -3,9 +3,7 @@ from datetime import datetime, timedelta
 import api.tests.utils as u
 import requests
 
-
 API_URL = os.environ["API_URL"]
-
 
 OWNER = {
     "username": "krusty_krab",
@@ -233,3 +231,16 @@ def test_create_booking():
     )
     assert protected_response.status_code == 200
     assert protected_response.json()["hours_booked"] == 1
+
+
+def test_my_bookings():
+    consumer_token = u.login_user(CONSUMER)
+    booking_url = f"{API_URL}/bookings/mybookings"
+    response = requests.get(
+        booking_url,
+        headers={
+            "Authorization": f"JWT {consumer_token}",
+        },
+    )
+    assert response.status_code == 200
+    assert "mybookings" in response.json().keys()
