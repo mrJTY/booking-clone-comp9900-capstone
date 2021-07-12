@@ -12,6 +12,7 @@ import NewListing from './pages/NewListing';
 import EditListing from './pages/EditListing';
 import Discover from './pages/Discover';
 import Profile from './pages/Profile';
+import Search from './pages/Search';
 import {
   BrowserRouter as Router,
   Switch,
@@ -126,6 +127,9 @@ function App () {
                 </Route>
                 <Route exact path="/profile/:user">
                   <Profile />
+                </Route>
+                <Route path="/search">
+                  <Search />
                 </Route>
                 <Route path="/">
                   <Redirect to="/login" />

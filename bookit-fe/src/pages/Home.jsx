@@ -1,7 +1,6 @@
 import React from 'react';
-import { StoreContext } from '../utils/store';
+import {StoreContext} from '../utils/store';
 import Navbar from '../components/Navbar';
-import SearchResults from '../components/SearchResults';
 import {
   useHistory,
   Redirect,
@@ -11,10 +10,9 @@ import {
   Box,
   Container,
   Typography,
+  Button,
   CircularProgress,
 } from '@material-ui/core';
-// import axios from 'axios';
-// import { toast } from 'react-toastify';
 
 // Page styling used on the Home screen and its subcomponents
 const useStyles = makeStyles((theme) => ({
@@ -56,53 +54,43 @@ const useStyles = makeStyles((theme) => ({
 
 const Home = () => {
   const context = React.useContext(StoreContext);
+  const classes = useStyles();
   const token = context.token[0];
   const history = useHistory();
-  // const baseUrl = context.baseUrl;
-  
+  const username = context.username[0];
+  const [page, setPage] = context.pageState;
+  const [loadingState, setLoadingState] = React.useState('idle');
+
   React.useEffect(() => {
     if (token === null) {
-      return <Redirect to={{ pathname: '/login' }} />
+      return <Redirect to={{pathname: '/login'}}/>
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const username = context.username[0];
-
-  // object containing all of the users a user is following from a GET API request
-  // const [following, setFollowing] = context.following;
-  // the page variable stores the current page as a string
-  const [page, setPage] = context.pageState;
-  // page loading state
-  const [loadingState, setLoadingState] = React.useState('idle');
-
-  // class used for the Toastify error component styling
-  // const toastErrorStyle = {
-  //   backgroundColor: '#cc0000',
-  //   opacity: 0.8,
-  //   textAlign: 'center',
-  //   fontSize: '18px'
-  // };
-
   React.useEffect(() => {
     setPage('/home');
-    async function setupHome () {
+
+    async function setupHome() {
       setLoadingState('loading');
       // await fetchUserFeed(...);
       setLoadingState('success');
     }
+
     setupHome();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // classes used for Material UI component styling
-  const classes = useStyles();
+  const handleSearchButtonOnClick = (event) => {
+    history.push("/search");
+  }
+
   return (
     <Container>
-      <Navbar page={page} />
+      <Navbar page={page}/>
       <Container className={classes.container}>
         {
           loadingState !== 'success' &&
           <div>
-            <CircularProgress color="secondary" />
+            <CircularProgress color="secondary"/>
           </div>
         }
         {
@@ -115,10 +103,10 @@ const Home = () => {
                   Welcome, {username}.
                 </Typography>
               </Box>
-              <SearchResults context={context} username={username} history={history}/>
+              <Button onClick={handleSearchButtonOnClick}>Start searching here</Button>
             </Box>
-            <br />
-            <br />
+            <br/>
+            <br/>
           </Box>
         }
         {/* {

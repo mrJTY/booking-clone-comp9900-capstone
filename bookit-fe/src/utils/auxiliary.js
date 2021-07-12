@@ -23,7 +23,7 @@ export async function fetchMyListings (baseUrl, token, setMylistings)
   await setMylistings(response.data.mylistings);
 }
 
-export async function fetchSearchListings(baseUrl, token, searchQuery, setSearchListings){
+export async function fetchSearchListings(baseUrl, token, searchQuery, setSearchListingResults){
   const response = await axios({
     method: 'GET',
     url: `${baseUrl}/listings?search_query=${searchQuery}`,
@@ -33,7 +33,7 @@ export async function fetchSearchListings(baseUrl, token, searchQuery, setSearch
       "Authorization": `JWT ${token}`,
     },
   })
-  await setSearchListings(response.data.listings);
+  await setSearchListingResults(response.data.listings);
 }
 
 // validate an image upload
