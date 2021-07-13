@@ -244,3 +244,5 @@ def test_my_bookings():
     )
     assert response.status_code == 200
     assert "mybookings" in response.json().keys()
+    assert "upcoming" in response.json()["mybookings"].keys()
+    assert "past" in response.json()["mybookings"].keys()

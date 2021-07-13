@@ -288,7 +288,16 @@ class MyBookings(Resource):
             {**b.to_dict(), **l.to_dict(), **a.to_dict()}
             for (b, l, a) in unpacked_query
         ]
-        return {"mybookings": my_bookings}
+        out = {
+            "past": [],
+            "upcoming": [],
+        }
+        for b in my_bookings:
+            if b["end_time"] < datetime.utcnow().timestamp():
+                out["past"].append(b)
+            else:
+                out["upcoming"].append(b)
+        return {"mybookings": out}
 
 
 # Exceptions
