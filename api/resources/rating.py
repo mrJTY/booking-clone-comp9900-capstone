@@ -15,7 +15,7 @@ rating_details = api.api.model(
     "rating",
     {
         "rating_id": fields.Integer(required=True, description="The ID of the rating"),
-        "booking_id": fields.Integer(
+        "booking_id": fields.String(
             required=True, description="The booking_id that was rated"
         ),
         "user_id": fields.Integer(

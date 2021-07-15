@@ -1,5 +1,7 @@
 import json
 import logging
+import uuid
+
 from datetime import datetime, timezone
 from api import db
 from api.resources.availability import AvailabilityModel
@@ -17,9 +19,7 @@ RESULT_LIMIT = 20
 create_booking_details = api.api.model(
     "booking",
     {
-        "booking_id": fields.Integer(
-            required=True, description="The ID of the booking"
-        ),
+        "booking_id": fields.String(required=True, description="The ID of the booking"),
         "listing_id": fields.Integer(
             required=True, description="The listing_id that the booking is for"
         ),
@@ -33,9 +33,7 @@ create_booking_details = api.api.model(
 get_booking_details = api.api.model(
     "booking",
     {
-        "booking_id": fields.Integer(
-            required=True, description="The ID of the booking"
-        ),
+        "booking_id": fields.String(required=True, description="The ID of the booking"),
         "user_id": fields.Integer(
             required=True, description="The user_id who owns the booking"
         ),
@@ -52,7 +50,7 @@ get_booking_details = api.api.model(
 
 class BookingModel(db.Model):
     __tablename__ = "bookings"
-    booking_id = db.Column(db.Integer, primary_key=True)
+    booking_id = db.Column(db.Text, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
     listing_id = db.Column(
         db.Integer, db.ForeignKey("listings.listing_id"), nullable=False
@@ -87,7 +85,7 @@ def start_vs_end(end, start):
 
 
 # See example: https://github.com/noirbizarre/flask-restplus/blob/master/examples/todo.py
-@booking.route("/<int:booking_id>")
+@booking.route("/<booking_id>")
 @booking.param("booking_id", "The booking identifier")
 @booking.response(404, "booking not found")
 class Booking(Resource):
@@ -112,6 +110,13 @@ class Booking(Resource):
                     "Cannot delete less than 3 days after the start date of the existing booking"
                 )
             b1 = BookingModel.query.filter(BookingModel.booking_id == booking_id)
+            b = BookingModel.query.get_or_404(booking_id)
+            a = AvailabilityModel.query.get_or_404(b.to_dict()["availability_id"])
+            # Mark as available
+            a.is_available = True
+            flag_modified(a, "availability_id")
+            db.session.merge(a)
+            db.session.flush()
             b1.delete()
             db.session.commit()
             return b1, 204
@@ -202,6 +207,7 @@ class BookingList(Resource):
             # Receive contents from request
             logging.info(content)
             user_id = current_user.user_id
+            booking_id = str(uuid.uuid4())
             listing_id = content["listing_id"]
             availability_id = content["availability_id"]
 
@@ -250,6 +256,7 @@ class BookingList(Resource):
             # The following steps must be atomic
             # 1. Make a booking
             b = BookingModel(
+                booking_id=booking_id,
                 user_id=user_id,
                 listing_id=listing_id,
                 availability_id=availability_id,

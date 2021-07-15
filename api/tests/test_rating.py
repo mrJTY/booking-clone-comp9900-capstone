@@ -67,7 +67,7 @@ def test_create_rating():
     booking_id = u.create_booking(
         consumer_user_id, listing_id, availability_id, consumer_token
     )
-    assert type(booking_id) == int
+    assert type(booking_id) == str
 
     # Consumer makes a rating
     rating_payload = {

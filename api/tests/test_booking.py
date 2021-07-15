@@ -141,7 +141,7 @@ def test_create_booking():
     booking_id = u.create_booking(
         consumer_user_id, listing_id, availability_id, consumer_token
     )
-    assert type(booking_id) == int
+    assert type(booking_id) == str
 
     # Access a protected endpoint
     protected_url = f"{API_URL}/auth/me"
