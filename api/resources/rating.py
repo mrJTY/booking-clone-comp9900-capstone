@@ -68,35 +68,33 @@ class Rating(Resource):
         logging.info(f"Getting rating {rating_id}")
         return RatingModel.query.get_or_404(rating_id).to_dict()
 
-    # TODO(Harris/Saksham): Update & Delete
-    # @rating.doc(description=f"rating_id must be provided")
-    # @rating.marshal_with(rating_details)
-    # def delete(self, rating_id):
-    #     logging.info(f"Deleting rating {rating_id}")
-    #     b = RatingModel.query.filter(RatingModel.rating_id == rating_id)
-    #     b.delete()
-    #     db.session.commit()
-    #     return b
+    @rating.doc(description=f"rating_id must be provided")
+    @rating.marshal_with(rating_details)
+    def delete(self, rating_id):
+        logging.info(f"Deleting rating {rating_id}")
+        b = RatingModel.query.filter(RatingModel.rating_id == rating_id)
+        b.delete()
+        db.session.commit()
+        return b, 204
 
-    # TODO(Harris/Saksham): Update & Delete
-    # @rating.doc(description=f"rating_id must be provided")
-    # @rating.marshal_with(rating_details)
-    # def put(self, rating_id):
-    #     logging.info(f"Updating rating {rating_id}")
-    #     # get rating id
-    #     content = get_request_json()
-    #     b = RatingModel.query.get_or_404(rating_id)
-    #     # update the rating data
-    #     b.rating_name = content["rating_name"]
-    #     b.address = content["address"]
-    #     b.category = content["category"]
-    #     b.description = content["description"]
-    #     b.user_id = current_user.user_id
-    #     flag_modified(rating, "description")
-    #     db.session.merge(b)
-    #     db.session.flush()
-    #     db.session.commit()
-    #     return b
+    @rating.doc(description=f"rating_id must be provided")
+    @rating.marshal_with(rating_details)
+    def put(self, rating_id):
+        logging.info(f"Updating rating {rating_id}")
+        # get rating id
+        content = get_request_json()
+        b = RatingModel.query.get_or_404(rating_id)
+        # update the rating data - consists of the relevant fields.
+        b.booking_id = content["booking_id"]
+        b.user_id = current_user.user_id
+        b.rating = content["rating"]
+        b.comment = content["comment"]
+        flag_modified(b, "rating")
+        flag_modified(b, "comment")
+        db.session.merge(b)
+        db.session.flush()
+        db.session.commit()
+        return b
 
 
 @rating.route("")

@@ -1,5 +1,5 @@
 import os
-
+from datetime import datetime, timedelta
 import api.tests.utils as u
 import requests
 
@@ -25,11 +25,28 @@ LISTING = {
     "description": "Best burgers down in Bikini Bottom",
 }
 
+# We will need to change the times as it goes along - static.
+# Ratings only activate if its past the start time - setup by frontend
+now = datetime.now().strftime("%Y-%m-%d-00:00:00")
+current_date = datetime.strptime(now, "%Y-%m-%d-00:00:00")
+
+avaliability_date = current_date + timedelta(-2)
+avaliability_date_start = avaliability_date.strftime("%Y-%m-%d 12:00:00")
+avaliability_date_finish = avaliability_date.strftime("%Y-%m-%d 13:00:00")
+
+avaliability_date_start_ue = datetime.strptime(
+    avaliability_date_start, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+avaliability_date_finish_ue = datetime.strptime(
+    avaliability_date_finish, "%Y-%m-%d %H:%M:%S"
+).strftime("%s")
+
 AVAILABILITY = {
-    # Fill this later once you create a listing
-    "listing_id": None,
-    "start_time": 1625214000,
-    "end_time": 162521500,
+    # Fill this later once you create a listing - 5
+    "listing_id": 5,
+    # Unix Epoch time (12pm-1pm - 2 days behind)
+    "start_time": int(avaliability_date_start_ue) * 1000,
+    "end_time": int(avaliability_date_finish_ue) * 1000,
 }
 
 
@@ -59,4 +76,31 @@ def test_create_rating():
         "rating": 5,
         "comment": "best burgers in town",
     }
+
     rating_response = u.create_rating(rating_payload, consumer_token)
+    rating_id = rating_response["rating_id"]
+    ratings_url = f"{API_URL}/ratings/{rating_id}"
+    rating_payload_updated = {
+        "booking_id": booking_id,
+        "user_id": consumer_user_id,
+        "rating": 3,
+        "comment": "On second thought, burgers were OKAY... it could have been better. Slightly dry for me...",
+    }
+
+    updated_rating_response = requests.put(
+        ratings_url,
+        json=rating_payload_updated,
+        headers={
+            "Authorization": f"JWT {consumer_token}",
+        },
+    )
+    assert updated_rating_response.status_code == 200
+    actual = updated_rating_response.json()
+    assert actual["user_id"] == rating_payload_updated["user_id"]
+    assert actual["booking_id"] == rating_payload_updated["booking_id"]
+    assert actual["rating"] == rating_payload_updated["rating"]
+    assert actual["comment"] == rating_payload_updated["comment"]
+
+    # Test delete
+    delete_response = requests.delete(ratings_url)
+    assert delete_response.status_code == 204
