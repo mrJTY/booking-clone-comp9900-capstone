@@ -174,7 +174,7 @@ const Listing = () => {
   // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
   // updated ensures appropriate re-rendering upon changing or deleting a resource
-  const updated = context.updates[0];
+  const [updated, setUpdated] = context.updates;
   const username = context.username[0];
   const [availabilities, setAvailabilities] = React.useState([]);
   const [resource, setResource] = React.useState(null);
@@ -195,6 +195,40 @@ const Listing = () => {
   const handleClickModfyAvail = (id) => {
     setModifyAvailId(id);
     setAvailModal(true);
+  }
+
+  const handleClickBookIt = (availId) => {
+    // listing id: location.state.givenId
+    async function attemptBooking () {
+      try {
+        const response = await axios({
+          method: 'POST',
+          url: `${baseUrl}/bookings`,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            "Authorization": `JWT ${token}`,
+          },
+          data: {
+            "listing_id": location.state.givenId,
+            "availability_id": availId
+          }
+        })
+
+        console.log(response.data);
+        
+        // setResource(response.data);
+        setUpdated(!updated);
+
+      } catch(error) {
+        
+        console.log(error.response);
+
+        // setResource(null);
+      }
+
+    }
+    attemptBooking();
   }
 
   React.useEffect(() => {
@@ -415,9 +449,8 @@ const Listing = () => {
                           </Tooltip>
                         </Box>
                       }
-                      {
-                        resource.username === username &&
-                        <Tooltip title="Book It" aria-label="book it">
+                      <Tooltip title="Book It" aria-label="book it">
+                        <span>
                           <Button
                             variant="contained"
                             color="default"
@@ -425,8 +458,9 @@ const Listing = () => {
                             disabled={
                               availability.is_available === true ? false : true
                             }
-                            // startIcon={}
-                            // onClick={() => handleClickBookIt(parseInt(availability.availability_id))}
+                            onClick={() => {
+                              handleClickBookIt(parseInt(availability.availability_id))
+                            }}
                           >
                             {
                               availability.is_available === true ?
@@ -434,8 +468,8 @@ const Listing = () => {
                               'Booked Out'
                             }
                           </Button>
-                        </Tooltip>
-                      }
+                        </span>
+                      </Tooltip>
                     </ListItem>
                     <ModalAvailability
                       availModal={availModal}

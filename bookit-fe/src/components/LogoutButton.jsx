@@ -51,8 +51,8 @@ const Logout = () => {
       })
       .catch((error) => {
         let errorText = '';
-        error.response.data.error !== undefined
-          ? errorText = error.response.data.error
+        error.response.data.message !== undefined
+          ? errorText = error.response.data.message
           : errorText = 'Invalid Auth token'
         toast.error(
           errorText, {

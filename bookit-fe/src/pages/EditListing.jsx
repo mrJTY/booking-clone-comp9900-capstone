@@ -234,8 +234,8 @@ const EditListing = () => {
         })
         .catch((error) => {
           let errorText = '';
-          error.response.data.error !== undefined
-            ? errorText = error.response.data.error
+          error.response.data.message !== undefined
+            ? errorText = error.response.data.message
             : errorText = 'Invalid input'
           toast.error(
             errorText, {

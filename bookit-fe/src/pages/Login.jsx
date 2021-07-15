@@ -12,6 +12,8 @@ import {
   Button,
   Box,
   TextField,
+  Typography,
+  Divider,
   FormControl,
   Tooltip
 } from '@material-ui/core';
@@ -30,6 +32,14 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     color: 'white',
     backgroundColor: theme.palette.background.default,
+  },
+  bookitTitle: {
+    margin: theme.spacing(2),
+    color: '#D0D0D0',
+  },
+  titleDivider: {
+    height: '2px',
+    backgroundColor: '#648dae',
   },
   logo: {
     display: 'flex',
@@ -125,8 +135,8 @@ const Login = () => {
         })
         .catch((error) => {
           let errorText = '';
-          error.response.data.error !== undefined
-            ? errorText = error.response.data.error
+          error.response.data.message !== undefined
+            ? errorText = error.response.data.message
             : errorText = 'Invalid input'
           toast.error(
             errorText, {
@@ -156,8 +166,14 @@ const Login = () => {
         </Tooltip>
       </Box>
       <br />
-      <Box>
-        <h2>BookIt Login</h2>
+      <Box className={classes.bookitTitle}>
+        <Typography variant="h3">
+          BookIt
+        </Typography>
+        <Divider className={classes.titleDivider} />
+        <Typography variant="h5">
+          Login
+        </Typography>
       </Box>
       <br />
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -186,7 +202,7 @@ const Login = () => {
                 <TextField
                   type="password"
                   label="Password"
-                  color="secondary"
+                  color="primary"
                   {...field}
                 />
               )}
@@ -197,7 +213,7 @@ const Login = () => {
         <Tooltip title="Login" aria-label="log in">
           <Button
             className={classes.button}
-            variant="outlined" color="secondary" type="submit"
+            variant="outlined" color="primary" type="submit"
           >
             Login
           </Button>
@@ -208,7 +224,7 @@ const Login = () => {
           <Button
             className={classes.button}
             variant="outlined"
-            color="primary"
+            color="secondary"
             onClick={registerScreenButton}
           >
             New User

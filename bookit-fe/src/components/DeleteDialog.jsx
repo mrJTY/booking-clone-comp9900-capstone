@@ -27,6 +27,8 @@ const DeleteDialog = ({ open, handleClose, deleteId, page, item }) => {
   let deleteUrl = `${baseUrl}/listings/${deleteId}`;
   if (item === "Availability") {
     deleteUrl = `${baseUrl}/availabilities/${deleteId}`;
+  } else if (item === "Booking") {
+    deleteUrl = `${baseUrl}/bookings/${deleteId}`;
   }
 
   return (
@@ -58,8 +60,8 @@ const DeleteDialog = ({ open, handleClose, deleteId, page, item }) => {
             })
               .catch((error) => {
                 let errorText = '';
-                error.response.data.error !== undefined
-                  ? errorText = error.response.data.error
+                error.response.data.message !== undefined
+                  ? errorText = error.response.data.message
                   : errorText = 'Invalid input'
                 toast.error(
                   errorText, {
@@ -76,7 +78,7 @@ const DeleteDialog = ({ open, handleClose, deleteId, page, item }) => {
               })
             setUpdate(!updated);
             handleClose();
-            if (item !== "Availability" && page !== '/mylistings') {
+            if (item !== "Availability" && page !== '/mylistings' && page !== '/mybookings') {
               history.push('/mylistings');
             }
           }}

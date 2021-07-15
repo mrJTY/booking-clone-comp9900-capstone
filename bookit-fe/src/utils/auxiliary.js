@@ -23,7 +23,9 @@ export async function fetchMyListings (baseUrl, token, setMylistings)
   await setMylistings(response.data.mylistings);
 }
 
-export async function fetchSearchListings(baseUrl, token, searchQuery, setSearchListingResults){
+
+export async function fetchSearchListings (baseUrl, token, searchQuery, setSearchListingResults)
+{
   const response = await axios({
     method: 'GET',
     url: `${baseUrl}/listings?search_query=${searchQuery}`,
@@ -34,6 +36,25 @@ export async function fetchSearchListings(baseUrl, token, searchQuery, setSearch
     },
   })
   await setSearchListingResults(response.data.listings);
+}
+
+
+export async function fetchMyBookings (baseUrl, token, setMybookings)
+{
+  const response = await axios({
+    method: 'GET',
+    url: `${baseUrl}/bookings/mybookings`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      "Authorization": `JWT ${token}`,
+    },
+  })
+  
+  // console.log('mybookings response is:')
+  // console.log(response)
+
+  await setMybookings(response.data.mybookings);
 }
 
 // validate an image upload

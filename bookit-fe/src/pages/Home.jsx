@@ -114,7 +114,7 @@ const Home = () => {
           following.length > 0 &&
           <div className={classes.containerDiv}>
             <div>
-              <h3>Welcome to your User Feed.</h3>
+              <h3>User Feed</h3>
             </div>
           </div>
         } */}

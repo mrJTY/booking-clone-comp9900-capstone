@@ -9,6 +9,8 @@ import {
   Button,
   Box,
   TextField,
+  Typography,
+  Divider,
   FormControl,
   Tooltip
 } from '@material-ui/core';
@@ -28,6 +30,14 @@ const useStyles = makeStyles((theme) => ({
     color: 'white',
     width: '100%',
     backgroundColor: theme.palette.background.default,
+  },
+  bookitTitle: {
+    margin: theme.spacing(2),
+    color: '#D0D0D0',
+  },
+  titleDivider: {
+    height: '2px',
+    backgroundColor: '#648dae',
   },
   logo: {
     display: 'flex',
@@ -138,8 +148,8 @@ const Register = () => {
         })
         .catch((error) => {
           let errorText = '';
-          error.response.data.error !== undefined
-            ? errorText = error.response.data.error
+          error.response.data.message !== undefined
+            ? errorText = error.response.data.message
             : errorText = 'Invalid input'
           toast.error(
             errorText, {
@@ -165,8 +175,14 @@ const Register = () => {
         </Tooltip>
       </Box>
       <br />
-      <Box>
-        <h3>BookIt Sign Up</h3>
+      <Box className={classes.bookitTitle}>
+        <Typography variant="h3">
+          BookIt
+        </Typography>
+        <Divider className={classes.titleDivider} />
+        <Typography variant="h5">
+          Sign Up
+        </Typography>
       </Box>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box className={classes.box}>
@@ -195,7 +211,7 @@ const Register = () => {
                 <TextField
                   type="password"
                   label="Password"
-                  color="secondary"
+                  color="primary"
                   {...field}
                 />
               )}
@@ -222,7 +238,7 @@ const Register = () => {
         <Tooltip title="Sign Up" aria-label="sign up">
           <Button
             className={classes.button}
-            variant="outlined" color="secondary" type="submit"
+            variant="outlined" color="primary" type="submit"
           >
             Sign Up
           </Button>
@@ -232,7 +248,7 @@ const Register = () => {
         <Tooltip title="Back to Login" aria-label="back to login">
           <Button
             className={classes.button}
-            variant="outlined" color="primary" onClick={backButtonLogin}
+            variant="outlined" color="default" onClick={backButtonLogin}
           >
             Back to Login
           </Button>

@@ -23,7 +23,9 @@ const ContextStore = ({ children }) => {
   const [username, setUsername] = React.useState(null);
   const [primaryUserId, setPrimaryUserId] = React.useState(null);
 
-
+  const [bookedHrs, setBookedHrs] = React.useState(null);
+  const [mybookings, setMybookings] = React.useState([]);
+  const [modifyBookingAvailId, setModifyBookingAvailId] = React.useState(null);
   const store = {
     baseUrl: `http://localhost:${port}`,
     token: [token, setToken],
@@ -33,6 +35,9 @@ const ContextStore = ({ children }) => {
     following: [following, setFollowing],
     username: [username, setUsername],
     primaryUserId: [primaryUserId, setPrimaryUserId],
+    bookedHrs: [bookedHrs, setBookedHrs],
+    mybookings: [mybookings, setMybookings],
+    modifyBookingAvailId: [modifyBookingAvailId, setModifyBookingAvailId],
   }
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }

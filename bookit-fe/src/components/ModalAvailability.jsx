@@ -1,5 +1,4 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { StoreContext } from '../utils/store';
 import Modal from '@material-ui/core/Modal';
 import {
@@ -65,8 +64,6 @@ const ModalAvailability = ({
   const token = context.token[0];
   const baseUrl = context.baseUrl;
   const [updated, setUpdate] = context.updates;
-  const history = useHistory();
-
   const theme = useTheme();
   const classes = useStyles();
 
@@ -150,9 +147,14 @@ const ModalAvailability = ({
 
   };
 
-  const availButton = () => {
+  const availButton = async () => {
     const startTime = startDatetime.getTime();
     const endTime = endDatetime.getTime();
+
+    console.log('start and end times are:');
+    console.log(startTime);
+    console.log(endTime);
+
     const reqMethod = newAvail === true ? 'POST' : 'PUT';
     const reqUrl = newAvail === true ?
       `${baseUrl}/availabilities` :
@@ -167,7 +169,7 @@ const ModalAvailability = ({
       reqBody.availability_id = availId;
     }
 
-    axios({
+    await axios({
       method: reqMethod,
       url: reqUrl,
       headers: {
@@ -195,8 +197,8 @@ const ModalAvailability = ({
       })
       .catch((error) => {
         let errorText = '';
-        error.response.data.error !== undefined
-          ? errorText = error.response.data.error
+        error.response.data.message !== undefined
+          ? errorText = error.response.data.message
           : errorText = 'Bad request'
         toast.error(
           errorText, {
@@ -211,12 +213,12 @@ const ModalAvailability = ({
           }
         );
       })
-    history.push({
-      pathname: `/listings/${givenId}`,
-      state: {
-        givenId: parseInt(givenId),
-      }
-    })
+    // history.push({
+    //   pathname: `/listings/${givenId}`,
+    //   state: {
+    //     givenId: parseInt(givenId),
+    //   }
+    // })
     setUpdate(!updated);
     handleCloseModal();
   }

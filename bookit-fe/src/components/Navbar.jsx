@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#648dae',
-    border: '2px solid #000',
+    border: '1px solid #282c34',
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 2, 2),
   },
@@ -106,8 +106,8 @@ const Navbar = ({ page }) => {
       })
       .catch((error) => {
         let errorText = '';
-        error.response.data.error !== undefined
-          ? errorText = error.response.data.error
+        error.response.data.message !== undefined
+          ? errorText = error.response.data.message
           : errorText = 'Invalid Auth token'
         toast.error(
           errorText, {
@@ -132,18 +132,13 @@ const Navbar = ({ page }) => {
     <ThemeProvider theme={theme}>
       <Box className={classes.box}>
         <Box className={classes.container}>
-
-          {/* <Box className={classes.buttonNav}> */}
           <Grid
             container
             spacing={0}
-            // direction="row"
             alignItems="center"
             justify="center"
             align="center"
           >
-
-
             <Grid container item xs={4} align="center" justify="flex-start">
               <Box className={classes.backDiv}>
                 <Tooltip title="Go Back">
@@ -174,7 +169,6 @@ const Navbar = ({ page }) => {
                 </Box>
               </Box>
             </Grid>
-
 
             <Grid item xs={4} align="center">
               <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
@@ -233,7 +227,6 @@ const Navbar = ({ page }) => {
               </ButtonGroup>
             </Grid>
 
-
             <Grid container item xs={4} align="flex-end" justify="flex-end">
               <ButtonGroup variant="text" color="primary" aria-label="text profile button group">
                 <Tooltip title="Profile">
@@ -266,7 +259,6 @@ const Navbar = ({ page }) => {
             </Grid>
 
           </Grid>
-          {/* </Box> */}
         </Box>
       </Box>
     </ThemeProvider>

@@ -1,8 +1,10 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import { StoreContext } from '../utils/store';
+import { fetchMyBookings } from '../utils/auxiliary';
+import BookingListItem from '../components/BookingListItem';
+
 import {
-  // useHistory,
   Redirect,
 } from 'react-router-dom';
 import {
@@ -11,6 +13,10 @@ import {
   Container,
   Typography,
   CircularProgress,
+  Button,
+  ButtonGroup,
+  Tooltip,
+  Divider,
 } from '@material-ui/core';
 
 // Page styling used on the MyBookings screen and its subcomponents
@@ -41,13 +47,35 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     margin: theme.spacing(1),
   },
+  mysubtitleDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+    marginLeft: '20px',
+  },
+  subtitleTextDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'flex-start',
+    marginLeft: '36px',
+  },
+  subtitleBtnDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'flex-end',
+  },
+  btnGrp: {
+    marginRight: '20px',
+  },
   button: {
     margin: theme.spacing(1),
   },
-  image: {
-    height: '128px',
-    width: '128px',
-    margin: 'auto',
+  divider: {
+    marginTop: '20px',
+    height: '2px',
   },
 }));
 
@@ -55,30 +83,35 @@ const useStyles = makeStyles((theme) => ({
 const MyBookings = () => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
-  // const history = useHistory();
+  const baseUrl = context.baseUrl;
+  const [mybookings, setMybookings] = context.mybookings;
+  const updated = context.updates[0];
   
   React.useEffect(() => {
     if (token === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // object containing all of the users a user is following from a GET API request
-  // const [following, setFollowing] = context.following;
   // the page variable stores the current page as a string
   const [page, setPage] = context.pageState;
   // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
+  const [upcomingBtn, setUpcomingBtn] = React.useState(true);
+
+
+
+
 
   React.useEffect(() => {
     setPage('/mybookings');
-    async function setupDash () {
+    async function setupMyBookings () {
       setLoadingState('loading');
-      // await fetchUserFeed(...);
+      await fetchMyBookings(baseUrl, token, setMybookings);
+
       setLoadingState('success');
     }
-    setupDash();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    setupMyBookings();
+  }, [updated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // classes used for Material UI component styling
   const classes = useStyles();
@@ -98,11 +131,67 @@ const MyBookings = () => {
           <Box className={classes.containerDiv}>
             <Box className={classes.mytitleDiv}>
               <Box>
-                <Typography paragraph align="left" variant="h4">
-                  Your Bookings
+                <Typography align="left" variant="h4">
+                  Bookings
                 </Typography>
               </Box>
             </Box>
+            <Box className={classes.mysubtitleDiv}>
+              <Box className={classes.subtitleTextDiv}>
+                <Typography align="center" variant="h6" color="textSecondary">
+                  {upcomingBtn === true ? "Upcoming" : "Past"}
+                </Typography>
+              </Box>
+              <Box className={classes.subtitleBtnDiv}>
+                <ButtonGroup variant="text" color="primary" className={classes.btnGrp} >
+                  <Tooltip title="Upcoming">
+                    <Button
+                      id="upcoming-bookings-button"
+                      variant="text"
+                      color={upcomingBtn === true ? "default" : "primary"}
+                      className={classes.buttonText}
+                      onClick={() => {
+                        setUpcomingBtn(true);
+                      }}
+                    >
+                      Upcoming
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Past">
+                    <Button
+                      id="past-bookings-button"
+                      variant="text"
+                      color={upcomingBtn === true ? "primary" : "default"}
+                      className={classes.buttonText}
+                      onClick={() => {
+                        setUpcomingBtn(false);
+                      }}
+                    >
+                      Past
+                    </Button>
+                  </Tooltip>
+                </ButtonGroup>
+              </Box>
+            </Box>
+            <Divider light className={classes.divider} />
+            {
+              upcomingBtn === true &&
+              mybookings.upcoming.length > 0 &&
+              mybookings.upcoming.map((booking) => (
+                <Box key={booking.booking_id}>
+                  <BookingListItem booking={booking} upcoming={true} />
+                </Box>
+              ))
+            }
+            {
+              upcomingBtn === false &&
+              mybookings.past.length > 0 &&
+              mybookings.past.map((booking) => (
+                <Box key={booking.booking_id}>
+                  <BookingListItem booking={booking} upcoming={false} />
+                </Box>
+              ))
+            }            
             <br />
             <br />
           </Box>
