@@ -1,15 +1,16 @@
+from random import randrange
 import hashlib
 import logging
 import uuid
-from random import randrange
 
-from faker import Faker
 from api import db
-from api.resources.user import UserModel
-from api.resources.listing import ListingModel
 from api.resources.availability import AvailabilityModel
 from api.resources.booking import BookingModel
+from api.resources.listing import ListingModel
 from api.resources.rating import RatingModel
+from api.resources.user import UserModel
+from faker import Faker
+import pandas as pd
 
 fake = Faker()
 fake_seed = 1
@@ -26,20 +27,17 @@ availabilities = []
 bookings = []
 ratings = []
 
+user_data = pd.read_csv("utils/users.csv")
+listing_data = pd.read_csv("utils/listings.csv")
+
 
 def create_fake_users():
-    # Oh no! They all have the same password...
-    dummy_password = "password"
-    dummy_password_hash = hashlib.sha256(dummy_password.encode("utf-8")).hexdigest()
-    for i in range(0, n_users):
-        Faker.seed(fake_seed + i)
-        username = fake.first_name().lower()
-        email = f"{username}@bookit.com"
+    for i, r in user_data.iterrows():
+        password_hash = hashlib.sha256(r[2].encode("utf-8")).hexdigest()
         u = UserModel()
-        u.user_id = i
-        u.username = username
-        u.email = email
-        u.password_hash = dummy_password_hash
+        u.username = r[0]
+        u.email = r[1]
+        u.password_hash = password_hash
         users.append(u)
 
     db.session.add_all(users)
@@ -47,26 +45,25 @@ def create_fake_users():
 
 
 def create_fake_listings():
-    for i in range(0, n_listings):
-        Faker.seed(fake_seed + i)
-        company = fake.company().lower()
-        address = fake.address()
+    for i, r in listing_data.iterrows():
+        company = r[0]
+        address = r[1]
+        category = r[2]
+        description = r[3]
+        # Faker.seed(fake_seed + i)
+        # company = fake.company().lower()
 
-        # TODO: define categories
-        category = "category"
-        description = "Lorem ipsum dolor"
-
-        # All belongs to user 1
-        user_id = users[0].user_id
+        # All belong to user 1
         username = users[0].username
 
         l = ListingModel()
         l.listing_id = i
+        # All belong to user id 1
+        l.user_id = users[0].user_id
         l.listing_name = company
         l.category = category
         l.address = address
         l.description = description
-        l.user_id = user_id
         l.username = username
         listings.append(l)
 

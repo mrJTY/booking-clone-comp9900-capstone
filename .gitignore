@@ -13,3 +13,5 @@ api/migrations
 
 # require a local frontend install to minimize repo size
 node_modules
+
+.DS_Store
