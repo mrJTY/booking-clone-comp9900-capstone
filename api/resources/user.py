@@ -7,6 +7,7 @@ from flask_restplus import Resource, fields
 import api
 import hashlib
 
+RESULT_LIMIT = 20
 user = api.api.namespace("users", description="User operations")
 
 create_user_details = api.api.model(
@@ -92,6 +93,7 @@ class User(Resource):
 
 
 @user.route("")
+@user.param("username", "The username to search")
 class UserList(Resource):
     @user.doc(description=f"Creates a new User")
     @user.expect(create_user_details)
@@ -120,3 +122,14 @@ class UserList(Resource):
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
+
+    @user.doc(description=f"Returns a user by search")
+    @user.expect(get_user_details)
+    def get(self):
+        keyword = request.args.get("username")
+        logging.info(f"Searching for usernames like: {keyword}")
+        search_return = UserModel.query.filter(
+            UserModel.username.ilike(f"%{keyword}%")
+        ).limit(RESULT_LIMIT)
+        search_users = [l.to_dict() for l in search_return]
+        return {"users": search_users}

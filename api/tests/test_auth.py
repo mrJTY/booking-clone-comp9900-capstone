@@ -42,3 +42,44 @@ def test_authenticate():
         },
     )
     assert logout_response.status_code == 200
+
+
+def test_search_user():
+    token = u.login_user(TEST_USER)
+    # Search for users - No matching returns
+    search_url = f"{API_URL}/users?username=xXZealXx"
+    search_response = requests.get(
+        search_url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual = search_response.json()
+    assert search_response.status_code == 200
+    assert "users" in actual.keys()
+
+    # Search for users - 1 matching return
+    search_url = f"{API_URL}/users?username=Harris"
+    search_response = requests.get(
+        search_url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual = search_response.json()
+    assert search_response.status_code == 200
+    assert "users" in actual.keys()
+    assert len(actual["users"]) == 1
+
+    # Search for users - 2 matching returns
+    search_url = f"{API_URL}/users?username=st"
+    search_response = requests.get(
+        search_url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual = search_response.json()
+    assert search_response.status_code == 200
+    assert "users" in actual.keys()
+    assert len(actual["users"]) == 3
