@@ -10,6 +10,7 @@ if __name__ == "__main__":
     import api.resources.booking
     import api.resources.rating
     import api.resources.recommendation
+    import api.resources.follower
 
     # Create all database tables
     db.create_all()

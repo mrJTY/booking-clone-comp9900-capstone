@@ -126,3 +126,17 @@ def create_rating(payload: dict, token: str):
     assert actual["rating"] == create_rating_payload["rating"]
     assert actual["comment"] == create_rating_payload["comment"]
     return actual
+
+
+def create_follower(payload: dict, token: str):
+    url = f"{API_URL}/followers/follow"
+    response = requests.post(
+        url,
+        json=payload,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["influencer_user_id"] == payload["influencer_user_id"]
+    return response
