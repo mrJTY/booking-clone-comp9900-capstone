@@ -7,7 +7,7 @@ API_URL = os.environ["API_URL"]
 
 TEST_LISTING = {
     "listing_name": "Recommendation coffee shop",
-    "address": "Kensington NSW 2033",
+    "address": "28 Anzac Parade Kensington NSW 2033",
     "category": "Coffee Shop",
     "description": "Delicious selection of sandwiches and coffee",
 }
@@ -80,3 +80,4 @@ def test_get_recommendations():
     )
     assert recommendations_response.status_code == 200
     assert "listings" in recommendations_response.json().keys()
+    assert len(recommendations_response.json()["listings"]) == 5
