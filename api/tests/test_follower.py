@@ -30,3 +30,8 @@ def test_follow_user():
     payload = {"influencer_user_id": influencer_user_id}
     follow_response = u.create_follower(payload, token)
     assert follow_response.json()["follower_user_id"] == follower_user_id
+    follow_id = follow_response.json()["follower_id"]
+    follow_url = f"{API_URL}/followers/{follow_id}"
+    # Test delete
+    delete_response = requests.delete(follow_url)
+    assert delete_response.status_code == 204

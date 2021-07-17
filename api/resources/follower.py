@@ -70,15 +70,14 @@ class Follower(Resource):
         logging.info(f"Getting follower {follower_id}")
         return FollowerModel.query.get_or_404(follower_id).to_dict()
 
-    # TODO(Harris): Delete a follower
-    # @follower.doc(description=f"follower_id must be provided")
-    # @follower.marshal_with(get_follower_details)
-    # def delete(self, follower_id):
-
-    # TODO(Harris): Update a follower
-    # @follower.doc(description=f"follower_id must be provided")
-    # @follower.marshal_with(create_follower_details)
-    # def put(self, follower_id):
+    @follower.doc(description=f"follower_id must be provided")
+    @follower.marshal_with(get_follower_details)
+    def delete(self, follower_id):
+        logging.info(f"Deleting follower {follower_id}")
+        b = FollowerModel.query.filter(FollowerModel.follower_id == follower_id)
+        b.delete()
+        db.session.commit()
+        return b, 204
 
 
 @follower.route("/follow")
