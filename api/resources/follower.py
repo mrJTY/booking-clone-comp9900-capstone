@@ -9,8 +9,6 @@ import api
 
 follower = api.api.namespace("followers", description="follower operations")
 
-RESULT_LIMIT = 20
-
 # You don't need to provide your follower_user_id when following a new user
 # Backend knows who you are as current_user.user_id
 create_follower_details = api.api.model(

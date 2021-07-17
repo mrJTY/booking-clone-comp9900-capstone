@@ -14,8 +14,6 @@ import api
 
 booking = api.api.namespace("bookings", description="booking operations")
 
-RESULT_LIMIT = 20
-
 create_booking_details = api.api.model(
     "booking",
     {
@@ -264,7 +262,7 @@ class MyBookings(Resource):
             .filter(BookingModel.user_id == current_user.user_id)
             .filter(BookingModel.listing_id == ListingModel.listing_id)
             .filter(BookingModel.availability_id == AvailabilityModel.availability_id)
-            .limit(RESULT_LIMIT)
+            .limit(api.config.Config.RESULT_LIMIT)
         )
         unpacked_query = [q for q in query]
         my_bookings = [

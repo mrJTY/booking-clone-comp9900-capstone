@@ -16,8 +16,6 @@ recommendation = api.api.namespace(
     "recommendations", description="Recommendation operations"
 )
 
-RESULT_LIMIT = 20
-
 
 @recommendation.route("/listings")
 @recommendation.response(404, "recommendation not found")
@@ -30,7 +28,7 @@ class RecommendationListings(Resource):
 
         # Simple example just returns listings owned by the user
         listings = ListingModel.query.filter(ListingModel.user_id == user_id).limit(
-            RESULT_LIMIT
+            api.config.Config.RESULT_LIMIT
         )
 
         # Some dummy model in api.recommendation.model

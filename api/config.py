@@ -10,3 +10,4 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "SUPER_SECRET_KEY"
     JWT_ACCESS_LIFESPAN = {"minutes": 60}
+    RESULT_LIMIT = 200

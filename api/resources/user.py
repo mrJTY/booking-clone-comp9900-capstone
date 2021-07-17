@@ -7,7 +7,6 @@ from flask_restplus import Resource, fields
 import api
 import hashlib
 
-RESULT_LIMIT = 20
 user = api.api.namespace("users", description="User operations")
 
 create_user_details = api.api.model(
@@ -130,6 +129,6 @@ class UserList(Resource):
         logging.info(f"Searching for usernames like: {keyword}")
         search_return = UserModel.query.filter(
             UserModel.username.ilike(f"%{keyword}%")
-        ).limit(RESULT_LIMIT)
+        ).limit(api.config.Config.RESULT_LIMIT)
         search_users = [l.to_dict() for l in search_return]
         return {"users": search_users}
