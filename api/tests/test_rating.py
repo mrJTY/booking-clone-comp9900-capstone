@@ -77,8 +77,28 @@ def test_create_rating():
         "comment": "best burgers in town",
     }
 
+    # Get my listings as the owner
+    url = f"{API_URL}/listings/mylistings"
+    mylistings_response = requests.get(
+        url,
+        headers={
+            "Authorization": f"JWT {owner_token}",
+        },
+    )
+    # The rating must be 0 at first
+    assert mylistings_response.json()["mylistings"][0]["avg_rating"] == 0.0
     rating_response = u.create_rating(rating_payload, consumer_token)
     rating_id = rating_response["rating_id"]
+    # Then 5 at first review, get mylistings again
+    mylistings_response = requests.get(
+        url,
+        headers={
+            "Authorization": f"JWT {owner_token}",
+        },
+    )
+    assert mylistings_response.json()["mylistings"][0]["avg_rating"] == 5.0
+
+    # Update the rating
     ratings_url = f"{API_URL}/ratings/{rating_id}"
     rating_payload_updated = {
         "booking_id": booking_id,

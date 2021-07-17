@@ -1,12 +1,12 @@
-import json
 import logging
 
 from api import db
-from api.resources.listing import ListingModel
+from api.models.listing import ListingModel
 from api.utils.req_handling import *
 from flask_login import current_user
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
+from api.models.availability import AvailabilityModel
 import api
 
 availability = api.api.namespace(
@@ -33,31 +33,6 @@ availability_details = api.api.model(
         ),
     },
 )
-
-
-class AvailabilityModel(db.Model):
-    __tablename__ = "availabilities"
-    availability_id = db.Column(db.Integer, primary_key=True)
-    listing_id = db.Column(
-        db.Integer, db.ForeignKey("listings.listing_id"), nullable=False
-    )
-    # Store them in Unix Time
-    start_time = db.Column(db.Integer)
-    end_time = db.Column(db.Integer)
-    is_available = db.Column(db.Boolean)
-
-    def __repr__(self):
-        return json.dumps(self.to_dict())
-
-    def to_dict(self):
-        data = {
-            "availability_id": self.availability_id,
-            "listing_id": self.listing_id,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
-            "is_available": self.is_available,
-        }
-        return data
 
 
 # See example: https://github.com/noirbizarre/flask-restplus/blob/master/examples/todo.py

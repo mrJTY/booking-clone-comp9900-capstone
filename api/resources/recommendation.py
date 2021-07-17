@@ -4,7 +4,7 @@ from flask_login import current_user
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy import or_
-from api.resources.listing import ListingModel
+from api.models.listing import ListingModel
 import api
 import json
 import logging

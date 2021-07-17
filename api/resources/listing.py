@@ -1,12 +1,16 @@
+import api
+import logging
+
 from api import db
+from api.models.booking import BookingModel
+from api.models.listing import ListingModel
+from api.models.rating import RatingModel
 from api.utils.req_handling import *
 from flask_login import current_user
 from flask_restplus import Resource, fields
-from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy import or_
-import api
-import json
-import logging
+from sqlalchemy.orm.attributes import flag_modified
+import numpy as np
 
 listing = api.api.namespace("listings", description="Listing operations")
 
@@ -30,34 +34,11 @@ listing_details = api.api.model(
             required=True, description="The owner of the listing"
         ),
         "username": fields.String(required=True, description="Username of the user"),
+        "avg_rating": fields.Float(
+            required=False, description="Avg rating for the listing"
+        ),
     },
 )
-
-
-class ListingModel(db.Model):
-    __tablename__ = "listings"
-    listing_id = db.Column(db.Integer, primary_key=True)
-    listing_name = db.Column(db.Text, unique=True)
-    address = db.Column(db.Text)
-    category = db.Column(db.Text)
-    description = db.Column(db.Text)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
-    username = db.Column(db.Text, db.ForeignKey("users.username"), nullable=False)
-
-    def __repr__(self):
-        return json.dumps(self.to_dict())
-
-    def to_dict(self):
-        data = {
-            "listing_id": self.listing_id,
-            "listing_name": self.listing_name,
-            "address": self.address,
-            "category": self.category,
-            "description": self.description,
-            "user_id": self.user_id,
-            "username": self.username,
-        }
-        return data
 
 
 # See example: https://github.com/noirbizarre/flask-restplus/blob/master/examples/todo.py
@@ -69,7 +50,13 @@ class Listing(Resource):
     @listing.marshal_with(listing_details)
     def get(self, listing_id):
         logging.info(f"Getting listing {listing_id}")
-        return ListingModel.query.get_or_404(listing_id).to_dict()
+        # Calculate avg ratings
+        listing_dict = ListingModel.query.get_or_404(listing_id).to_dict()
+        out = {
+            **listing_dict,
+            "avg_rating": calculate_avg_rating(listing_dict["listing_id"]),
+        }
+        return out
 
     @listing.doc(description=f"listing_id must be provided")
     @listing.marshal_with(listing_details)
@@ -99,7 +86,7 @@ class Listing(Resource):
         db.session.merge(listing)
         db.session.flush()
         db.session.commit()
-        return listing
+        return {**listing.to_dict(), "avg_rating": 0}
 
 
 @listing.route("")
@@ -130,7 +117,10 @@ class ListingList(Resource):
             db.session.commit()
             listing_id = v.listing_id
             logging.info(f"listing_id created: {listing_id}")
-            return ListingModel.query.get_or_404(listing_id).to_dict()
+            return {
+                **ListingModel.query.get_or_404(listing_id).to_dict(),
+                "avg_rating": 0,
+            }
 
         except Exception as e:
             logging.error(e)
@@ -141,15 +131,20 @@ class ListingList(Resource):
     def get(self):
         keyword = request.args.get("search_query")
         logging.info(f"Searching for {keyword}")
-        search_return = ListingModel.query.filter(
+        search_listings = ListingModel.query.filter(
             or_(
                 ListingModel.listing_name.ilike(f"%{keyword}%"),
                 ListingModel.description.ilike(f"%{keyword}%"),
                 ListingModel.address.ilike(f"%{keyword}%"),
             )
         ).limit(RESULT_LIMIT)
-        search_listings = [l.to_dict() for l in search_return]
-        return {"listings": search_listings}
+        # Calculate avg ratings
+        search_listings = [l.to_dict() for l in search_listings]
+        out = [
+            {**l, "avg_rating": calculate_avg_rating(l["listing_id"])}
+            for l in search_listings
+        ]
+        return {"listings": out}
 
 
 # TODO: Paginate this and add docs
@@ -160,5 +155,36 @@ class MyListings(Resource):
         my_listings = ListingModel.query.filter_by(user_id=current_user.user_id).limit(
             RESULT_LIMIT
         )
+
         my_listings = [l.to_dict() for l in my_listings]
-        return {"mylistings": my_listings}
+        # Calculate avg ratings
+        out = [
+            {**l, "avg_rating": calculate_avg_rating(l["listing_id"])}
+            for l in my_listings
+        ]
+        return {"mylistings": out}
+
+
+def calculate_avg_rating(listing_id):
+    # Calculate an avg rating for a listing
+
+    # Find out the booking ids
+    my_bookings = BookingModel.query.filter_by(listing_id=listing_id).all()
+
+    my_ratings = []
+    for b in my_bookings:
+        booking_id = b.to_dict()["booking_id"]
+        my_ratings_in_booking = RatingModel.query.filter_by(booking_id=booking_id).all()
+        for r in my_ratings_in_booking:
+            my_ratings.append(r)
+
+    # Calculate the avg rating
+    if len(my_ratings) == 0:
+        avg_rating = 0.0
+    else:
+        ratings_numeric = [r.to_dict()["rating"] for r in my_ratings]
+        avg_rating = np.average(ratings_numeric)
+
+    # Round to two significant digits
+    rounded_avg = round(avg_rating, 2)
+    return rounded_avg

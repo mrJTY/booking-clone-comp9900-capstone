@@ -1,12 +1,10 @@
 import json
 import logging
-from datetime import datetime, timezone
+
 from api import db
-from api.resources.user import UserModel
 from api.utils.req_handling import *
 from flask_login import current_user
 from flask_restplus import Resource, fields
-from sqlalchemy.orm.attributes import flag_modified
 import api
 
 follower = api.api.namespace("followers", description="follower operations")

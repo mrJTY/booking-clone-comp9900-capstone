@@ -4,10 +4,10 @@ import logging
 import uuid
 
 from api import db
-from api.resources.availability import AvailabilityModel
-from api.resources.booking import BookingModel
-from api.resources.listing import ListingModel
-from api.resources.rating import RatingModel
+from api.models.availability import AvailabilityModel
+from api.models.booking import BookingModel
+from api.models.listing import ListingModel
+from api.models.rating import RatingModel
 from api.resources.user import UserModel
 from faker import Faker
 import pandas as pd

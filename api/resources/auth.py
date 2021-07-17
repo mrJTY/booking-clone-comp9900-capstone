@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 import hashlib
 import logging
-from api.resources.availability import AvailabilityModel
-from api.resources.booking import BookingModel
+from api.models.availability import AvailabilityModel
+from api.models.booking import BookingModel
 from api import db, login_manager
 from api.config import Config
 from api.resources.user import UserModel

@@ -62,6 +62,8 @@ def test_create_listing():
     assert actual["address"] == TEST_LISTING["address"]
     assert actual["category"] == TEST_LISTING["category"]
     assert actual["description"] == TEST_LISTING["description"]
+    # It must be zero at the start
+    assert actual["avg_rating"] == 0.0
 
     # Test update
     listing_url = f"{API_URL}/listings/{actual['listing_id']}"
@@ -77,6 +79,8 @@ def test_create_listing():
     assert actual["address"] == TEST_2_LISTING["address"]
     assert actual["category"] == TEST_2_LISTING["category"]
     assert actual["description"] == TEST_2_LISTING["description"]
+    # Avg rating must still be zero
+    assert actual["avg_rating"] == 0.0
 
     # Test delete
     listing_url = f"{API_URL}/listings/{actual['listing_id']}"
@@ -153,3 +157,5 @@ def test_search_resource():
     assert search_response_2.status_code == 200
     assert "listings" in actual_2.keys()
     assert len(actual_2["listings"]) == 1
+    # It must have an avg rating of zero
+    assert actual_2["listings"][0]["avg_rating"] == 0.0

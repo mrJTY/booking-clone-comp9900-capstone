@@ -1,9 +1,8 @@
-import json
 import logging
 
 from api import db
-from api.resources.availability import AvailabilityModel
 from api.utils.req_handling import *
+from api.models.rating import RatingModel
 from flask_login import current_user
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
@@ -31,30 +30,6 @@ rating_details = api.api.model(
         ),
     },
 )
-
-
-class RatingModel(db.Model):
-    __tablename__ = "ratings"
-    rating_id = db.Column(db.Integer, primary_key=True)
-    booking_id = db.Column(
-        db.Integer, db.ForeignKey("bookings.booking_id"), nullable=False
-    )
-    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    comment = db.Column(db.String)
-
-    def __repr__(self):
-        return json.dumps(self.to_dict())
-
-    def to_dict(self):
-        data = {
-            "rating_id": self.rating_id,
-            "booking_id": self.booking_id,
-            "user_id": self.user_id,
-            "rating": self.rating,
-            "comment": self.comment,
-        }
-        return data
 
 
 # See example: https://github.com/noirbizarre/flask-restplus/blob/master/examples/todo.py
