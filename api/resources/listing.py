@@ -53,6 +53,7 @@ class Listing(Resource):
         out = {
             **listing_dict,
             "avg_rating": calculate_avg_rating(listing_dict["listing_id"]),
+            "ratings": get_ratings(listing_dict["listing_id"]),
         }
         return out
 
@@ -138,8 +139,13 @@ class ListingList(Resource):
         ).limit(api.config.Config.RESULT_LIMIT)
         # Calculate avg ratings
         search_listings = [l.to_dict() for l in search_listings]
+        # Calculate avg ratings and fetch ratings for that listing
         out = [
-            {**l, "avg_rating": calculate_avg_rating(l["listing_id"])}
+            {
+                **l,
+                "avg_rating": calculate_avg_rating(l["listing_id"]),
+                "ratings": get_ratings(l["listing_id"]),
+            }
             for l in search_listings
         ]
         return {"listings": out}
@@ -155,9 +161,13 @@ class MyListings(Resource):
         )
 
         my_listings = [l.to_dict() for l in my_listings]
-        # Calculate avg ratings
+        # Calculate avg ratings and fetch ratings for that listing
         out = [
-            {**l, "avg_rating": calculate_avg_rating(l["listing_id"])}
+            {
+                **l,
+                "avg_rating": calculate_avg_rating(l["listing_id"]),
+                "ratings": get_ratings(l["listing_id"]),
+            }
             for l in my_listings
         ]
         return {"mylistings": out}
@@ -186,3 +196,17 @@ def calculate_avg_rating(listing_id):
     # Round to two significant digits
     rounded_avg = round(avg_rating, 2)
     return rounded_avg
+
+
+def get_ratings(listing_id):
+    # Pull the ratinsg for this listing
+    # Find out the booking ids
+    my_bookings = BookingModel.query.filter_by(listing_id=listing_id).all()
+    my_ratings = []
+    for b in my_bookings:
+        booking_id = b.to_dict()["booking_id"]
+        my_ratings_in_booking = RatingModel.query.filter_by(booking_id=booking_id).all()
+        for r in my_ratings_in_booking:
+            my_ratings.append(r)
+    out = [r.to_dict() for r in my_ratings]
+    return out

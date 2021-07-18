@@ -97,6 +97,8 @@ def test_create_rating():
         },
     )
     assert mylistings_response.json()["mylistings"][0]["avg_rating"] == 5.0
+    # There should be 1 rating attached to this
+    assert len(mylistings_response.json()["mylistings"][0]["ratings"]) == 1
 
     # Update the rating
     ratings_url = f"{API_URL}/ratings/{rating_id}"
