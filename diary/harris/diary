@@ -33,3 +33,15 @@ past 10 hours will also not be allowed.
 
 Also created a simple search functionality (so far), where if the search keyword was like the given name and description it will return the list of venues. Proposed the
 latitude and longitude framework but that is yet to come. 
+
+Week 7
+Set up the endpoints for the ratings (Update Ratings and Delete Ratings). Changed the avaliabilities format from unix epoch time in seconds to unix epoch time in milliseconds, 
+which was required for the front end to work in terms of the dates and the times.
+
+Mentioned that a separate followers endpoint was required since it involved a separate data model.
+
+Set up the search functionality for the users which so far is based off a non-case sensitive like match. Considered using regex statements but will keep it simple for now
+and optimise it later
+
+Finally, set up the recommender system endpoint and the data setup for it. Still a work in progress. 
+Set up the delete function for the followers endpoint.
