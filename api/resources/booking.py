@@ -6,10 +6,13 @@ from api import db
 from api.models.availability import AvailabilityModel
 from api.models.listing import ListingModel
 from api.models.booking import BookingModel
+from api.models.rating import RatingModel
 from api.utils.req_handling import *
 from flask_login import current_user
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.sql import select
+from api import engine
 import api
 
 booking = api.api.namespace("bookings", description="booking operations")
@@ -257,28 +260,32 @@ class BookingList(Resource):
 class MyBookings(Resource):
     @booking.doc(description=f"Fetch my bookings")
     def get(self):
-        query = (
-            db.session.query(BookingModel, ListingModel, AvailabilityModel)
-            .filter(BookingModel.user_id == current_user.user_id)
-            .filter(BookingModel.listing_id == ListingModel.listing_id)
-            .filter(BookingModel.availability_id == AvailabilityModel.availability_id)
-            .limit(api.config.Config.RESULT_LIMIT)
-        )
-        unpacked_query = [q for q in query]
-        my_bookings = [
-            {**b.to_dict(), **l.to_dict(), **a.to_dict()}
-            for (b, l, a) in unpacked_query
-        ]
-        out = {
-            "past": [],
-            "upcoming": [],
-        }
-        for b in my_bookings:
-            if b["end_time"] < datetime.utcnow().timestamp():
-                out["past"].append(b)
-            else:
-                out["upcoming"].append(b)
-        return {"mybookings": out}
+        query_text = f"""
+        select *
+        from bookings as b
+        join listings as l 
+            on l.listing_id = b.listing_id
+        join availabilities as a
+            on a.availability_id = b.availability_id
+        left join ratings as r
+            on r.booking_id = b.booking_id
+        where
+            b.user_id = {current_user.user_id}
+        limit {api.config.Config.RESULT_LIMIT}
+        """
+        with engine.connect() as conn:
+            results = conn.execute(query_text)
+            my_bookings = [dict(r) for r in results]
+            out = {
+                "past": [],
+                "upcoming": [],
+            }
+            for b in my_bookings:
+                if b["end_time"] < datetime.utcnow().timestamp():
+                    out["past"].append(b)
+                else:
+                    out["upcoming"].append(b)
+            return {"mybookings": out}
 
 
 # Exceptions

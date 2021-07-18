@@ -1,6 +1,7 @@
 from flask import Flask
 from api.config import Config
 
+
 # Init the app and configs
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -14,11 +15,13 @@ api = Api(app)
 
 # Database
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
 from flask_migrate import Migrate
 from api import app
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+engine = create_engine("sqlite:///app.db")
 
 # Flask Login
 from flask_login import LoginManager

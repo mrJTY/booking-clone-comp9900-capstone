@@ -63,6 +63,8 @@ class RecommendationListings(Resource):
         ).subquery()
 
         not_booked = db.session.query(ListingModel).filter(
+            # FIXME(Saksham/Harris): not_in isn't understood, try using the SQL engine
+            # pattern instead from /mybookings
             ListingModel.listing_id.not_in(subquery)
         )
 
@@ -79,6 +81,8 @@ class RecommendationListings(Resource):
                 BookingModel.listing_id, func.count(BookingModel.booking_id)
             )
             .group_by(BookingModel.listing_id)
+            # FIXME(Saksham/Harris): not_in isn't understood, try using the SQL engine
+            # pattern instead from /mybookings
             .filter(BookingModel.listing_id.not_in(subquery))
             .all()
         )
