@@ -261,7 +261,13 @@ class MyBookings(Resource):
     @booking.doc(description=f"Fetch my bookings")
     def get(self):
         query_text = f"""
-        select *
+        select 
+            b.*,
+            l.*,
+            a.*,
+            r.rating_id,
+            r.rating,
+            r.comment
         from bookings as b
         join listings as l 
             on l.listing_id = b.listing_id

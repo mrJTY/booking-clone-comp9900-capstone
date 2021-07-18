@@ -218,7 +218,20 @@ def test_create_booking():
     )
     assert response.status_code == 200
 
+    # Test my bookings before deletion
+    booking_url = f"{API_URL}/bookings/mybookings"
+    response = requests.get(
+        booking_url,
+        headers={
+            "Authorization": f"JWT {consumer_token}",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["mybookings"]["upcoming"][0]["booking_id"] is not None
+    assert response.json()["mybookings"]["upcoming"][0]["user_id"] is not None
+
     # Test delete
+    booking_url = f"{API_URL}/bookings/{booking_id_2}"
     response = requests.delete(booking_url)
     assert response.status_code == 204
 
