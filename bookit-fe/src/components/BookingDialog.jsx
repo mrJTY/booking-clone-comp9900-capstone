@@ -27,6 +27,7 @@ import { toast } from 'react-toastify';
 import 'date-fns';
 import { format, formatDistanceStrict } from 'date-fns';
 
+
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: 'flex',
@@ -40,25 +41,20 @@ const useStyles = makeStyles((theme) => ({
     padding: 0,
     overflow: 'auto',
     maxHeight: '50%',
+    maxWidth: '483px',
   },
   paperContainer: {
-    // width: 400,
     backgroundColor: theme.palette.background.paper,
     border: '2px solid #000',
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
     color: 'white',
     height: '100%',
-    // maxHeight: 500,
-    // overflow: 'hidden',
 
   },
   paperBody: {
-    // width: 400,
     backgroundColor: theme.palette.background.paper,
-    // padding: theme.spacing(2, 4, 3),
     color: 'white',
-    // maxHeight: '80%',
     overflow: 'scroll',
   },
   modalButtons: {
@@ -71,8 +67,6 @@ const useStyles = makeStyles((theme) => ({
   },
   createButton: {
     margin: theme.spacing(1),
-    // backgroundColor: '#12824C',
-    // color: '#FFFFFF',
   },
   dialogTitle: {
     paddingBottom: 0,
@@ -122,48 +116,6 @@ const BookingDialog = ({
   const handleAvailChange = (id) => {
     setModifyBookingAvailId(id);
   };
-
-
-  const [startDatetime, setStartDatetime] = React.useState(today);
-  // const threeDayCheck = async (date) => {
-  //   const inputDatetimeDiff = date - startDatetime;
-  //   const tenHrsMs = 60000 * 60 * 10; // 60000 ms in a min * 60mins * 10 hrs
-
-  //   console.log('end Datetime is');
-  //   console.log(date);
-  //   console.log('input datetime diff is:');
-  //   console.log(inputDatetimeDiff);
-
-  //   if (inputDatetimeDiff > tenHrsMs) {
-  //     toast.error(
-  //       'Availability cannot span more than 10 hours', {
-  //         position: 'top-right',
-  //         hideProgressBar: true,
-  //         style: {
-  //           backgroundColor: '#cc0000',
-  //           opacity: 0.8,
-  //           textAlign: 'center',
-  //           fontSize: '18px'
-  //         }
-  //       }
-  //     );
-
-  //     let startDateEpoch = startDatetime.getTime();
-  //     let tenHrsMore = startDateEpoch + tenHrsMs;
-
-  //     console.log('ten hrs MORE is');
-  //     console.log(tenHrsMore);
-
-  //     let tenHrsDatetime = new Date(tenHrsMore);
-
-  //     console.log('ten hrs datetime is');
-  //     console.log(tenHrsDatetime);
-
-  //     setEndDatetime(tenHrsDatetime);
-  //   }
-  // }
-
-  
 
   const confirmBtn = async () => {
 
@@ -244,7 +196,6 @@ const BookingDialog = ({
               <List className={classes.listRootTitle}>
                 <ListItem
                   disableGutters
-
                 >
                   <ListItemText
                     className={classes.listItemTextTitle}
@@ -274,7 +225,6 @@ const BookingDialog = ({
                     />
                   </ListItemSecondaryAction>
                 </ListItem>
-                {/* <Divider className={classes.listDivider}/> */}
               </List>
             }
           </DialogTitle>
@@ -366,7 +316,7 @@ BookingDialog.propTypes = {
   bookingDialog: PropTypes.bool.isRequired,
   handleCloseModal: PropTypes.func.isRequired,
   listingId: PropTypes.number.isRequired,
-  bookingId: PropTypes.number.isRequired,
+  bookingId: PropTypes.string.isRequired,
   currentAvail: PropTypes.object.isRequired,
   availabilities: PropTypes.array.isRequired,
 };

@@ -17,7 +17,7 @@ import { toast } from 'react-toastify';
 // props as state handlers, and a relevant listing id. The user is promtped
 // whether they would like to confirm the deletion of a particular listing,
 // and upon confirmation an API DELETE request is sent.
-const DeleteDialog = ({ open, handleClose, deleteId, page, item }) => {
+const DeleteDialog = ({ open, handleClose, deleteId, page, item, deleteUuid }) => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
@@ -28,7 +28,7 @@ const DeleteDialog = ({ open, handleClose, deleteId, page, item }) => {
   if (item === "Availability") {
     deleteUrl = `${baseUrl}/availabilities/${deleteId}`;
   } else if (item === "Booking") {
-    deleteUrl = `${baseUrl}/bookings/${deleteId}`;
+    deleteUrl = `${baseUrl}/bookings/${deleteUuid}`;
   }
 
   return (
@@ -99,6 +99,7 @@ DeleteDialog.propTypes = {
   deleteId: PropTypes.number,
   page: PropTypes.string,
   item: PropTypes.string.isRequired,
+  deleteUuid: PropTypes.string,
 };
 
 export default DeleteDialog;

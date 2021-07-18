@@ -98,10 +98,6 @@ const MyBookings = () => {
   const [loadingState, setLoadingState] = React.useState('idle');
   const [upcomingBtn, setUpcomingBtn] = React.useState(true);
 
-
-
-
-
   React.useEffect(() => {
     setPage('/mybookings');
     async function setupMyBookings () {
@@ -138,7 +134,7 @@ const MyBookings = () => {
             </Box>
             <Box className={classes.mysubtitleDiv}>
               <Box className={classes.subtitleTextDiv}>
-                <Typography align="center" variant="h6" color="textSecondary">
+                <Typography component={'span'} align="center" variant="h6" color="textSecondary">
                   {upcomingBtn === true ? "Upcoming" : "Past"}
                 </Typography>
               </Box>

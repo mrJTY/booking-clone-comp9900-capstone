@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import {
   useHistory,
   useLocation,
+  useParams,
   Redirect,
 } from 'react-router-dom';
 import {
@@ -15,6 +16,10 @@ import {
   Tooltip,
   TextField,
   CircularProgress,
+  Chip,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -111,10 +116,12 @@ const EditListing = () => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const history = useHistory();
-
+  // the givenListingId refers to the selected listing Id as a parameter in the URL
+  const params = useParams();
+  const givenListingId = params.id;
   React.useEffect(() => {
     // unauthorized users are redirected to the landing page
-    if (token === null) {
+    if (token === null || givenListingId === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -124,8 +131,6 @@ const EditListing = () => {
   const baseUrl = context.baseUrl;
   const [page, setPage] = context.pageState;
   const location = useLocation();
-  // the givenId refers to the selected listing Id as a parameter in the URL
-  const givenId = location.state.givenId;
   const prevPage = location.state.prevPage;
 
   // class used for the Toastify error component styling
@@ -147,13 +152,13 @@ const EditListing = () => {
 
   // useEffect hook sets up the page
   React.useEffect(() => {
-    setPage(`/listings/edit/${givenId}`);
+    setPage(`/listings/edit/${givenListingId}`);
     
     async function setupEditListing () {
       setLoadingState('loading');
       const response = await axios({
         method: 'GET',
-        url: `${baseUrl}/listings/${givenId}`,
+        url: `${baseUrl}/listings/${givenListingId}`,
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
@@ -200,7 +205,7 @@ const EditListing = () => {
       // Send a POST request to modify the existing listing
       axios({
         method: 'PUT',
-        url: `${baseUrl}/listings/${givenId}`,
+        url: `${baseUrl}/listings/${givenListingId}`,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -211,7 +216,7 @@ const EditListing = () => {
         .then(() => {
           // notify user listing creation was successful
           toast.success(
-            `Successfully modified Listing ID ${givenId}`, {
+            `Successfully modified Listing ID ${givenListingId}`, {
               position: 'top-right',
               hideProgressBar: true,
               style: {
@@ -225,9 +230,9 @@ const EditListing = () => {
             history.push('/mylistings');
           } else {
             history.push({
-              pathname: `/listings/${givenId}`,
+              pathname: `/listings/${givenListingId}`,
               state: {
-                givenId: parseInt(givenId),
+                givenListingId: parseInt(givenListingId),
               }
             });
           }
@@ -362,9 +367,9 @@ const EditListing = () => {
                       history.push('/mylistings');
                     } else {
                       history.push({
-                        pathname: `/listings/${givenId}`,
+                        pathname: `/listings/${givenListingId}`,
                         state: {
-                          givenId: parseInt(givenId),
+                          givenListingId: parseInt(givenListingId),
                         }
                       });
                     }

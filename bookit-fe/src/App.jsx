@@ -4,7 +4,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import MyBookings from './pages/MyBookings';
-import Booking from './pages/Booking';
 import EditBooking from './pages/EditBooking';
 import MyListings from './pages/MyListings';
 import Listing from './pages/Listing';
@@ -103,9 +102,6 @@ function App () {
                 </Route>
                 <Route exact path="/mybookings">
                   <MyBookings />
-                </Route>
-                <Route exact path="/bookings/:id">
-                  <Booking />
                 </Route>
                 <Route exact path="/bookings/edit/:id">
                   <EditBooking />

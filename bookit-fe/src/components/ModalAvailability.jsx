@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
 // they enter a name. They may choose to cancel/close the modal without
 // the creation of a new availability.
 const ModalAvailability = ({
-  availModal, handleCloseModal, givenId, newAvail, availId
+  availModal, handleCloseModal, givenListingId, newAvail, availId
 }) => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
@@ -160,7 +160,7 @@ const ModalAvailability = ({
       `${baseUrl}/availabilities` :
       `${baseUrl}/availabilities/${availId}`;
     const reqBody = {
-      "listing_id": givenId,
+      "listing_id": givenListingId,
       "start_time": startTime,
       "end_time": endTime,
       "is_available": true,
@@ -181,7 +181,7 @@ const ModalAvailability = ({
     })
       .then(() => {
         const successMsg = newAvail === true ?
-        `Done! Created a new Availability for Listing ID: ${givenId}` :
+        `Done! Created a new Availability for Listing ID: ${givenListingId}` :
         `Done! Modified Availability ID: ${availId}`
         toast.success(
           successMsg, {
@@ -214,9 +214,9 @@ const ModalAvailability = ({
         );
       })
     // history.push({
-    //   pathname: `/listings/${givenId}`,
+    //   pathname: `/listings/${givenListingId}`,
     //   state: {
-    //     givenId: parseInt(givenId),
+    //     givenListingId: parseInt(givenListingId),
     //   }
     // })
     setUpdate(!updated);
@@ -314,7 +314,7 @@ const ModalAvailability = ({
 ModalAvailability.propTypes = {
   availModal: PropTypes.bool.isRequired,
   handleCloseModal: PropTypes.func.isRequired,
-  givenId: PropTypes.number.isRequired,
+  givenListingId: PropTypes.number.isRequired,
   newAvail: PropTypes.bool.isRequired,
   availId: PropTypes.number,
 };

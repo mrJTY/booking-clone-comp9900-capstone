@@ -22,6 +22,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import RoomIcon from '@material-ui/icons/Room';
+import Rating from '@material-ui/lab/Rating';
 import axios from 'axios';
 
 // Page styling used on the ResourceCard component
@@ -41,23 +42,53 @@ const useStyles = makeStyles((theme) => ({
   },
   media: {
     height: 0,
-    paddingTop: '56.25%', // 16:9 ratio
+    paddingTop: '56.25%',
   },
   resourceCardActions: {
     justifyContent: 'space-between',
   },
   resourceCardCentered: {
     justifyContent: 'center',
+    padding: 0,
   },
+  resourceCardRating: {
+    justifyContent: 'center',
+    padding: 0,
+  },
+  resourceCardDescDiv:{
+    maxHeight: '100px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    height: '128px',
+  },
+  resourceCardDesc:{
+    maxHeight: '100px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: "-webkit-box",
+    "-webkit-line-clamp": 4,
+    "-webkit-box-orient": "vertical",
+  },  
   locationDiv: {
     display: 'flex',
     flexDirection: 'row',
+    maxHeight: '40px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   locationIcon: {
     paddingRight: '4px',
     width: '16px',
     height: '16px',
   },
+  locationText: {
+    height: '56px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: "-webkit-box",
+    "-webkit-line-clamp": 2,
+    "-webkit-box-orient": "vertical",
+  },  
 }));
 
 // The ResourceCard component is a subcomponent representing a resource
@@ -156,21 +187,29 @@ const ResourceCard = (
       <CardContent>
         <Box className={classes.locationDiv}>
           <RoomIcon className={classes.locationIcon} />
-          <Typography paragraph align="left" variant="caption" component="p">
+          <Typography className={classes.locationText} paragraph align="left" variant="caption" component="p">
             {resource.address}
           </Typography>
         </Box>
       </CardContent>
 
-      <CardContent>
-        <Typography paragraph align="left" variant="body2" color="textSecondary" component="p">
+      <CardContent className={classes.resourceCardRating}>
+        <Tooltip title={`Average rating: ${resource.avg_rating}`} placement="top" >
+          <div>
+            <Rating name="avg-rating" defaultValue={resource.avg_rating} precision={0.1} readOnly />
+          </div>
+        </Tooltip>
+      </CardContent>
+
+      <CardContent className={classes.resourceCardDescDiv}>
+        <Typography className={classes.resourceCardDesc} paragraph align="left" variant="body2" color="textSecondary" component="p">
           {resource.description}
         </Typography>
       </CardContent>
 
       <CardContent className={classes.resourceCardCentered}>
         <Typography variant="overline" align="center" color="textPrimary" component="p">
-        Availabilities: {availabilities.length}
+          Availabilities: {availabilities.length}
         </Typography>
       </CardContent>
 
@@ -194,9 +233,7 @@ const ResourceCard = (
               history.push({
                 pathname: `/listings/${resource.listing_id}`,
                 state: {
-                  givenId: parseInt(resource.listing_id),
-                  resource: resource,
-                  availabilities: availabilities,
+                  givenListingId: parseInt(resource.listing_id),
                 }
               })
             }}
@@ -216,7 +253,7 @@ const ResourceCard = (
                   history.push({
                     pathname: `/listings/edit/${resource.listing_id}`,
                     state: {
-                      givenId: parseInt(resource.listing_id),
+                      givenListingId: parseInt(resource.listing_id),
                       prevPage: currPage,
                     }
                   })

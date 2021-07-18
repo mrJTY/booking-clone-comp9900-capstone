@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
     border: '1px solid #282c34',
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 2, 2),
+    borderRadius: 5,
   },
   button: {
     backgroundColor: theme.palette.background.button,

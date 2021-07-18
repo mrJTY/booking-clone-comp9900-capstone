@@ -20,6 +20,9 @@ export async function fetchMyListings (baseUrl, token, setMylistings)
       "Authorization": `JWT ${token}`,
     },
   })
+
+  console.log(response.data)
+
   await setMylistings(response.data.mylistings);
 }
 
@@ -51,8 +54,8 @@ export async function fetchMyBookings (baseUrl, token, setMybookings)
     },
   })
   
-  // console.log('mybookings response is:')
-  // console.log(response)
+  console.log('mybookings response is:')
+  console.log(response)
 
   await setMybookings(response.data.mybookings);
 }

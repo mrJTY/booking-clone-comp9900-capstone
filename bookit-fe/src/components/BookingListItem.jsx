@@ -25,11 +25,11 @@ import {
 import ArrowRight from '@material-ui/icons/ArrowRight';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import RateReviewIcon from '@material-ui/icons/RateReview';
 import { format, formatDistanceStrict } from 'date-fns';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import { toast } from 'react-toastify';
 
 
 const ListSpan = styled.span`
@@ -60,6 +60,8 @@ const BookingListItem = ({ booking, upcoming }) => {
   const token = context.token[0];
   const baseUrl = context.baseUrl;
 
+  // console.log(booking)
+
   // used for the delete dialog
   const [openDelete, setOpenDelete] = React.useState(false);
   // determines which booking in particular to delete
@@ -82,7 +84,7 @@ const BookingListItem = ({ booking, upcoming }) => {
   // determines which associated listing of a particular booking to modify
   const [modifyBookingListingId, setModifyBookingListingId] = React.useState(null);
   // determines which associated availability of a particular booking to modify
-  const [modifyBookingAvailId, setModifyBookingAvailId] = context.modifyBookingAvailId;
+  const setModifyBookingAvailId = context.modifyBookingAvailId[1];
 
   const [availabilities, setAvailabilities] = React.useState([]);
   const [currentAvail, setCurrentAvail] = React.useState({});
@@ -152,12 +154,12 @@ const BookingListItem = ({ booking, upcoming }) => {
             primary={
               <div>
                 <div>
-                  <Typography variant="body2" align="left" color="textSecondary">
+                  <Typography component={'span'} variant="body2" align="left" color="textSecondary">
                     <ListSpan>Listing /</ListSpan> {`${booking.listing_name}`}
                   </Typography>
                 </div>
                 <div>
-                  <Typography variant="body2" align="left" color="textSecondary">
+                  <Typography component={'span'} variant="body2" align="left" color="textSecondary">
                     <ListSpan>Owner /</ListSpan> {' '}
                     <Link
                       component={RouterLink}
@@ -171,7 +173,7 @@ const BookingListItem = ({ booking, upcoming }) => {
             }
             secondary={
               <div>
-                <Typography variant="body2" align="left" color="textSecondary">
+                <Typography component={'span'} variant="body2" align="left" color="textSecondary">
                   <ListSpan>Booking /</ListSpan> {`From: ${format(new Date(booking.start_time), 'dd/MM/yyyy hh:mm a')} | Until: ${format(new Date(booking.end_time), 'dd/MM/yyyy hh:mm a')} (${formatDistanceStrict(new Date(booking.start_time), new Date(booking.end_time))})`}
                 </Typography>
               </div>
@@ -187,11 +189,8 @@ const BookingListItem = ({ booking, upcoming }) => {
                     color={'primary'}
                     className={classes.button}
                     onClick={() => {
-
-                      console.log('Clicked Edit Booking');
-
                       handleClickModfyBooking(
-                        parseInt(booking.booking_id),
+                        booking.booking_id,
                         parseInt(booking.listing_id),
                         parseInt(booking.availability_id)
                       )
@@ -206,10 +205,7 @@ const BookingListItem = ({ booking, upcoming }) => {
                     color={'secondary'}
                     className={classes.button}
                     onClick={() => {
-
-                      console.log('Clicked Delete Booking');
-
-                      handleClickOpenDelete(parseInt(booking.booking_id))
+                      handleClickOpenDelete(booking.booking_id)
                     }}
                   >
                     <DeleteIcon />
@@ -227,7 +223,7 @@ const BookingListItem = ({ booking, upcoming }) => {
                     history.push({
                       pathname: `/listings/${booking.listing_id}`,
                       state: {
-                        givenId: parseInt(booking.listing_id),
+                        givenListingId: parseInt(booking.listing_id),
                       }
                     })
                   }}
@@ -236,19 +232,43 @@ const BookingListItem = ({ booking, upcoming }) => {
             }
             {
               upcoming === false &&
-              <CustomButton
-                title={'Review'}
-                ariaLabel={'review'}
-                id={'review-booking-button'}
-                variant={'contained'}
-                color={'primary'}
-                className={classes.button}
-                endIcon={<ArrowRight />}
-                onClick={() => {
-                  // load a modal / page for review
-                  console.log('Clicked Review Listing');
-                }}
-              />
+              <Box>
+                <CustomButton
+                  title={'Review'}
+                  ariaLabel={'review'}
+                  id={'booking-review-button'}
+                  variant={'outlined'}
+                  color={'default'}
+                  className={classes.button}
+                  endIcon={<RateReviewIcon />}
+                  onClick={() => {
+                    // history.push({
+                    //   pathname: `/listings/${booking.listing_id}`,
+                    //   state: {
+                    //     givenListingId: parseInt(booking.listing_id),
+                    //   }
+                    // })
+                    console.log('Clicked Review')
+                  }}
+                />
+                <CustomButton
+                  title={'View Listing'}
+                  ariaLabel={'listing'}
+                  id={'booking-view-listing-button'}
+                  variant={'contained'}
+                  color={'primary'}
+                  className={classes.button}
+                  endIcon={<ArrowRight />}
+                  onClick={() => {
+                    history.push({
+                      pathname: `/listings/${booking.listing_id}`,
+                      state: {
+                        givenListingId: parseInt(booking.listing_id),
+                      }
+                    })
+                  }}
+                />
+            </Box>
             }
           </ListItemSecondaryAction>
         </ListItem>
@@ -257,13 +277,13 @@ const BookingListItem = ({ booking, upcoming }) => {
         bookingDialog={bookingModal}
         handleCloseModal={handleCloseModal}
         listingId={parseInt(modifyBookingListingId)}
-        bookingId={parseInt(modifyBookingId)}
+        bookingId={modifyBookingId}
         currentAvail={currentAvail}
         availabilities={availabilities}
       />
       <DeleteDialog
         open={openDelete} handleClose={handleCloseDelete}
-        deleteId={parseInt(deleteBookingId)}
+        deleteUuid={deleteBookingId}
         page={`/mybookings`}
         item="Booking"
       />

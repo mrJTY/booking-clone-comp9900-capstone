@@ -191,8 +191,6 @@ const MyListings = () => {
                 </Box>
               </Box>
             </Box>
-            <br />
-            <br />
             <Grid className={classes.root} container spacing={2}>
                 <Grid item xs={12}>
                   <Grid container justify="center" spacing={2}>
@@ -204,7 +202,7 @@ const MyListings = () => {
                           handleClickOpen={handleClickOpen}
                         />
                         <DeleteDialog
-                          open={open} handleClose={handleClose} deleteId={listid}
+                          open={open} handleClose={handleClose} deleteId={parseInt(listid)}
                           page="/mylistings" item="Listing"
                         />
                       </Grid>

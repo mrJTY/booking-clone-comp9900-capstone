@@ -7,8 +7,8 @@ import DeleteDialog from '../components/DeleteDialog';
 import ModalAvailability from '../components/ModalAvailability';
 import {
   useHistory,
-  useLocation,
   Redirect,
+  useParams,
 } from 'react-router-dom';
 import { Link as RouterLink } from 'react-router-dom';
 import {
@@ -28,6 +28,7 @@ import {
 import Add from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Rating from '@material-ui/lab/Rating';
 import axios from 'axios';
 import styled from 'styled-components';
 import { format, formatDistanceStrict } from 'date-fns';
@@ -110,6 +111,18 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     paddingBottom: '10px',
   },
+  resourceTitleDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  resourceAvgRating: {
+    display: 'flex',
+    paddingRight: '8px',
+    paddingBottom: '4px',
+    alignContent: 'center',
+    alignItems: 'center',
+  },
   button: {
     margin: theme.spacing(1),
   },
@@ -149,7 +162,6 @@ const Listing = () => {
   const baseUrl = context.baseUrl;
   const token = context.token[0];
   const history = useHistory();
-  const location = useLocation();
   // used for the delete dialog
   const [open, setOpen] = React.useState(false);
   // determines which availability in particular to delete
@@ -163,8 +175,11 @@ const Listing = () => {
     setOpen(false);
   };
 
+  const params = useParams();
+  const listingId = params.id || null;
+
   React.useEffect(() => {
-    if (token === null) {
+    if (token === null || listingId === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -198,7 +213,6 @@ const Listing = () => {
   }
 
   const handleClickBookIt = (availId) => {
-    // listing id: location.state.givenId
     async function attemptBooking () {
       try {
         const response = await axios({
@@ -210,7 +224,7 @@ const Listing = () => {
             "Authorization": `JWT ${token}`,
           },
           data: {
-            "listing_id": location.state.givenId,
+            "listing_id": listingId,
             "availability_id": availId
           }
         })
@@ -233,18 +247,21 @@ const Listing = () => {
 
   React.useEffect(() => {
     setLoadingState('loading');
-    setPage(`/listings/${location.state.givenId}`);
+    setPage(`/listings/${listingId}`);
     async function setupListing () {
       try {
         const response = await axios({
           method: 'GET',
-          url: `${baseUrl}/listings/${location.state.givenId}`,
+          url: `${baseUrl}/listings/${listingId}`,
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             "Authorization": `JWT ${token}`,
           },
         })
+
+        console.log(response.data);
+
         setResource(response.data);
       } catch(error) {
         
@@ -256,7 +273,7 @@ const Listing = () => {
       try {
         const response = await axios({
           method: 'GET',
-          url: `${baseUrl}/availabilities?listing_id=${location.state.givenId}`,
+          url: `${baseUrl}/availabilities?listing_id=${listingId}`,
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -314,10 +331,10 @@ const Listing = () => {
                       startIcon={<EditIcon />}
                       onClick={() => {
                         history.push({
-                          pathname: `/listings/edit/${location.state.givenId}`,
+                          pathname: `/listings/edit/${listingId}`,
                           state: {
-                            givenId: parseInt(location.state.givenId),
-                            prevPage: `/listings/${location.state.givenId}`,
+                            givenListingId: parseInt(listingId),
+                            prevPage: `/listings/${listingId}`,
                           }
                         })
                       }}
@@ -330,13 +347,13 @@ const Listing = () => {
                       color={'secondary'}
                       className={classes.button}
                       startIcon={<DeleteIcon />}
-                      onClick={() => handleClickOpen(location.state.givenId)}
+                      onClick={() => handleClickOpen(listingId)}
                     />
 
                     <DeleteDialog
                       open={open} handleClose={handleClose}
-                      deleteId={location.state.givenId}
-                      page={`/listings/${location.state.givenId}`}
+                      deleteId={parseInt(listingId)}
+                      page={`/listings/${listingId}`}
                       item="Listing"
                     />
                   </Box>
@@ -360,10 +377,16 @@ const Listing = () => {
                   <img src={PlaceholderImage} alt="thumbnail" className={classes.img} />
                 </Box>
                 <Box className={classes.outerContainer}>
-                  <Typography gutterBottom variant="h5" align="left">
-                    {resource.listing_name}
-                  </Typography>
-
+                  <Box className={classes.resourceTitleDiv}>
+                    <Typography gutterBottom variant="h5" align="left">
+                      {resource.listing_name}
+                    </Typography>
+                    <Tooltip title={`Average rating: ${resource.avg_rating}`} placement="top" >
+                      <div className={classes.resourceAvgRating}>
+                        <Rating name="avg-rating" defaultValue={resource.avg_rating} precision={0.1} readOnly />
+                      </div>
+                    </Tooltip>
+                  </Box>
                   <Typography paragraph align="left" variant="body2" color="textSecondary" component="p">
                     {resource.description}
                   </Typography>
@@ -401,7 +424,7 @@ const Listing = () => {
                     <ModalAvailability
                       availModal={newAvailModal}
                       handleCloseModal={handleCloseNewModal}
-                      givenId={location.state.givenId}
+                      givenListingId={listingId}
                       newAvail={true}
                     />
                   </Box>
@@ -474,14 +497,14 @@ const Listing = () => {
                     <ModalAvailability
                       availModal={availModal}
                       handleCloseModal={handleCloseModal}
-                      givenId={location.state.givenId}
+                      givenListingId={parseInt(listingId)}
                       newAvail={false}
                       availId={parseInt(modifyAvailId)}
                     />
                     <DeleteDialog
                       open={open} handleClose={handleClose}
                       deleteId={parseInt(deleteAvailId)}
-                      page={`/listings/${location.state.givenId}`}
+                      page={`/listings/${listingId}`}
                       item="Availability"
                     />
                   </Box>
