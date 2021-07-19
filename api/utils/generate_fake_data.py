@@ -1,6 +1,5 @@
-from random import randrange
 import hashlib
-import logging
+import random
 import uuid
 
 from api import db
@@ -75,8 +74,11 @@ def create_fake_availabilties():
     for i in range(0, n_availabilities):
         # All dummy availabilities on one listing id
         listing_id = listings[0].listing_id
-        start_time = 123
-        end_time = 123
+        # Give me a random start time (hourly blocks)
+        random.seed(123)
+        start_time = (1626458400 + random.randrange(0, 2629746, 60 * 60)) * 1000
+        # Set end time as 1 hour
+        end_time = start_time + (60 * 60 * 1000)
         a = AvailabilityModel(
             start_time=start_time,
             end_time=end_time,
@@ -115,7 +117,8 @@ def create_fake_ratings():
         # All bookings on listing 0
         booking_id = bookings[i].booking_id
         # Generate a random rating with some random comment
-        rating = randrange(1, 5)
+        random.seed(123)
+        rating = random.randrange(1, 5)
         comment = "Good! Me'h! Ok! Best!"
         r = RatingModel(
             user_id=user_id, booking_id=booking_id, rating=rating, comment=comment
