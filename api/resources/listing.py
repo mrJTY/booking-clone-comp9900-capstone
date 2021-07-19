@@ -35,6 +35,10 @@ listing_details = api.api.model(
         "avg_rating": fields.Float(
             required=False, description="Avg rating for the listing"
         ),
+        # FIXME(justin): Getting a random error with this: cls_or_instance not defined???
+        # "ratings": fields.List(
+        #     required=False, description="The list of Rating objects attached to this Listing", cls_or_instance=
+        # ),
     },
 )
 
@@ -45,7 +49,7 @@ listing_details = api.api.model(
 @listing.response(404, "listing not found")
 class Listing(Resource):
     @listing.doc(description=f"listing_id must be provided")
-    @listing.marshal_with(listing_details)
+    # @listing.marshal_with(listing_details)
     def get(self, listing_id):
         logging.info(f"Getting listing {listing_id}")
         # Calculate avg ratings
@@ -68,7 +72,7 @@ class Listing(Resource):
 
     # Need to see what updates are made
     @listing.doc(description=f"listing_id must be provided")
-    @listing.marshal_with(listing_details)
+    # @listing.marshal_with(listing_details)
     def put(self, listing_id):
         logging.info(f"Updating listing {listing_id}")
         # get listing id
@@ -93,7 +97,7 @@ class Listing(Resource):
 class ListingList(Resource):
     @listing.doc(description=f"Creates a new listing")
     @listing.expect(listing_details)
-    @listing.marshal_with(listing_details)
+    # @listing.marshal_with(listing_details)
     def post(self):
         logging.info("Registering a listing")
         content = get_request_json()

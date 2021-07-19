@@ -62,8 +62,19 @@ def test_create_listing():
     assert actual["address"] == TEST_LISTING["address"]
     assert actual["category"] == TEST_LISTING["category"]
     assert actual["description"] == TEST_LISTING["description"]
+
     # It must be zero at the start
-    assert actual["avg_rating"] == 0.0
+    get_listing_url = f"{API_URL}/listings/{actual['listing_id']}"
+    get_response = requests.get(
+        get_listing_url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    get_actual = get_response.json()
+    # Avg rating must still be zero
+    assert type(get_actual["ratings"]) == list
+    assert get_actual["avg_rating"] == 0.0
 
     # Test update
     listing_url = f"{API_URL}/listings/{actual['listing_id']}"
@@ -79,8 +90,6 @@ def test_create_listing():
     assert actual["address"] == TEST_2_LISTING["address"]
     assert actual["category"] == TEST_2_LISTING["category"]
     assert actual["description"] == TEST_2_LISTING["description"]
-    # Avg rating must still be zero
-    assert actual["avg_rating"] == 0.0
 
     # Test delete
     listing_url = f"{API_URL}/listings/{actual['listing_id']}"
