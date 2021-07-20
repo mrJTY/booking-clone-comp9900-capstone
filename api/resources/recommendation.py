@@ -1,21 +1,19 @@
-from api import db
-from api.utils.req_handling import *
-from flask_login import current_user
-from flask_restplus import Resource, fields
-from sqlalchemy.orm.attributes import flag_modified
-from sqlalchemy import or_, func
-from api.models.listing import ListingModel
-from api.models.booking import BookingModel
-from api.models.rating import RatingModel
-import pandas as pd
-import api
 import json
 import logging
+
+from api import db
+from api.models.booking import BookingModel
+from api.models.listing import ListingModel
+from api.models.rating import RatingModel
+from api.utils.req_handling import *
+from flask_login import current_user
+from flask_restplus import Resource
+from sqlalchemy import func
+import api
 import numpy as np
+import pandas as pd
+from api.recommendation.top_rated_listings import get_top_rated_listings
 
-
-# This is just an example
-from api.recommendation.model import Model
 
 recommendation = api.api.namespace(
     "recommendations", description="Recommendation operations"
@@ -130,3 +128,12 @@ class RecommendationListings(Resource):
         # Return as json
         # search_recommendations = [p.to_dict() for p in predictions]
         return {"listings": final_recommendations}
+
+
+@recommendation.route("/top_5_rated_listings")
+@recommendation.response(404, "recommendation not found")
+class Top5RatedListings(Resource):
+    @recommendation.doc(description="Returns the top 5 avg rated listings")
+    def get(self):
+        out = get_top_rated_listings(5)
+        return out
