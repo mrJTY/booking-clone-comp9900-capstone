@@ -11,6 +11,7 @@ from flask_restplus import Resource, fields
 from sqlalchemy import or_
 from sqlalchemy.orm.attributes import flag_modified
 import numpy as np
+from jinja2 import Template
 
 listing = api.api.namespace("listings", description="Listing operations")
 
@@ -132,27 +133,78 @@ class ListingList(Resource):
     @listing.doc(description=f"Returns a listing by search")
     @listing.expect(listing_details)
     def get(self):
-        keyword = request.args.get("search_query")
-        logging.info(f"Searching for {keyword}")
-        search_listings = ListingModel.query.filter(
-            or_(
-                ListingModel.listing_name.ilike(f"%{keyword}%"),
-                ListingModel.description.ilike(f"%{keyword}%"),
-                ListingModel.address.ilike(f"%{keyword}%"),
+        search_query = request.args.get("search_query")
+        start_time = request.args.get("start_time")
+        end_time = request.args.get("end_time")
+        is_available = request.args.get("is_available")
+        category = request.args.get("category")
+
+        # Cast types
+        if search_query:
+            search_query = str(search_query).lower()
+        if start_time:
+            start_time = int(start_time)
+        if end_time:
+            end_time = int(end_time)
+        if is_available:
+            is_available = bool(is_available)
+        if category:
+            category = str(category).lower()
+
+        template = Template(
+            """
+        select l.*
+        from listings as l
+        where
+            l.listing_name like '%{{ search_query }}%'
+            or l.description like '%{{ search_query }}%'
+            or l.address like '%{{ search_query }}%'
+
+            {% if start_time or end_time or is_available %}
+            and l.listing_id in (
+                select listing_id
+                from availabilities
+                where
+                {% if start_time and end_time %}
+                    start_time = {{ start_time }}
+                    and end_time = {{ end_time }}
+                {% endif %}
+                {% if is_available %}
+                    {% if start_time and end_time %} and {% endif %} is_available
+                {% endif %}
             )
-        ).limit(api.config.Config.RESULT_LIMIT)
-        # Calculate avg ratings
-        search_listings = [l.to_dict() for l in search_listings]
-        # Calculate avg ratings and fetch ratings for that listing
-        out = [
-            {
-                **l,
-                "avg_rating": calculate_avg_rating(l["listing_id"]),
-                "ratings": get_ratings(l["listing_id"]),
-            }
-            for l in search_listings
-        ]
-        return {"listings": out}
+            {% endif %}
+
+            {% if category %}
+            and category = '{{ category }}'
+            {% endif %}
+        limit {{ result_limit }}
+        """
+        )
+
+        query = template.render(
+            search_query=search_query,
+            start_time=start_time,
+            end_time=end_time,
+            is_available=is_available,
+            result_limit=api.config.Config.RESULT_LIMIT,
+            category=category,
+        )
+
+        with api.engine.connect() as conn:
+            query_results = conn.execute(query)
+            search_listings = [dict(l) for l in query_results]
+
+            # Calculate avg ratings and fetch ratings for that listing
+            out = [
+                {
+                    **l,
+                    "avg_rating": calculate_avg_rating(l["listing_id"]),
+                    "ratings": get_ratings(l["listing_id"]),
+                }
+                for l in search_listings
+            ]
+            return {"listings": out}
 
 
 # TODO: Paginate this and add docs
