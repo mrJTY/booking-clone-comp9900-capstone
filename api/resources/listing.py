@@ -82,7 +82,11 @@ class Listing(Resource):
         # update the listing data
         listing.listing_name = content["listing_name"]
         listing.address = content["address"]
-        listing.category = content["category"]
+        category = str(content["category"]).lower()
+        if category in api.config.Config.CATEGORIES:
+            listing.category = category
+        else:
+            listing.category = "other"
         listing.description = content["description"]
         listing.user_id = current_user.user_id
         listing.username = current_user.username
@@ -108,7 +112,11 @@ class ListingList(Resource):
             listing_name = content["listing_name"]
             address = content["address"]
             description = content["description"]
-            category = content["category"]
+            category = str(content["category"]).lower()
+            if category in api.config.Config.CATEGORIES:
+                category = category
+            else:
+                category = "other"
             v = ListingModel(
                 listing_name=listing_name,
                 address=address,

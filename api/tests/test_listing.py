@@ -8,13 +8,13 @@ API_URL = os.environ["API_URL"]
 TEST_LISTING = {
     "listing_name": "Coffee On Campus",
     "address": "Kensington NSW 2033",
-    "category": "Coffee Shop",
+    "category": "enterTAinmeNT",
     "description": "Delicious selection of sandwiches and coffee",
 }
 TEST_2_LISTING = {
     "listing_name": "Coffee On Campus",
     "address": "Kensington NSW 2033",
-    "category": "Coffee Shop",
+    "category": "entertainment",
     "description": "Great way to get coffee at UNSW",
 }
 
@@ -60,7 +60,7 @@ def test_create_listing():
     actual = response.json()
     assert actual["listing_name"] == TEST_LISTING["listing_name"]
     assert actual["address"] == TEST_LISTING["address"]
-    assert actual["category"] == TEST_LISTING["category"]
+    assert actual["category"] == TEST_LISTING["category"].lower()
     assert actual["description"] == TEST_LISTING["description"]
 
     # It must be zero at the start
@@ -88,7 +88,7 @@ def test_create_listing():
     actual = response.json()
     assert actual["listing_name"] == TEST_2_LISTING["listing_name"]
     assert actual["address"] == TEST_2_LISTING["address"]
-    assert actual["category"] == TEST_2_LISTING["category"]
+    assert actual["category"] == TEST_2_LISTING["category"].lower()
     assert actual["description"] == TEST_2_LISTING["description"]
 
     # Test delete

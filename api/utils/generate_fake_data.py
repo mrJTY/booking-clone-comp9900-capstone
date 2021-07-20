@@ -60,7 +60,7 @@ def create_fake_listings():
         # All belong to user id 1
         l.user_id = users[0].user_id
         l.listing_name = company
-        l.category = category
+        l.category = category.lower()
         l.address = address
         l.description = description
         l.username = username

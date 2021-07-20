@@ -7,7 +7,7 @@ API_URL = os.environ["API_URL"]
 TEST_LISTING = {
     "listing_name": "Recommendation coffee shop",
     "address": "28 Anzac Parade Kensington NSW 2033",
-    "category": "Coffee Shop",
+    "category": "entertainment",
     "description": "Delicious selection of sandwiches and coffee",
 }
 

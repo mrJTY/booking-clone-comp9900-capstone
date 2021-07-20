@@ -11,3 +11,4 @@ class Config(object):
     SECRET_KEY = "SUPER_SECRET_KEY"
     JWT_ACCESS_LIFESPAN = {"minutes": 60}
     RESULT_LIMIT = 200
+    CATEGORIES = ["entertainment", "sport", "accommodation", "healthcare", "other"]
