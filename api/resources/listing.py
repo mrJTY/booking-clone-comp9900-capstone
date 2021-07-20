@@ -209,8 +209,23 @@ def get_ratings(listing_id):
     my_ratings = []
     for b in my_bookings:
         booking_id = b.to_dict()["booking_id"]
-        my_ratings_in_booking = RatingModel.query.filter_by(booking_id=booking_id).all()
+        my_ratings_in_booking = get_ratings_with_username(booking_id)
         for r in my_ratings_in_booking:
             my_ratings.append(r)
-    out = [r.to_dict() for r in my_ratings]
-    return out
+    return my_ratings
+
+
+def get_ratings_with_username(booking_id):
+    with api.engine.connect() as conn:
+        query = f"""
+            select
+                r.*,
+                u.username
+            from ratings as r
+            join users as u
+                on u.user_id = r.user_id 
+            where r.booking_id = '{booking_id}'
+            """
+        results = conn.execute(query)
+        my_ratings_in_booking = [dict(r) for r in results]
+        return my_ratings_in_booking
