@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { StoreContext } from '../utils/store';
+import { useHistory } from "react-router-dom";
 import PlaceholderImage from '../assets/mountaindawn.png';
 import CustomButton from './CustomButton';
 import {
@@ -52,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 0,
   },
   resourceCardRating: {
+    display: 'flex',
     justifyContent: 'center',
     padding: 0,
   },
@@ -96,14 +98,15 @@ const useStyles = makeStyles((theme) => ({
 // The contents include a title, default thumbnail image, resource owner,
 // address and brief description and relevant interaction buttons.
 const ResourceCard = (
-  {
-    resource, owner, history,  parentPage, handleClickOpen
-  }) => {
+{
+  resource, owner, parentPage, handleClickOpen
+}) => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
   const currPage = context.pageState[0];
   const user = context.username[0];
+  const history = useHistory();
   const [availabilities, setAvailabilities] = React.useState([]);
 
   React.useEffect(() => {
@@ -283,7 +286,6 @@ const ResourceCard = (
 ResourceCard.propTypes = {
   resource: PropTypes.object.isRequired,
   owner: PropTypes.string.isRequired,
-  history: PropTypes.object.isRequired,
   parentPage: PropTypes.string.isRequired,
   handleClickOpen: PropTypes.func,
 };

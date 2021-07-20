@@ -197,7 +197,8 @@ const MyListings = () => {
                     {mylistings.map((listing) => (
                       <Grid key={listing.listing_id} item>
                         <ResourceCard
-                          resource={listing} owner={username} history={history}
+                          resource={listing}
+                          owner={username}
                           parentPage={`/mylistings`}
                           handleClickOpen={handleClickOpen}
                         />

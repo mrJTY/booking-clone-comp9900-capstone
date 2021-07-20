@@ -26,6 +26,11 @@ const ContextStore = ({ children }) => {
   const [bookedHrs, setBookedHrs] = React.useState(null);
   const [mybookings, setMybookings] = React.useState([]);
   const [modifyBookingAvailId, setModifyBookingAvailId] = React.useState(null);
+
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchCategory, setSearchCategory] = React.useState('listings');
+  const [searchResults, setSearchResults] = React.useState([]);
+
   const store = {
     baseUrl: `http://localhost:${port}`,
     token: [token, setToken],
@@ -38,6 +43,9 @@ const ContextStore = ({ children }) => {
     bookedHrs: [bookedHrs, setBookedHrs],
     mybookings: [mybookings, setMybookings],
     modifyBookingAvailId: [modifyBookingAvailId, setModifyBookingAvailId],
+    searchQuery: [searchQuery, setSearchQuery],
+    searchCategory: [searchCategory, setSearchCategory],
+    searchResults: [searchResults, setSearchResults],
   }
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }

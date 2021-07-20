@@ -16,14 +16,18 @@ import {
   Container,
   CircularProgress,
   Button,
+  ButtonGroup,
   Box,
   Typography,
   Tooltip,
   Divider,
   Link,
+  List,
   ListItem,
   ListItemText,
+  ListItemSecondaryAction,
   IconButton,
+  TextField,
 } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
@@ -126,6 +130,14 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
   },
+  buttonBookit: {
+    margin: theme.spacing(1),
+    width: '10em',
+  },
+  buttonText:{
+    textTransform: 'none',
+    fontSize: '16px',
+  },
   newAvailButton: {
     margin: theme.spacing(1),
     width: '100%',
@@ -151,8 +163,29 @@ const useStyles = makeStyles((theme) => ({
   backButton: {
     maxHeight: '38px',
   },
+  listRootAvail: {
+    flexGrow: 1,
+    listStyleType: 'none',
+    padding: 0,
+    paddingLeft: '1em',
+    paddingRight: '1em',
+  },
   listDiv: {
     paddingBottom: '4px',
+  },
+  listItemText: {
+    maxWidth: '36em',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: "-webkit-box",
+    "-webkit-line-clamp": 1,
+    "-webkit-box-orient": "vertical",
+  },
+  listItemTextReviewDiv: {
+    maxWidth: '52em',
+    width: '100%',
+    margin: theme.spacing(1),
+    // paddingLeft: '2em',
   },
 }));
 
@@ -188,6 +221,9 @@ const Listing = () => {
   const [page, setPage] = context.pageState;
   // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
+
+  const [showAvailBtn, setShowAvailBtn] = React.useState(true);
+
   // updated ensures appropriate re-rendering upon changing or deleting a resource
   const [updated, setUpdated] = context.updates;
   const username = context.username[0];
@@ -280,6 +316,9 @@ const Listing = () => {
             "Authorization": `JWT ${token}`,
           },
         })
+
+        console.log(response.data.availabilities)
+
         await setAvailabilities(response.data.availabilities);
 
       } catch(error) {
@@ -399,12 +438,46 @@ const Listing = () => {
             <Box className={classes.mytitleDiv}>
               <Box className={classes.titleSubcontainer}>
                 <Box className={classes.titleHeadingDiv}>
-                  <Typography paragraph align="left" variant="h4">
+                  {/* <Typography paragraph align="left" variant="h4">
                     Availabilities
-                  </Typography>
+                  </Typography> */}
+
+                  <ButtonGroup
+                    variant="text"
+                    color="primary"
+                  >
+                    <Tooltip title="Show Availabilities" placement="top">
+                      <Button
+                        id="show-availabilities-button"
+                        variant="text"
+                        color={showAvailBtn === true ? "default" : "primary"}
+                        className={classes.buttonText}
+                        onClick={() => {
+                          setShowAvailBtn(true);
+                        }}
+                      >
+                        Availabilities
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Show Reviews" placement="top">
+                      <Button
+                        id="show-reviews-button"
+                        variant="text"
+                        color={showAvailBtn === true ? "primary" : "default"}
+                        className={classes.buttonText}
+                        onClick={() => {
+                          setShowAvailBtn(false);
+                        }}
+                      >
+                        Reviews
+                      </Button>
+                    </Tooltip>
+                  </ButtonGroup>
+
                 </Box>
                 {
                   // only render the new availabiliites button if user owns the listing
+                  showAvailBtn === true &&
                   resource.username === username &&
                   <Box className={classes.outerContainerBtns}>
                     <Tooltip title="New Availability" aria-label="new availability">
@@ -433,67 +506,112 @@ const Listing = () => {
               </Box>
 
               {
+                showAvailBtn === true &&
                 availabilities.length > 0 &&
                 availabilities.map((availability) => (
                   <Box key={availability.availability_id}>
-                    <ListItem className={classes.root}>
-                      <ListItemText
-                        className={classes.listItemText}
-                        primary={
-                          `Start time: ${format(new Date(availability.start_time), 'dd/MM/yyyy hh:mm a')} - End time: ${format(new Date(availability.end_time), 'dd/MM/yyyy hh:mm a')} (${formatDistanceStrict(new Date(availability.start_time), new Date(availability.end_time))})`
+                    <List className={classes.listRootAvail}>
+                      <ListItem disableGutters divider>
+                        <ListItemText
+                          disableTypography
+                          primary={
+                            <div>
+                              <div className={classes.listItemText}>
+                                <Typography component={'span'} variant="body2" align="left" color="textSecondary">
+                                  <LocationSpan>Start time: </LocationSpan>
+                                  {`${format(new Date(availability.start_time), 'dd/MM/yyyy hh:mm a')}  `}
+                                </Typography>
+                              </div>
+                              <div className={classes.listItemText}>
+                                <Typography component={'span'} variant="body2" align="left" color="textSecondary">
+                                  <LocationSpan>{'/ '} End time: </LocationSpan>
+                                  {`${format(new Date(availability.end_time), 'dd/MM/yyyy hh:mm a')}`}
+                                  <LocationSpan>
+                                    {` (${formatDistanceStrict(new Date(availability.start_time), new Date(availability.end_time))})`}
+                                  </LocationSpan>
+                                </Typography>
+                              </div>
+                            </div>
+                          }
+                        />
+                        <ListItemSecondaryAction>
+                        {
+                          resource.username === username &&
+                          <Box>
+                            <Tooltip title={'Edit'} aria-label={'edit'}>
+                              <IconButton
+                                id={'availability-edit-button'}
+                                color={'primary'}
+                                className={classes.button}
+                                onClick={() => {
+                                  handleClickModfyAvail(parseInt(availability.availability_id))
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={'Delete'} aria-label={'delete'}>
+                              <IconButton
+                                id={'availability-delete-button'}
+                                color={'secondary'}
+                                className={classes.button}
+                                onClick={() => {
+                                  handleClickOpen(parseInt(availability.availability_id))
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Book It" aria-label="book it">
+                              <span>
+                                <Button
+                                  variant="contained"
+                                  color="default"
+                                  className={classes.buttonBookit}
+                                  disabled={
+                                    availability.is_available === true ? false : true
+                                  }
+                                  onClick={() => {
+                                    handleClickBookIt(parseInt(availability.availability_id))
+                                  }}
+                                >
+                                  {
+                                    availability.is_available === true ?
+                                    'Book It!' :
+                                    'Booked Out'
+                                  }
+                                </Button>
+                              </span>
+                            </Tooltip>
+                          </Box>
                         }
-                      />
-                      {
-                        resource.username === username &&
-                        <Box>
-                          <Tooltip title={'Edit'} aria-label={'edit'}>
-                            <IconButton
-                              id={'availability-edit-button'}
-                              color={'primary'}
-                              className={classes.button}
-                              onClick={() => {
-                                handleClickModfyAvail(parseInt(availability.availability_id))
-                              }}
-                            >
-                              <EditIcon />
-                            </IconButton>
+                        {
+                          resource.username !== username &&
+                          <Tooltip title="Book It" aria-label="book it">
+                            <span>
+                              <Button
+                                variant="contained"
+                                color="default"
+                                className={classes.buttonBookit}
+                                disabled={
+                                  availability.is_available === true ? false : true
+                                }
+                                onClick={() => {
+                                  handleClickBookIt(parseInt(availability.availability_id))
+                                }}
+                              >
+                                {
+                                  availability.is_available === true ?
+                                  'Book It!' :
+                                  'Booked Out'
+                                }
+                              </Button>
+                            </span>
                           </Tooltip>
-                          <Tooltip title={'Delete'} aria-label={'delete'}>
-                            <IconButton
-                              id={'availability-delete-button'}
-                              color={'secondary'}
-                              className={classes.button}
-                              onClick={() => {
-                                handleClickOpen(parseInt(availability.availability_id))
-                              }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                      }
-                      <Tooltip title="Book It" aria-label="book it">
-                        <span>
-                          <Button
-                            variant="contained"
-                            color="default"
-                            className={classes.button}
-                            disabled={
-                              availability.is_available === true ? false : true
-                            }
-                            onClick={() => {
-                              handleClickBookIt(parseInt(availability.availability_id))
-                            }}
-                          >
-                            {
-                              availability.is_available === true ?
-                              'Book It!' :
-                              'Booked Out'
-                            }
-                          </Button>
-                        </span>
-                      </Tooltip>
-                    </ListItem>
+                        }
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    </List>
                     <ModalAvailability
                       availModal={availModal}
                       handleCloseModal={handleCloseModal}
@@ -507,6 +625,88 @@ const Listing = () => {
                       page={`/listings/${listingId}`}
                       item="Availability"
                     />
+                  </Box>
+                ))
+              }
+              {
+                showAvailBtn === false &&
+                resource !== null &&
+                resource.ratings.length > 0 &&
+                resource.ratings.map((rating) => (
+                  <Box key={rating.rating_id}>
+                    <List className={classes.listRootAvail}>
+                      <ListItem disableGutters>
+                        <ListItemText
+                          disableTypography
+                          primary={
+                            <div>
+                              <div className={classes.listItemText}>
+                                <Typography component={'span'} variant="body2" align="left" color="textSecondary">
+                                  <LocationSpan>Reviewer: </LocationSpan>
+                                  <Link
+                                    component={RouterLink}
+                                    to={`/profile/${rating.username}`}
+                                  >
+                                    {rating.username}
+                                  </Link>
+                                </Typography>
+                              </div>
+                              <div className={classes.listItemText}>
+                                <Tooltip title={`Rating: ${rating.rating}`} placement="top">
+                                  <div className={classes.button}>
+                                    <Rating name="review-rating" defaultValue={rating.rating} precision={0.5} readOnly />
+                                  </div>
+                                </Tooltip>
+                              </div>                           
+                            </div>
+                          }                   
+                        />
+                        <ListItemSecondaryAction>
+                          <Box>
+                            <Tooltip title={'Delete'} aria-label={'delete'}>
+                              <IconButton
+                                id={'availability-delete-button'}
+                                color={'secondary'}
+                                className={classes.button}
+                                onClick={() => {
+                                  console.log('Clicked Delete review');
+                                  // handleClickOpen(parseInt(rating.rating_id))
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                      <ListItem divider>
+                        <ListItemText
+                          disableTypography
+                          primary={
+                            <div className={classes.listItemTextReviewDiv}>
+                              <TextField
+                                variant="outlined"
+                                inputProps={{
+                                  readOnly: true
+                                }}
+                                value={rating.comment}
+                                multiline
+                                fullWidth
+                                label="Review"
+                              />
+                            </div>
+                          }
+                        />
+                      </ListItem>
+                    </List>
+
+                    {/* <DeleteDialog
+                      open={open} handleClose={handleClose}
+                      deleteId={parseInt(deleteAvailId)}
+                      page={`/listings/${listingId}`}
+                      item="Review"
+                    /> */}
+
                   </Box>
                 ))
               }

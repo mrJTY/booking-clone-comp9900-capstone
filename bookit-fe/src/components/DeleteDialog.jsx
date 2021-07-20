@@ -29,6 +29,8 @@ const DeleteDialog = ({ open, handleClose, deleteId, page, item, deleteUuid }) =
     deleteUrl = `${baseUrl}/availabilities/${deleteId}`;
   } else if (item === "Booking") {
     deleteUrl = `${baseUrl}/bookings/${deleteUuid}`;
+  } else if (item === "Review") {
+    deleteUrl = `${baseUrl}/ratings/${deleteId}`;
   }
 
   return (

@@ -128,6 +128,7 @@ const Login = () => {
         }
       })
         .then((response) => {
+          console.log(response)
           // store the authorization token
           setToken(response.data.accessToken);
           // navigate to the Home screen

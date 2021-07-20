@@ -1,8 +1,8 @@
 import React from 'react';
 import {StoreContext} from '../utils/store';
 import Navbar from '../components/Navbar';
+import SearchControls from '../components/SearchControls';
 import {
-  useHistory,
   Redirect,
 } from 'react-router-dom';
 import {
@@ -10,7 +10,6 @@ import {
   Box,
   Container,
   Typography,
-  Button,
   CircularProgress,
 } from '@material-ui/core';
 
@@ -56,7 +55,6 @@ const Home = () => {
   const context = React.useContext(StoreContext);
   const classes = useStyles();
   const token = context.token[0];
-  const history = useHistory();
   const username = context.username[0];
   const [page, setPage] = context.pageState;
   const [loadingState, setLoadingState] = React.useState('idle');
@@ -79,10 +77,6 @@ const Home = () => {
     setupHome();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSearchButtonOnClick = (event) => {
-    history.push("/search");
-  }
-
   return (
     <Container>
       <Navbar page={page}/>
@@ -102,8 +96,8 @@ const Home = () => {
                 <Typography paragraph align="left" variant="h4">
                   Welcome, {username}.
                 </Typography>
+                <SearchControls />
               </Box>
-              <Button onClick={handleSearchButtonOnClick}>Start searching here</Button>
             </Box>
             <br/>
             <br/>

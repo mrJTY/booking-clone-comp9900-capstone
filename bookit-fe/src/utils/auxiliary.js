@@ -27,7 +27,7 @@ export async function fetchMyListings (baseUrl, token, setMylistings)
 }
 
 
-export async function fetchSearchListings (baseUrl, token, searchQuery, setSearchListingResults)
+export async function fetchSearchListings (baseUrl, token, searchQuery, setSearchResults)
 {
   const response = await axios({
     method: 'GET',
@@ -38,7 +38,7 @@ export async function fetchSearchListings (baseUrl, token, searchQuery, setSearc
       "Authorization": `JWT ${token}`,
     },
   })
-  await setSearchListingResults(response.data.listings);
+  await setSearchResults(response.data.listings);
 }
 
 

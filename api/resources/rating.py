@@ -83,7 +83,8 @@ class RatingList(Resource):
             # Receive contents from request
             logging.info(content)
             booking_id = content["booking_id"]
-            user_id = content["user_id"]
+            # user_id = content["user_id"]
+            user_id = current_user.user_id
             # Calling it rating_value because rating is already taken
             rating_value = content["rating"]
             comment = content["comment"]

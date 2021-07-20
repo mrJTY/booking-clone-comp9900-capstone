@@ -4,6 +4,7 @@ import CustomButton from './CustomButton';
 import PlaceholderImage from '../assets/mountaindawn.png';
 import DeleteDialog from './DeleteDialog';
 import BookingDialog from './BookingDialog';
+import RatingDialog from './RatingDialog';
 import {
   useHistory,
 } from 'react-router-dom';
@@ -26,6 +27,7 @@ import ArrowRight from '@material-ui/icons/ArrowRight';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import RateReviewIcon from '@material-ui/icons/RateReview';
+import StarRateIcon from '@material-ui/icons/StarRate';
 import { format, formatDistanceStrict } from 'date-fns';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
@@ -49,6 +51,24 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '64px',
     maxWidth: '64px',
     margin: 'auto',
+  },
+  listItemText: {
+    maxWidth: '36em',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: "-webkit-box",
+    "-webkit-line-clamp": 1,
+    "-webkit-box-orient": "vertical",
+  },
+  bookingRatingDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bookingStarRatingDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 }));
 
@@ -75,6 +95,20 @@ const BookingListItem = ({ booking, upcoming }) => {
     setOpenDelete(false);
   };
 
+
+  // used for the delete review dialog
+  const [openDeleteReview, setOpenDeleteReview] = React.useState(false);
+  const [deleteReviewId, setDeleteReviewId] = React.useState(null);
+  // state variables used for the DeleteDialog modal
+  const handleClickOpenDeleteReview = (id) => {
+    setDeleteReviewId(id);
+    setOpenDeleteReview(true);
+  };
+  const handleCloseDeleteReview = () => {
+    setOpenDeleteReview(false);
+  };
+
+
   const [bookingModal, setBookingModal] = React.useState(false);
   const handleCloseModal = () => {
     setBookingModal(false);
@@ -88,6 +122,24 @@ const BookingListItem = ({ booking, upcoming }) => {
 
   const [availabilities, setAvailabilities] = React.useState([]);
   const [currentAvail, setCurrentAvail] = React.useState({});
+
+  const [ratingId, setRatingId] = React.useState(null);
+  const [ratingStars, setRatingStars] = React.useState(null);
+  const [ratingComment, setRatingComment] = React.useState('');
+
+  const [ratingDialog, setRatingDialog] = React.useState(false);
+  const handleCloseRatingDialog = () => {
+    setRatingDialog(false);
+  };
+
+  const handleClickReview = async (bookingId, ratingId, ratingStars, ratingComment) => {
+    await setModifyBookingId(bookingId);
+    await setRatingId(ratingId);
+    await setRatingStars(ratingStars);
+    await setRatingComment(ratingComment);
+
+    setRatingDialog(true);
+  }
 
   const handleClickModfyBooking = async (bookingId, listingId, availId) => {
     setModifyBookingAvailId(availId);
@@ -151,14 +203,15 @@ const BookingListItem = ({ booking, upcoming }) => {
             <Avatar className={classes.listImage} src={PlaceholderImage} alt="Placeholder" />
           </ListItemAvatar>
           <ListItemText
+            disableTypography
             primary={
               <div>
-                <div>
+                <div className={classes.listItemText}>
                   <Typography component={'span'} variant="body2" align="left" color="textSecondary">
                     <ListSpan>Listing /</ListSpan> {`${booking.listing_name}`}
                   </Typography>
                 </div>
-                <div>
+                <div className={classes.listItemText}>
                   <Typography component={'span'} variant="body2" align="left" color="textSecondary">
                     <ListSpan>Owner /</ListSpan> {' '}
                     <Link
@@ -172,7 +225,7 @@ const BookingListItem = ({ booking, upcoming }) => {
               </div>
             }
             secondary={
-              <div>
+              <div className={classes.listItemText}>
                 <Typography component={'span'} variant="body2" align="left" color="textSecondary">
                   <ListSpan>Booking /</ListSpan> {`From: ${format(new Date(booking.start_time), 'dd/MM/yyyy hh:mm a')} | Until: ${format(new Date(booking.end_time), 'dd/MM/yyyy hh:mm a')} (${formatDistanceStrict(new Date(booking.start_time), new Date(booking.end_time))})`}
                 </Typography>
@@ -232,27 +285,71 @@ const BookingListItem = ({ booking, upcoming }) => {
             }
             {
               upcoming === false &&
-              <Box>
+              <Box className={classes.bookingRatingDiv}>
+                <Box className={classes.bookingStarRatingDiv}>
+                  <Typography component={'span'} variant="subtitle2" align="left" color="textPrimary">
+                    {booking.rating === null ? 'Not rated' : `Rating: ${booking.rating}`}
+                  </Typography>
+                  <StarRateIcon />
+                </Box>
+                {
+                  booking.rating === null &&
+                  <CustomButton
+                    title='Add Review'
+                    ariaLabel={'review'}
+                    id={'booking-review-button'}
+                    variant={'outlined'}
+                    color={'default'}
+                    className={classes.button}
+                    endIcon={<RateReviewIcon />}
+                    onClick={() => {
+                      handleClickReview(
+                        booking.booking_id,
+                        booking.rating_id,
+                        booking.rating,
+                        booking.comment,
+                      );
+                    }}
+                  />
+                }
+                {
+                  booking.rating !== null &&
+                  <Box className={classes.button}>
+                    <Tooltip title={'Change Review'} aria-label={'edit review'}>
+                      <IconButton
+                        id={'booking-review-edit-button'}
+                        color={'primary'}
+                        // className={classes.button}
+                        onClick={() => {
+                          handleClickReview(
+                            booking.booking_id,
+                            booking.rating_id,
+                            booking.rating,
+                            booking.comment,
+                          );
+                        }}
+                      >
+                        <RateReviewIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={'Delete Review'} aria-label={'delete review'}>
+                      <IconButton
+                        id={'booking-review-delete-button'}
+                        color={'secondary'}
+                        // className={classes.button}
+                        onClick={() => {
+                          handleClickOpenDeleteReview(
+                            booking.rating_id,
+                          );
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                }
                 <CustomButton
-                  title={'Review'}
-                  ariaLabel={'review'}
-                  id={'booking-review-button'}
-                  variant={'outlined'}
-                  color={'default'}
-                  className={classes.button}
-                  endIcon={<RateReviewIcon />}
-                  onClick={() => {
-                    // history.push({
-                    //   pathname: `/listings/${booking.listing_id}`,
-                    //   state: {
-                    //     givenListingId: parseInt(booking.listing_id),
-                    //   }
-                    // })
-                    console.log('Clicked Review')
-                  }}
-                />
-                <CustomButton
-                  title={'View Listing'}
+                  title={'Listing'}
                   ariaLabel={'listing'}
                   id={'booking-view-listing-button'}
                   variant={'contained'}
@@ -281,11 +378,27 @@ const BookingListItem = ({ booking, upcoming }) => {
         currentAvail={currentAvail}
         availabilities={availabilities}
       />
+      <RatingDialog
+        ratingDialog={ratingDialog}
+        handleCloseRatingDialog={handleCloseRatingDialog}
+        bookingId={modifyBookingId}
+        ratingId={ratingId}
+        ratingStars={ratingStars}
+        ratingComment={ratingComment}
+      />
       <DeleteDialog
-        open={openDelete} handleClose={handleCloseDelete}
+        open={openDelete}
+        handleClose={handleCloseDelete}
         deleteUuid={deleteBookingId}
         page={`/mybookings`}
         item="Booking"
+      />
+      <DeleteDialog
+        open={openDeleteReview}
+        handleClose={handleCloseDeleteReview}
+        deleteId={deleteReviewId}
+        page={`/mybookings`}
+        item="Review"
       />
     </div>
   )

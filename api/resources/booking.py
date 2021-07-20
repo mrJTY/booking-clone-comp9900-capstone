@@ -287,7 +287,7 @@ class MyBookings(Resource):
                 "upcoming": [],
             }
             for b in my_bookings:
-                if b["end_time"] < datetime.utcnow().timestamp():
+                if b["end_time"] < int(datetime.now().strftime("%s")) * 1000:
                     out["past"].append(b)
                 else:
                     out["upcoming"].append(b)

@@ -1,10 +1,9 @@
 import React from 'react';
 import {StoreContext} from '../utils/store';
 import Navbar from '../components/Navbar';
-import SearchResults from '../components/SearchResults';
+import ResourceCard from "../components/ResourceCard";
 import SearchControls from '../components/SearchControls';
 import {
-  useHistory,
   Redirect
 } from 'react-router-dom';
 import {
@@ -13,54 +12,56 @@ import {
   Container,
   Typography,
   CircularProgress,
+  Grid,
 } from '@material-ui/core';
-import {fetchSearchListings} from "../utils/auxiliary";
 
-const useStyles = makeStyles((theme) => ({}));
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  container: {
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: 'white',
+    minHeight: '100vh',
+    width: '100%',
+    backgroundColor: theme.palette.background.default,
+  },
+  containerDiv: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignSelf: 'flex-start',
+    width: '100%',
+  },
+  mytitleDiv: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    margin: theme.spacing(1),
+  },
+  noResultsDiv: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    margin: theme.spacing(1),
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  button: {
+    margin: theme.spacing(1),
+  },
+}));
 
 const Search = () => {
   const context = React.useContext(StoreContext);
   const classes = useStyles();
-  const history = useHistory();
-  const baseUrl = context.baseUrl;
   const token = context.token[0];
   const [page, setPage] = context.pageState;
   const [loadingState, setLoadingState] = React.useState('idle');
-
-  // Categories
-  const SEARCH_CATEGORY_LISTINGS = "listings";
-  const SEARCH_CATEGORY_USERS = "users";
-  const SEARCH_CATEGORY_AVAILABILITIES = "availabilities";
-
-  // State variables
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [searchListingResults, setSearchListingResults] = React.useState('');
-  const [searchCategory, setSearchCategory] = React.useState(SEARCH_CATEGORY_LISTINGS);
-
-  // Handle changes on the radio button to search listing vs users
-  const handleSearchCategoryChange = (event) => {
-    setSearchCategory(event.target.value);
-  }
-
-  const handleSearchTextChange = (event) => {
-    setSearchQuery(event.target.value);
-  }
-
-  const handleSearchClick = (event) => {
-    if (searchCategory === SEARCH_CATEGORY_LISTINGS) {
-      fetchSearchListings(baseUrl, token, searchQuery, setSearchListingResults).then(() => {
-          history.push({
-            pathname: "/search",
-            state: {
-              searchListingResults: searchListingResults,
-              searchQuery: searchQuery,
-            }
-          });
-        }
-      );
-    }
-  }
-
+  const searchResults = context.searchResults[0];
 
   React.useEffect(() => {
     if (token === null) {
@@ -70,19 +71,18 @@ const Search = () => {
 
   React.useEffect(() => {
     setPage('/search');
-
     async function setupSearch() {
       setLoadingState('loading');
       setLoadingState('success');
     }
-
     setupSearch();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchResults]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   return (
     <Container>
       <Navbar page={page}/>
-      <Container>
+      <Container className={classes.container}>
         {
           loadingState !== 'success' &&
           <div>
@@ -91,16 +91,44 @@ const Search = () => {
         }
         {
           loadingState === 'success' &&
-          <Box>
-            <Box>
+          <Box className={classes.containerDiv}>
+            <Box className={classes.mytitleDiv}>
               <Box>
                 <Typography paragraph align="left" variant="h4">
                   Search Results
                 </Typography>
-                <SearchControls handleSearchTextChange={handleSearchTextChange}
-                                handleSearchCategoryChange={handleSearchCategoryChange}
-                                handleSearchClick={handleSearchClick}/>
-                <SearchResults searchListingResults={searchListingResults}/>
+
+                <SearchControls />
+
+                {
+                  loadingState === 'success' &&
+                  searchResults.length > 0 &&
+                  <Grid className={classes.root} container spacing={2}>
+                    <Grid item xs={12}>
+                      <Grid container justify="center" spacing={2}>
+                      {
+                        searchResults.map((listing) => (
+                          <Grid key={listing.listing_id} item>
+                            <ResourceCard
+                              resource={listing}
+                              owner={listing.username}
+                              parentPage={`/search`}
+                            />
+                          </Grid>
+                        ))
+                      }
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                }
+                {
+                  loadingState === 'success' &&
+                  searchResults.length === 0 &&
+                  <Box className={classes.noResultsDiv}>
+                    No results found
+                  </Box>
+                }
+
               </Box>
             </Box>
             <br/>
@@ -108,6 +136,7 @@ const Search = () => {
           </Box>
         }
       </Container>
+      <br />
     </Container>
   );
 }

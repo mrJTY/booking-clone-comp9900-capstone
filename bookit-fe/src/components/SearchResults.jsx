@@ -1,43 +1,76 @@
+import React from "react";
+import { StoreContext } from '../utils/store';
+import ResourceCard from "./ResourceCard";
 import {
   Grid,
   Container,
   makeStyles,
 } from "@material-ui/core";
-import ResourceCard from "./ResourceCard";
-import React from "react";
-import {useHistory} from "react-router-dom";
 
-const useStyles = makeStyles((theme) => ({}));
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+}));
 
-const SearchResults = (
-  {
-    searchListingResults
-  }
-) => {
+// *************************************************************
+// NOTE: OBSOLETE
+// *************************************************************
+
+const SearchResults = () => {
+  const context = React.useContext(StoreContext);
+  const searchResults = context.searchResults[0];
+  const [loadingState, setLoadingState] = React.useState('idle');
+
+  React.useEffect(() => {
+    async function setupSearchResults () {
+      searchResults.length > 0 ? 
+        await setLoadingState('loading') :
+        await setLoadingState('success')
+    }
+    setupSearchResults();
+  }, [searchResults]); // eslint-disable-line react-hooks/exhaustive-deps
+
+
+  // var renderedResults;
+  // if (searchResults.length > 0) {
+  //   renderedResults = (
+  //     searchResults.map((listing) => (
+  //       <Grid key={listing.listing_id} item>
+  //         <ResourceCard
+  //           resource={listing} owner={listing.username}
+  //           history={history} parentPage={`/search`}
+  //         />
+  //       </Grid>
+  //     ))
+  //   );
+  // } else {
+  //   renderedResults = (<div>No results found</div>)
+  // }
+
   const classes = useStyles();
-  const history = useHistory();
-  var renderedResults;
-  if (searchListingResults.length > 0) {
-    renderedResults = (
-      searchListingResults.map((listing) => (
-        <Grid key={listing.listing_id} item>
-          <ResourceCard
-            resource={listing} owner={listing.username}
-            history={history} parentPage={`/search`}
-          />
-        </Grid>
-      ))
-    );
-  } else {
-    renderedResults = (<div>No results found</div>)
-  }
-
   return (
     <Container>
       <Grid className={classes.root} container spacing={2}>
         <Grid item xs={12}>
           <Grid container justify="center" spacing={2}>
-            {renderedResults}
+            {
+              loadingState !== 'success' &&
+              <div>No results found</div>
+            }
+            {
+              loadingState === 'success' &&
+              searchResults.length > 0 &&
+              searchResults.map((listing) => (
+                <Grid key={listing.listing_id} item>
+                  <ResourceCard
+                    resource={listing}
+                    owner={listing.username}
+                    parentPage={`/search`}
+                  />
+                </Grid>
+              ))
+            }
           </Grid>
         </Grid>
       </Grid>
