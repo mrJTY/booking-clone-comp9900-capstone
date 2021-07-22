@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 import hashlib
 import logging
-from api.models.availability import AvailabilityModel
-from api.models.booking import BookingModel
+
 from api import db, login_manager
 from api.config import Config
-from api.resources.user import UserModel
+from api.models.availability import AvailabilityModel
+from api.models.booking import BookingModel
+from api.models.user import UserModel
+from api.models.follower import FollowerModel
 from api.utils.req_handling import *
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_restplus import Resource, fields
@@ -14,9 +16,12 @@ import jwt
 
 auth = api.api.namespace("auth", description="Auth operations")
 
+RESULT_LIMIT = 20
+
 ############################
 # LOGIN
 ############################
+
 
 login_details_request = api.api.model(
     "User",
@@ -115,7 +120,7 @@ class AuthMe(Resource):
             ).all()
             list_bookings = [l.to_dict() for l in list_bookings]
             hours_booked = 0
-            ##Search through the existing bookings
+            # Search through the existing bookings
             for i in range(len(list_bookings)):
                 timeslot = AvailabilityModel.query.get_or_404(
                     list_bookings[i]["availability_id"]
@@ -125,10 +130,48 @@ class AuthMe(Resource):
                 )
                 hours_booked += get_interval
             get_user_dict["hours_booked"] = hours_booked
+
+            # Who I'm following
+            get_user_dict["followees"] = find_followees()
+
+            # Who is following me
+            get_user_dict["followers"] = find_followers()
+
+            # TODO: Base64 image
+            get_user_dict["profile_image"] = "TODO, this is not yet merged"
+
             return get_user_dict
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
+
+
+def find_followees():
+    # Given the current user, find out who I am following
+    # Return a list of users
+    follower_user_id = current_user.user_id
+    query = (
+        db.session.query(UserModel, FollowerModel)
+        .filter(FollowerModel.follower_id == follower_user_id)
+        .limit(RESULT_LIMIT)
+    )
+    unpacked_query = [q for q in query]
+    followers = [{**u.to_dict()} for (u, f) in unpacked_query]
+    return followers
+
+
+def find_followers():
+    # Given the current user, find who is following me
+    # Return a list of users
+    influencer_user_id = current_user.user_id
+    query = (
+        db.session.query(UserModel, FollowerModel)
+        .filter(FollowerModel.influencer_user_id == influencer_user_id)
+        .limit(RESULT_LIMIT)
+    )
+    unpacked_query = [q for q in query]
+    followers = [{**u.to_dict()} for (u, f) in unpacked_query]
+    return followers
 
 
 # Add a user loader:

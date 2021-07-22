@@ -7,7 +7,7 @@ from api.models.availability import AvailabilityModel
 from api.models.booking import BookingModel
 from api.models.listing import ListingModel
 from api.models.rating import RatingModel
-from api.resources.user import UserModel
+from api.models.user import UserModel
 from faker import Faker
 import pandas as pd
 

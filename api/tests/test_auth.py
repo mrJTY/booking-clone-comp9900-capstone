@@ -9,7 +9,6 @@ TEST_USER = {
     "username": "test_user",
     "email": "test@test.com",
     "password": "test",
-    "hours_booked": 0,
 }
 
 
@@ -32,7 +31,12 @@ def test_authenticate():
     assert protected_response.status_code == 200
     assert protected_response.json()["username"] == TEST_USER["username"]
     assert protected_response.json()["email"] == TEST_USER["email"]
-    assert protected_response.json()["hours_booked"] == TEST_USER["hours_booked"]
+    # Nothing booked yet
+    assert protected_response.json()["hours_booked"] == 0
+    # No followers yet
+    assert len(protected_response.json()["followers"]) == 0
+    # No followees yet
+    assert len(protected_response.json()["followees"]) == 0
 
     # Logout
     logout_response = requests.post(
