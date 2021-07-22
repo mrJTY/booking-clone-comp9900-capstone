@@ -145,7 +145,7 @@ class ListingList(Resource):
         start_time = request.args.get("start_time")
         end_time = request.args.get("end_time")
         is_available = request.args.get("is_available")
-        category = request.args.get("category")
+        categories = request.args.get("categories")
 
         # Cast types
         if search_query:
@@ -156,17 +156,21 @@ class ListingList(Resource):
             end_time = int(end_time)
         if is_available:
             is_available = bool(is_available)
-        if category:
-            category = str(category).lower()
+        # If categories is None, then the query will return all
+        if categories:
+            # Split the categories with comma
+            categories = [str(i).lower() for i in categories.split(",")]
 
         template = Template(
             """
         select l.*
         from listings as l
         where
-            l.listing_name like '%{{ search_query }}%'
-            or l.description like '%{{ search_query }}%'
-            or l.address like '%{{ search_query }}%'
+            (
+                l.listing_name like '%{{ search_query }}%'
+                or l.description like '%{{ search_query }}%'
+                or l.address like '%{{ search_query }}%'
+            )
 
             {% if start_time or end_time or is_available %}
             and l.listing_id in (
@@ -183,8 +187,12 @@ class ListingList(Resource):
             )
             {% endif %}
 
-            {% if category %}
-            and category = '{{ category }}'
+            {% if categories %}
+            and category in (
+                {% for category in categories %}
+                    '{{ category }}' {% if not loop.last %},{% endif %}
+                {% endfor %}
+            )
             {% endif %}
         limit {{ result_limit }}
         """
@@ -196,7 +204,7 @@ class ListingList(Resource):
             end_time=end_time,
             is_available=is_available,
             result_limit=api.config.Config.RESULT_LIMIT,
-            category=category,
+            categories=categories,
         )
 
         with api.engine.connect() as conn:

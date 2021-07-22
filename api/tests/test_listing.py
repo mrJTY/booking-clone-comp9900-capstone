@@ -168,3 +168,33 @@ def test_search_resource():
     assert len(actual_2["listings"]) == 1
     # It must have an avg rating of zero
     assert actual_2["listings"][0]["avg_rating"] == 0.0
+
+    # Search for a listing by entertainment category
+    search_url_3 = (
+        f"{API_URL}/listings?search_query=Campus&categories=entertainment,etc,etc,etc"
+    )
+    search_response_3 = requests.get(
+        search_url_3,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual_3 = search_response_3.json()
+    assert search_response_3.status_code == 200
+    assert "listings" in actual_3.keys()
+    assert len(actual_3["listings"]) == 1
+
+    # Search for a listing by categories, should return nothing
+    search_url_4 = (
+        f"{API_URL}/listings?search_query=Campus&categories=some,other,category"
+    )
+    search_response_4 = requests.get(
+        search_url_4,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    actual_4 = search_response_4.json()
+    assert search_response_4.status_code == 200
+    assert "listings" in actual_4.keys()
+    assert len(actual_4["listings"]) == 0
