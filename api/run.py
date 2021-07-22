@@ -11,6 +11,7 @@ if __name__ == "__main__":
     import api.resources.rating
     import api.resources.recommendation
     import api.resources.follower
+    import api.resources.profile
 
     # Create all database tables
     db.create_all()
