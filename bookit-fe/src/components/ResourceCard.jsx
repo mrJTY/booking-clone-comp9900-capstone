@@ -25,6 +25,11 @@ import ArrowRight from '@material-ui/icons/ArrowRight';
 import RoomIcon from '@material-ui/icons/Room';
 import Rating from '@material-ui/lab/Rating';
 import axios from 'axios';
+import styled from 'styled-components';
+
+const WhiteText = styled.span`
+  color: white;
+`
 
 // Page styling used on the ResourceCard component
 const useStyles = makeStyles((theme) => ({
@@ -55,7 +60,8 @@ const useStyles = makeStyles((theme) => ({
   resourceCardRating: {
     display: 'flex',
     justifyContent: 'center',
-    padding: 0,
+    padding: '8px 0px',
+    margin: theme.spacing(0.5),
   },
   resourceCardDescDiv:{
     maxHeight: '100px',
@@ -70,7 +76,10 @@ const useStyles = makeStyles((theme) => ({
     display: "-webkit-box",
     "-webkit-line-clamp": 4,
     "-webkit-box-orient": "vertical",
-  },  
+  },
+  locationContent: {
+    padding: '6px 16px',
+  },
   locationDiv: {
     display: 'flex',
     flexDirection: 'row',
@@ -90,7 +99,19 @@ const useStyles = makeStyles((theme) => ({
     display: "-webkit-box",
     "-webkit-line-clamp": 2,
     "-webkit-box-orient": "vertical",
-  },  
+  },
+  categoryContent: {
+    padding: '6px 16px',
+  },
+  categoryText: {
+    // height: '56px',
+    margin: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: "-webkit-box",
+    "-webkit-line-clamp": 1,
+    "-webkit-box-orient": "vertical",
+  },
 }));
 
 // The ResourceCard component is a subcomponent representing a resource
@@ -187,7 +208,15 @@ const ResourceCard = (
         </Tooltip>
       {/* } */}
 
-      <CardContent>
+      <CardContent className={classes.resourceCardRating}>
+        <Tooltip title={`Average rating: ${resource.avg_rating}`} placement="top" >
+          <div>
+            <Rating name="avg-rating" defaultValue={resource.avg_rating} precision={0.1} readOnly />
+          </div>
+        </Tooltip>
+      </CardContent>
+
+      <CardContent className={classes.locationContent}>
         <Box className={classes.locationDiv}>
           <RoomIcon className={classes.locationIcon} />
           <Typography className={classes.locationText} paragraph align="left" variant="caption" component="p">
@@ -196,12 +225,11 @@ const ResourceCard = (
         </Box>
       </CardContent>
 
-      <CardContent className={classes.resourceCardRating}>
-        <Tooltip title={`Average rating: ${resource.avg_rating}`} placement="top" >
-          <div>
-            <Rating name="avg-rating" defaultValue={resource.avg_rating} precision={0.1} readOnly />
-          </div>
-        </Tooltip>
+      <CardContent className={classes.categoryContent}>
+        <Typography component={'span'} className={classes.categoryText} align="left" variant="subtitle2" color="textSecondary">
+          <WhiteText>Category / </WhiteText>
+          {resource.category.charAt(0).toUpperCase() + resource.category.slice(1)}
+        </Typography>
       </CardContent>
 
       <CardContent className={classes.resourceCardDescDiv}>

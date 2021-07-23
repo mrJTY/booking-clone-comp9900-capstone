@@ -27,11 +27,26 @@ export async function fetchMyListings (baseUrl, token, setMylistings)
 }
 
 
-export async function fetchSearchListings (baseUrl, token, searchQuery, setSearchResults)
+export async function fetchSearchListings
+  (
+    baseUrl, token, searchQuery, searchCategoriesFlat,
+    useSearchTimeFrame, searchStartDatetime, searchEndDatetime,
+    setSearchResults,
+  )
 {
+  let queryUrl = `${baseUrl}/listings?search_query=${searchQuery}`;
+  useSearchTimeFrame === true && (
+    queryUrl += `&start_time=${searchStartDatetime}&end_time=${searchEndDatetime}`
+  );
+  searchCategoriesFlat.length > 0 && (
+    queryUrl += `&categories=${searchCategoriesFlat}`
+  );
+
+  console.log(queryUrl);
+
   const response = await axios({
     method: 'GET',
-    url: `${baseUrl}/listings?search_query=${searchQuery}`,
+    url: queryUrl,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -39,6 +54,27 @@ export async function fetchSearchListings (baseUrl, token, searchQuery, setSearc
     },
   })
   await setSearchResults(response.data.listings);
+}
+
+export async function fetchSearchUsers (baseUrl, token, searchQuery, setSearchUserResults)
+{
+  let queryUrl = `${baseUrl}/users?username=${searchQuery}`;
+
+  console.log(queryUrl);
+
+  const response = await axios({
+    method: 'GET',
+    url: queryUrl,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      "Authorization": `JWT ${token}`,
+    },
+  })
+
+  console.log(response.data)
+
+  await setSearchUserResults(response.data.users);
 }
 
 

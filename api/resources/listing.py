@@ -144,7 +144,6 @@ class ListingList(Resource):
         search_query = request.args.get("search_query")
         start_time = request.args.get("start_time")
         end_time = request.args.get("end_time")
-        is_available = request.args.get("is_available")
         categories = request.args.get("categories")
 
         # Cast types
@@ -154,8 +153,6 @@ class ListingList(Resource):
             start_time = int(start_time)
         if end_time:
             end_time = int(end_time)
-        if is_available:
-            is_available = bool(is_available)
         # If categories is None, then the query will return all
         if categories:
             # Split the categories with comma
@@ -172,17 +169,15 @@ class ListingList(Resource):
                 or l.address like '%{{ search_query }}%'
             )
 
-            {% if start_time or end_time or is_available %}
+            {% if start_time and end_time %}
             and l.listing_id in (
                 select listing_id
                 from availabilities
                 where
                 {% if start_time and end_time %}
-                    start_time = {{ start_time }}
-                    and end_time = {{ end_time }}
-                {% endif %}
-                {% if is_available %}
-                    {% if start_time and end_time %} and {% endif %} is_available
+                    start_time >= {{ start_time }}
+                    and end_time <= {{ end_time }}
+                    and is_available
                 {% endif %}
             )
             {% endif %}
@@ -202,7 +197,6 @@ class ListingList(Resource):
             search_query=search_query,
             start_time=start_time,
             end_time=end_time,
-            is_available=is_available,
             result_limit=api.config.Config.RESULT_LIMIT,
             categories=categories,
         )

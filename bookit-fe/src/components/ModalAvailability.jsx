@@ -78,12 +78,6 @@ const ModalAvailability = ({
   const tenHourLimit = async (date) => {
     const inputDatetimeDiff = date - startDatetime;
     const tenHrsMs = 60000 * 60 * 10; // 60000 ms in a min * 60mins * 10 hrs
-
-    console.log('end Datetime is');
-    console.log(date);
-    console.log('input datetime diff is:');
-    console.log(inputDatetimeDiff);
-
     if (inputDatetimeDiff > tenHrsMs) {
       toast.error(
         'Availability cannot span more than 10 hours', {
@@ -97,18 +91,9 @@ const ModalAvailability = ({
           }
         }
       );
-
       let startDateEpoch = startDatetime.getTime();
       let tenHrsMore = startDateEpoch + tenHrsMs;
-
-      console.log('ten hrs MORE is');
-      console.log(tenHrsMore);
-
       let tenHrsDatetime = new Date(tenHrsMore);
-
-      console.log('ten hrs datetime is');
-      console.log(tenHrsDatetime);
-
       setEndDatetime(tenHrsDatetime);
     }
   }
@@ -142,9 +127,7 @@ const ModalAvailability = ({
       }
       setEndDatetime(date);
     }
-
     await tenHourLimit(date);
-
   };
 
   const availButton = async () => {

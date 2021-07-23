@@ -15,11 +15,13 @@ import {
   Box,
   Tooltip,
   TextField,
+  Typography,  
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,  
   CircularProgress,
-  // Chip,
-  // Select,
-  // FormControl,
-  // InputLabel,
 } from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -109,6 +111,21 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '128px',
     maxWidth: '128px',
   },
+  categoriesFormDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    height: '6em',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoriesForm: {
+    margin: theme.spacing(1),
+    width: '18em',
+  },
+  categoriesFormSelect: {
+    textAlign: 'left',
+    paddingLeft: '4px',
+  },  
 }));
 
 // The EditListing page allows a user to create a new listing.
@@ -268,12 +285,9 @@ const EditListing = () => {
         {
           loadingState === 'success' &&
           <Box className={classes.containerDiv}>
-            <h2>Edit Listing</h2>
-            <Box>
-              <p className={classes.headerText}>
-                Fill in the form below to modify your Listing
-              </p>
-            </Box>
+            <Typography gutterBottom component={'span'} variant="h4" align="center" color="textPrimary">
+              Modify Listing
+            </Typography>
             <br />
             <br />
             <form onSubmit={onSubmit}>
@@ -315,24 +329,6 @@ const EditListing = () => {
               <br />
               <br />
               <TextField
-                id="listing-category"
-                type="text"
-                label="Category"
-                aria-label="category"
-                className={classes.listingTextField}
-                multiline
-                rows={3}
-                columns={50}
-                fullWidth
-                variant="outlined"
-                defaultValue={fields.category}
-                onChange={
-                  e => onChange(setFields, 'category', e.target.value)
-                }
-              />
-              <br />
-              <br />
-              <TextField
                 id="listing-description"
                 type="text"
                 label="Description"
@@ -348,6 +344,35 @@ const EditListing = () => {
                   e => onChange(setFields, 'description', e.target.value)
                 }
               />
+              <br />
+              <br />
+              <Box className={classes.categoriesFormDiv}>
+                <FormControl required className={classes.categoriesForm}>
+                  <InputLabel id="listing-category-label">
+                    Listing Category
+                  </InputLabel>
+                  <Select
+                    labelId="listing-category-select-label"
+                    id="listing-category"
+                    label="Category"
+                    value={fields.category}
+                    onChange={
+                      e => onChange(setFields, 'category', e.target.value)
+                    }
+                    className={classes.categoriesFormSelect}
+                  >
+                    <MenuItem aria-label="None" value="">
+                      <em>None</em>
+                    </MenuItem>
+                    <MenuItem value={'entertainment'}>Entertainment</MenuItem>
+                    <MenuItem value={'sport'}>Sport</MenuItem>
+                    <MenuItem value={'accommodation'}>Accommodation</MenuItem>
+                    <MenuItem value={'healthcare'}>Healthcare</MenuItem>                    
+                    <MenuItem value={'other'}>Other</MenuItem>
+                  </Select>
+                  <FormHelperText>Required</FormHelperText>
+                </FormControl>
+              </Box>
               <br />
               <br />
               <Tooltip title="Create Listing" aria-label="create">

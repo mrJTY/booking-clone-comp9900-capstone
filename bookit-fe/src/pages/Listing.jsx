@@ -181,6 +181,11 @@ const useStyles = makeStyles((theme) => ({
     "-webkit-line-clamp": 1,
     "-webkit-box-orient": "vertical",
   },
+  listItemReviewDiv: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   listItemTextReviewDiv: {
     maxWidth: '52em',
     width: '100%',
@@ -638,46 +643,30 @@ const Listing = () => {
                       <ListItem disableGutters>
                         <ListItemText
                           disableTypography
+                          className={classes.listItemReviewDiv}
                           primary={
-                            <div>
-                              <div className={classes.listItemText}>
-                                <Typography component={'span'} variant="body2" align="left" color="textSecondary">
-                                  <LocationSpan>Reviewer: </LocationSpan>
-                                  <Link
-                                    component={RouterLink}
-                                    to={`/profile/${rating.username}`}
-                                  >
-                                    {rating.username}
-                                  </Link>
-                                </Typography>
-                              </div>
-                              <div className={classes.listItemText}>
-                                <Tooltip title={`Rating: ${rating.rating}`} placement="top">
-                                  <div className={classes.button}>
-                                    <Rating name="review-rating" defaultValue={rating.rating} precision={0.5} readOnly />
-                                  </div>
-                                </Tooltip>
-                              </div>                           
+                            <div className={classes.listItemText}>
+                              <Typography component={'span'} variant="body2" align="left" color="textSecondary">
+                                <LocationSpan>Reviewer: </LocationSpan>
+                                <Link
+                                  component={RouterLink}
+                                  to={`/profile/${rating.username}`}
+                                >
+                                  {rating.username}
+                                </Link>
+                              </Typography>
                             </div>
-                          }                   
+                          }
+                          secondary={
+                            <div className={classes.listItemText}>
+                              <Tooltip title={`Rating: ${rating.rating}`} placement="top">
+                                <div className={classes.button}>
+                                  <Rating name="review-rating" defaultValue={rating.rating} precision={0.5} readOnly />
+                                </div>
+                              </Tooltip>
+                            </div>                           
+                          }
                         />
-                        <ListItemSecondaryAction>
-                          <Box>
-                            <Tooltip title={'Delete'} aria-label={'delete'}>
-                              <IconButton
-                                id={'availability-delete-button'}
-                                color={'secondary'}
-                                className={classes.button}
-                                onClick={() => {
-                                  console.log('Clicked Delete review');
-                                  // handleClickOpen(parseInt(rating.rating_id))
-                                }}
-                              >
-                                <DeleteIcon />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        </ListItemSecondaryAction>
                       </ListItem>
                       <ListItem divider>
                         <ListItemText

@@ -28,8 +28,20 @@ const ContextStore = ({ children }) => {
   const [modifyBookingAvailId, setModifyBookingAvailId] = React.useState(null);
 
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [searchCategory, setSearchCategory] = React.useState('listings');
+  const [searchUserQuery, setSearchUserQuery] = React.useState('');
+  const [searchType, setSearchType] = React.useState('listings');
+  const [searchCategories, setSearchCategories] = React.useState([]);
   const [searchResults, setSearchResults] = React.useState([]);
+  const [searchUserResults, setSearchUserResults] = React.useState([]);
+
+  let today = new Date();
+  today.setMinutes(60);
+  let todayPlus = new Date(today);
+  todayPlus.setMinutes(60);
+
+  const [searchStartDatetime, setSearchStartDatetime] = React.useState(today);
+  const [searchEndDatetime, setSearchEndDatetime] = React.useState(todayPlus);
+  const [useSearchTimeFrame, setUseSearchTimeFrame] = React.useState(false);
 
   const store = {
     baseUrl: `http://localhost:${port}`,
@@ -44,8 +56,14 @@ const ContextStore = ({ children }) => {
     mybookings: [mybookings, setMybookings],
     modifyBookingAvailId: [modifyBookingAvailId, setModifyBookingAvailId],
     searchQuery: [searchQuery, setSearchQuery],
-    searchCategory: [searchCategory, setSearchCategory],
+    searchUserQuery: [searchUserQuery, setSearchUserQuery],
+    searchType: [searchType, setSearchType],
+    searchCategories: [searchCategories, setSearchCategories],
     searchResults: [searchResults, setSearchResults],
+    searchUserResults: [searchUserResults, setSearchUserResults],
+    searchStartDatetime: [searchStartDatetime, setSearchStartDatetime],
+    searchEndDatetime: [searchEndDatetime, setSearchEndDatetime],
+    useSearchTimeFrame: [useSearchTimeFrame, setUseSearchTimeFrame], 
   }
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }
