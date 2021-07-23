@@ -1,52 +1,39 @@
 # Blue Sky Thinking
+COMP9900 Project (BookIt)
 
 # Quick start
 
-Install by:
-```shell
-./bin/install.sh
-```
+## Prerequisites
+Ensure you have the prerequisites installed such as:
+- `python3`
+- `pip3`
+- `nodejs`
+- `yarn`
 
-Start the backend and frontend services by:
-```shell
-./bin/start-api.sh
-```
-
-# Backend API
-
-Flask + SQLITE DB
-
-## Create a user
-```shell
- curl -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"username": "john", "email": "john@wick.com", "password": "keanu"}' \
-  http://localhost:5000/users
-```
-
-## Authenticate a user
-
-Authenticating the user will give a token
+On an Ubuntu / Debian based system, these packages can be installed by:
 
 ```shell
-# Login as the user, receive the access token
-local access_token
-access_token=$(
-    curl -s -X POST \
-      -H "Content-Type: application/json" \
-      -d '{"username": "john", "password": "keanu"}' \
-      http://localhost:5000/auth |
-    jq -r '.access_token'
-)
-  
-# Protected endpoint can only be accessed by logged in users
-curl -s -X GET \
-    -H "Authorization: JWT ${access_token}" \
-    http://localhost:5000/current_user
+sudo apt install python3 python3-pip npm
+sudo npm install --global yarn
 ```
 
-# Front end
-TODO(Vidan)
+Once you have the prerequisites ready, install the application dependencies by running:
+```shell
+make install
+```
 
-# Reference
-- Auth: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database
+Verify that this installed the following:
+- A Python environment at the `.venv` directory
+- Node packages at `bookit-fe/node_modules`
+
+## Starting the services
+
+Start the backend service by running:
+```shell
+make backend
+```
+
+On a separate terminal, start the frontend by running:
+```shell
+make frontend
+```
