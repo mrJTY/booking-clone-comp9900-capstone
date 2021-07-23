@@ -6,7 +6,7 @@ install:
 
 # Start the backend
 backend:
-	$(REPO_ROOT)/bin/start-backend.sh
+	$(REPO_ROOT)/bin/start-api.sh
 
 # Start the frontend
 frontend:

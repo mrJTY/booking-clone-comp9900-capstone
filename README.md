@@ -22,6 +22,8 @@ Once you have the prerequisites ready, install the application dependencies by r
 make install
 ```
 
+**If it fails the first time, try `make install` again the second time.**
+
 Verify that this installed the following:
 - A Python environment at the `.venv` directory
 - Node packages at `bookit-fe/node_modules`
