@@ -32,6 +32,23 @@ def login_user(user: dict):
     return token
 
 
+def get_auth_me(token: str):
+    # Get auth me
+    response = requests.get(
+        f"{API_URL}/auth/me",
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    assert response.status_code == 200
+    assert "followees" in response.json().keys()
+    assert "followers" in response.json().keys()
+    # The listings of followees
+    assert "listings" in response.json().keys()
+
+    return response
+
+
 def create_listing(listing: dict, token: str) -> int:
     # Create a listing
     url = f"{API_URL}/listings"

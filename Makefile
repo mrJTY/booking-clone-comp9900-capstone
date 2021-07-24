@@ -12,3 +12,8 @@ backend:
 frontend:
 	$(REPO_ROOT)/bin/start-frontend.sh
 
+# Run tests on the backend
+tests:
+	$(REPO_ROOT)/bin/test-backend.sh
+
+

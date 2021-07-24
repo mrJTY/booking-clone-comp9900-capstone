@@ -32,6 +32,13 @@ def test_follow_user():
     assert follow_response.json()["follower_user_id"] == follower_user_id
     follow_id = follow_response.json()["follower_id"]
     follow_url = f"{API_URL}/followers/{follow_id}"
+
+    # Test auth me
+    auth_me_response = u.get_auth_me(token)
+    assert type(auth_me_response.json()["followees"]) == list
+    assert type(auth_me_response.json()["followers"]) == list
+    assert type(auth_me_response.json()["listings"]) == list
+
     # Test delete
     delete_response = requests.delete(follow_url)
     assert delete_response.status_code == 204
