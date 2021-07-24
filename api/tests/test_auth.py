@@ -1,5 +1,6 @@
 import os
 
+from api.models.default_avatar import DEFAULT_AVATAR
 import api.tests.utils as u
 import requests
 
@@ -31,6 +32,7 @@ def test_authenticate():
     assert protected_response.status_code == 200
     assert protected_response.json()["username"] == TEST_USER["username"]
     assert protected_response.json()["email"] == TEST_USER["email"]
+    assert protected_response.json()["avatar"] == DEFAULT_AVATAR
     assert type(protected_response.json()["avatar"]) == str
     # Nothing booked yet
     assert protected_response.json()["hours_booked"] == 0

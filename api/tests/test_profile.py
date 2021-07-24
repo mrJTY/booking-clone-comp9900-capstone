@@ -1,6 +1,7 @@
 import os
 
 import api.tests.utils as u
+from api.models.default_avatar import DEFAULT_AVATAR
 import requests
 
 API_URL = os.environ["API_URL"]
@@ -36,6 +37,7 @@ def test_profile():
     assert response.status_code == 200
     assert response.json()["username"] == TEST_USER["username"]
     assert response.json()["email"] == TEST_USER["email"]
+    assert response.json()["avatar"] == DEFAULT_AVATAR
     assert type(response.json()["followers"]) == list
     assert type(response.json()["followees"]) == list
     assert type(response.json()["user_id"]) == int

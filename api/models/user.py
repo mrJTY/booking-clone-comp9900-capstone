@@ -1,5 +1,6 @@
 import json
 
+from api.models.default_avatar import DEFAULT_AVATAR
 from api import db
 
 
@@ -10,7 +11,7 @@ class UserModel(db.Model):
     email = db.Column(db.Text, unique=True)
     password_hash = db.Column(db.Text)
     authenticated = db.Column(db.Boolean, default=False)
-    avatar = db.Column(db.Text, nullable=True, default=False)
+    avatar = db.Column(db.Text, nullable=True, default=DEFAULT_AVATAR)
 
     # See: https://realpython.com/using-flask-login-for-user-management-with-flask/
     def is_active(self):
