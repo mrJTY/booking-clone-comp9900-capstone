@@ -13,36 +13,15 @@ import api
 import numpy as np
 import pandas as pd
 from api.recommendation.top_rated_listings import get_top_rated_listings
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
+sid = SentimentIntensityAnalyzer()
 
 
 recommendation = api.api.namespace(
     "recommendations", description="Recommendation operations"
 )
-
-
-def calculate_avg_rating(listing_id):
-    # Calculate an avg rating for a listing
-
-    # Find out the booking ids
-    my_bookings = BookingModel.query.filter_by(listing_id=listing_id).all()
-
-    my_ratings = []
-    for b in my_bookings:
-        booking_id = b.to_dict()["booking_id"]
-        my_ratings_in_booking = RatingModel.query.filter_by(booking_id=booking_id).all()
-        for r in my_ratings_in_booking:
-            my_ratings.append(r)
-
-    # Calculate the avg rating
-    if len(my_ratings) == 0:
-        avg_rating = 0.0
-    else:
-        ratings_numeric = [r.to_dict()["rating"] for r in my_ratings]
-        avg_rating = np.average(ratings_numeric)
-
-    # Round to two significant digits
-    rounded_avg = round(avg_rating, 2)
-    return rounded_avg
 
 
 @recommendation.route("/listings")
@@ -53,55 +32,81 @@ class RecommendationListings(Resource):
         user_id = current_user.user_id
         username = current_user.username
         logging.info(f"User {username} is requesting a recommendation for listings...")
-        # Do not use existing listings the user has already booked - creating a subquery
-        subquery = (
-            db.session.query(ListingModel.listing_id)
-            .filter(BookingModel.user_id == current_user.user_id)
-            .filter(BookingModel.listing_id == ListingModel.listing_id)
-        ).subquery()
 
-        not_booked = db.session.query(ListingModel).filter(
-            # FIXME(Saksham/Harris): not_in isn't understood, try using the SQL engine
-            # pattern instead from /mybookings
-            ListingModel.listing_id.not_in(subquery)
+        # get all bookings
+        all_bookings = BookingModel.query.all()
+        all_bookings = [l.to_dict() for l in all_bookings]
+        all_bookings = pd.DataFrame(all_bookings)
+
+        # get all listings
+        all_listings = ListingModel.query.all()
+        all_listings = [l.to_dict() for l in all_listings]
+        all_listings = pd.DataFrame(all_listings)
+
+        # get all ratings
+        all_ratings = RatingModel.query.all()
+        all_ratings = [l.to_dict() for l in all_ratings]
+        all_ratings = pd.DataFrame(all_ratings)
+
+        # get all bookings made by current user
+        my_bookings = all_bookings[all_bookings["user_id"] == user_id]
+
+        # join to get which categories current user has booked
+        my_bookings = my_bookings.merge(
+            all_listings, left_on="listing_id", right_on="listing_id", how="left"
         )
 
-        not_booked_listings = [l.to_dict() for l in not_booked]
-        out = [
-            {**l, "avg_rating": calculate_avg_rating(l["listing_id"])}
-            for l in not_booked_listings
-        ]
+        # count how many of each category current user has booked, and store in dictionary
+        my_bookings = my_bookings.groupby(["category"]).count()
+        my_bookings = my_bookings.reset_index()
+        my_bookings = my_bookings[["category", "booking_id"]]
+        my_bookings.columns = ["category", "count_categories"]
 
-        # Turn this into a dataframe
-        listingdata = pd.DataFrame(out)
-        past_current_book = (
-            db.session.query(
-                BookingModel.listing_id, func.count(BookingModel.booking_id)
-            )
-            .group_by(BookingModel.listing_id)
-            # FIXME(Saksham/Harris): not_in isn't understood, try using the SQL engine
-            # pattern instead from /mybookings
-            .filter(BookingModel.listing_id.not_in(subquery))
-            .all()
-        )
-        book_history = pd.DataFrame(
-            past_current_book, columns=["listing_id", "booking_count"]
-        )
-        data_table = listingdata.merge(
-            book_history, left_on="listing_id", right_on="listing_id", how="left"
-        )
-        data_table["booking_count"] = data_table["booking_count"].fillna(0)
+        # get sentiment from each rating
+        sent_arr = []
+        for i, r in all_ratings.iterrows():
+            comment = r[4]
+            comment = comment.lower()
 
-        # Getting the ratings of the resource
-        booking_ratings = RatingModel.query.all()
-        ratings_list = [l.to_dict() for l in booking_ratings]
-        input_ratings_data = pd.DataFrame(ratings_list)
-        # Start of the recommender system algorithm - rank
-        data_table["score"] = data_table["booking_count"] + data_table["avg_rating"]
+            sentiment = sid.polarity_scores(comment)
+            sent_arr.append(sentiment["compound"])
 
-        #########################################
-        data_table.sort_values(by=["score"], inplace=True, ascending=False)
-        top5reco = data_table.head(5)
+        all_ratings["sentiment"] = sent_arr
+
+        # get all available bookings (remove bookings made by current user)
+        avail_bookings = all_listings[(all_listings["user_id"] != user_id)]
+
+        # merge mybookings with available bookings to get number of times current user has booked each category
+        avail_bookings = avail_bookings.merge(
+            my_bookings, left_on="category", right_on="category", how="left"
+        )
+
+        # merge ratings with all bookings to get listing id. Get average ratings and sentiments for each rating/booking
+        all_ratings = all_bookings.merge(
+            all_ratings, left_on="booking_id", right_on="booking_id", how="left"
+        )
+        all_ratings = all_ratings[["listing_id", "rating", "sentiment"]]
+        all_ratings = all_ratings.dropna()
+        all_ratings = all_ratings.groupby(["listing_id"]).mean()
+        all_ratings = all_ratings.reset_index()
+
+        # merge all_ratings with available bookings to get average rating/sentiment data of each venue
+        avail_bookings = avail_bookings.merge(
+            all_ratings, left_on="listing_id", right_on="listing_id", how="left"
+        )
+
+        # fill all na's with 0
+        avail_bookings = avail_bookings.fillna(0)
+
+        # sort by #times category has been booked by current user, then rating, then sentiment
+        avail_bookings.sort_values(
+            by=["count_categories", "rating", "sentiment"],
+            inplace=True,
+            ascending=False,
+        )
+        avail_bookings = avail_bookings.rename(columns={"rating": "avg_rating"})
+
+        top5reco = avail_bookings.head(5)
         top5reco.set_index(["listing_id"], inplace=True)
         top5reco = top5reco[
             [
@@ -114,19 +119,12 @@ class RecommendationListings(Resource):
                 "avg_rating",
             ]
         ]
+        # get top 5 recommendations
         top5recojson = top5reco.to_json(orient="table")
         parsed = json.loads(top5recojson)
         final_recommendations = parsed["data"]
 
-        # Some dummy model in api.recommendation.model
-        # model = Model()
-        # You'd probably want to pretrain it before, don't do it on the fly...
-        # don't train it here!
-        # model.train()
-        # predictions = model.predict(listings)
-
         # Return as json
-        # search_recommendations = [p.to_dict() for p in predictions]
         return {"listings": final_recommendations}
 
 

@@ -1,6 +1,11 @@
 from api import app
 from api import db
 import api.utils.generate_fake_data as g
+import nltk
+
+# Download NLTK
+nltk.download("vader_lexicon")
+
 
 if __name__ == "__main__":
     import api.resources.user

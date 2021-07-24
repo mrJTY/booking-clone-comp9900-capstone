@@ -14,12 +14,6 @@ import pandas as pd
 fake = Faker()
 fake_seed = 1
 
-n_users = 5
-n_listings = 5
-n_availabilities = 5
-n_bookings = n_availabilities  # Book all availabilities for simplicity
-n_ratings = n_bookings  # Rate all bookings for simplicity
-
 users = []
 listings = []
 availabilities = []
@@ -28,6 +22,12 @@ ratings = []
 
 user_data = pd.read_csv("utils/users.csv")
 listing_data = pd.read_csv("utils/listings.csv")
+rating_data = pd.read_csv("utils/ratings.csv")
+
+
+n_users = 6
+n_listings = len(listing_data)
+n_availabilities = n_ratings = n_bookings = 15
 
 
 def create_fake_users():
@@ -73,7 +73,7 @@ def create_fake_listings():
 def create_fake_availabilties():
     for i in range(0, n_availabilities):
         # All dummy availabilities on one listing id
-        listing_id = listings[0].listing_id
+        listing_id = listings[i].listing_id
         # Give me a random start time (hourly blocks)
         random.seed(123)
         start_time = (1626458400 + random.randrange(0, 2629746, 60 * 60)) * 1000
@@ -92,10 +92,13 @@ def create_fake_availabilties():
 
 def create_fake_bookings():
     for i in range(0, n_bookings):
-        # All bookings made by user 1
-        user_id = users[1].user_id
+        # All bookings made by user 1, except first 8 which are made by 'test user'
+        if i <= 8:
+            user_id = 16
+        else:
+            user_id = users[1].user_id
         # All bookings on listing 0
-        listing_id = listings[0].listing_id
+        listing_id = listings[i].listing_id
         # Availability id must match booking
         availability_id = availabilities[i].availability_id
         booking_id = str(uuid.uuid4())
@@ -114,12 +117,11 @@ def create_fake_ratings():
     for i in range(0, n_ratings):
         # All ratings made by user 1
         user_id = users[1].user_id
-        # All bookings on listing 0
         booking_id = bookings[i].booking_id
         # Generate a random rating with some random comment
-        random.seed(123)
-        rating = random.randrange(1, 5)
-        comment = "Good! Me'h! Ok! Best!"
+        random_index = random.randrange(0, 4)
+        rating = rating_data["rating"][random_index].astype(float)
+        comment = rating_data["comment"][random_index]
         r = RatingModel(
             user_id=user_id, booking_id=booking_id, rating=rating, comment=comment
         )

@@ -105,3 +105,27 @@ def test_get_top_5_rated_listings():
     assert recommendations_response.status_code == 200
     assert type(recommendations_response.json()["listings"][0]["avg_rating"]) == float
     assert len(recommendations_response.json()["listings"]) == 5
+
+
+def test_recommendation():
+    # Login first
+    login_response = requests.post(
+        f"{API_URL}/auth/login",
+        json={
+            "username": TEST_RECOMMENDATION_USER["username"],
+            "password": TEST_RECOMMENDATION_USER["password"],
+        },
+    )
+    assert login_response.status_code == 200
+    token = login_response.json()["accessToken"]
+
+    # Return the top 5 listings with highest avg ratings
+    url = f"{API_URL}/recommendations/listings"
+    response = requests.get(
+        url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    assert response.status_code == 200
+    assert len(response.json()["listings"]) == 5
