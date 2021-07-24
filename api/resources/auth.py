@@ -138,9 +138,6 @@ class AuthMe(Resource):
             # Who is following me
             get_user_dict["followers"] = find_followers()
 
-            # TODO: Base64 image
-            get_user_dict["profile_image"] = "TODO, this is not yet merged"
-
             # Listings
             get_user_dict["listings"] = find_listings_of_followees(followees)
 

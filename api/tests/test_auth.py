@@ -31,6 +31,7 @@ def test_authenticate():
     assert protected_response.status_code == 200
     assert protected_response.json()["username"] == TEST_USER["username"]
     assert protected_response.json()["email"] == TEST_USER["email"]
+    assert type(protected_response.json()["avatar"]) == str
     # Nothing booked yet
     assert protected_response.json()["hours_booked"] == 0
     # No followers yet
