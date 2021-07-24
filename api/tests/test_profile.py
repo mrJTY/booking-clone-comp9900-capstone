@@ -36,6 +36,8 @@ def test_profile():
     assert response.status_code == 200
     assert response.json()["username"] == TEST_USER["username"]
     assert response.json()["email"] == TEST_USER["email"]
+    assert type(response.json()["followers"]) == list
+    assert type(response.json()["followees"]) == list
     assert type(response.json()["user_id"]) == int
 
     # update the username with some avatar

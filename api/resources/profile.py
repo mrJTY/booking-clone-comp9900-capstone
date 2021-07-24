@@ -2,6 +2,7 @@ import logging
 import api
 from api.models.user import UserModel
 from api.models.listing import ListingModel
+from api.models.follower import FollowerModel
 from api.models.rating import RatingModel
 from api.models.booking import BookingModel
 from flask_restplus import Resource
@@ -25,7 +26,17 @@ class Profile(Resource):
     def get(self, username):
         u = UserModel.query.filter(UserModel.username == username).first()
         if u:
-            return u.to_dict()
+            followers = find_followers(u.user_id)
+            followees = find_followees(u.user_id)
+            is_followed = True if len(followers) > 0 else False
+            user = u.to_dict()
+            out = {
+                **user,
+                "followers": followers,
+                "followees": followees,
+                "is_followed": is_followed,
+            }
+            return out
         else:
             return {"error": "user not found"}, 404
 
@@ -62,3 +73,25 @@ class Listings(Resource):
             for l in my_listings
         ]
         return {"mylistings": out}
+
+
+def find_followees(follower_user_id: int):
+    query = (
+        db.session.query(UserModel, FollowerModel)
+        .filter(FollowerModel.follower_id == follower_user_id)
+        .limit(api.config.Config.RESULT_LIMIT)
+    )
+    unpacked_query = [q for q in query]
+    followers = [{**u.to_dict()} for (u, f) in unpacked_query]
+    return followers
+
+
+def find_followers(influencer_user_id: int):
+    query = (
+        db.session.query(UserModel, FollowerModel)
+        .filter(FollowerModel.influencer_user_id == influencer_user_id)
+        .limit(api.config.Config.RESULT_LIMIT)
+    )
+    unpacked_query = [q for q in query]
+    followers = [{**u.to_dict()} for (u, f) in unpacked_query]
+    return followers
