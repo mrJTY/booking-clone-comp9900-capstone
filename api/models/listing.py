@@ -1,6 +1,7 @@
 import json
 
 from api import db
+from api.models.default_listing_image import DEFAULT_LISTING_IMAGE
 
 
 class ListingModel(db.Model):
@@ -12,6 +13,7 @@ class ListingModel(db.Model):
     description = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
     username = db.Column(db.Text, db.ForeignKey("users.username"), nullable=False)
+    listing_image = db.Column(db.Text, nullable=True, default=DEFAULT_LISTING_IMAGE)
 
     def __repr__(self):
         return json.dumps(self.to_dict())
@@ -25,5 +27,6 @@ class ListingModel(db.Model):
             "description": self.description,
             "user_id": self.user_id,
             "username": self.username,
+            "listing_image": self.listing_image,
         }
         return data

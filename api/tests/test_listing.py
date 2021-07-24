@@ -1,6 +1,7 @@
 import os
 
 import requests
+from api.models.default_listing_image import DEFAULT_LISTING_IMAGE
 
 API_URL = os.environ["API_URL"]
 
@@ -62,6 +63,7 @@ def test_create_listing():
     assert actual["address"] == TEST_LISTING["address"]
     assert actual["category"] == TEST_LISTING["category"].lower()
     assert actual["description"] == TEST_LISTING["description"]
+    assert actual["listing_image"] == DEFAULT_LISTING_IMAGE
 
     # It must be zero at the start
     get_listing_url = f"{API_URL}/listings/{actual['listing_id']}"
@@ -90,6 +92,7 @@ def test_create_listing():
     assert actual["address"] == TEST_2_LISTING["address"]
     assert actual["category"] == TEST_2_LISTING["category"].lower()
     assert actual["description"] == TEST_2_LISTING["description"]
+    assert actual["listing_image"] == DEFAULT_LISTING_IMAGE
 
     # Test delete
     listing_url = f"{API_URL}/listings/{actual['listing_id']}"
@@ -183,6 +186,7 @@ def test_search_resource():
     assert search_response_3.status_code == 200
     assert "listings" in actual_3.keys()
     assert len(actual_3["listings"]) == 1
+    assert actual_3["listings"][0]["listing_image"] == DEFAULT_LISTING_IMAGE
 
     # Search for a listing by categories, should return nothing
     search_url_4 = (

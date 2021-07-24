@@ -8,7 +8,6 @@ from api.models.rating import RatingModel
 from api.utils.req_handling import *
 from flask_login import current_user
 from flask_restplus import Resource, fields
-from sqlalchemy import or_
 from sqlalchemy.orm.attributes import flag_modified
 import numpy as np
 from jinja2 import Template
@@ -33,6 +32,9 @@ listing_details = api.api.model(
             required=True, description="The owner of the listing"
         ),
         "username": fields.String(required=True, description="Username of the user"),
+        "listing_image": fields.String(
+            required=False, description="The image of the listing in base64"
+        ),
         "avg_rating": fields.Float(
             required=False, description="Avg rating for the listing"
         ),
@@ -90,6 +92,11 @@ class Listing(Resource):
         listing.description = content["description"]
         listing.user_id = current_user.user_id
         listing.username = current_user.username
+
+        # Image is optional
+        if "listing_image" in content.keys():
+            listing.listing_image = content["listing_image"]
+
         flag_modified(listing, "description")
         db.session.merge(listing)
         db.session.flush()
@@ -125,6 +132,11 @@ class ListingList(Resource):
                 user_id=current_user.user_id,
                 username=current_user.username,
             )
+
+            # Image is optional
+            if "listing_image" in content.keys():
+                v.listing_image = content["listing_image"]
+
             db.session.add(v)
             db.session.commit()
             listing_id = v.listing_id
