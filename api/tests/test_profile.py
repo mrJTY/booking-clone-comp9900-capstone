@@ -9,6 +9,14 @@ TEST_USER = {
     "username": "test_user_profile",
     "email": "test_profile@test.com",
     "password": "test",
+    "avatar": "0",
+}
+
+UPDATE_USER = {
+    "username": "test_user_profile",
+    "email": "test_profile@test.com",
+    "password": "test",
+    "avatar": "R0lGODdhAQABAPAAAP8AAAAAACwAAAAAAQABAAACAkQBADs=",
 }
 
 
@@ -24,10 +32,24 @@ def test_profile():
     response = requests.get(
         url,
     )
+
     assert response.status_code == 200
     assert response.json()["username"] == TEST_USER["username"]
     assert response.json()["email"] == TEST_USER["email"]
     assert type(response.json()["user_id"]) == int
+
+    # update the username with some avatar
+    update_url = f"{API_URL}/profiles/{UPDATE_USER['username']}"
+
+    response = requests.put(
+        update_url,
+        json=UPDATE_USER,
+    )
+    assert response.status_code == 200
+    assert response.json()["username"] == UPDATE_USER["username"]
+    assert response.json()["email"] == UPDATE_USER["email"]
+    assert type(response.json()["user_id"]) == int
+    assert response.json()["avatar"] == UPDATE_USER["avatar"]
 
     # A missing user should return a 404
     url = f"{API_URL}/profiles/unknown"
@@ -35,3 +57,12 @@ def test_profile():
         url,
     )
     assert response.status_code == 404
+
+    # Now looking for stephanie - who has many listings to reference from
+    profile_listings_url = f"{API_URL}/profiles/stephanie/listings"
+    listing_response = requests.get(
+        profile_listings_url,
+    )
+
+    assert listing_response.status_code == 200
+    assert "mylistings" in listing_response.json().keys()
