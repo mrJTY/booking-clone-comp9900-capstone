@@ -105,6 +105,24 @@ def create_booking(
     return booking_id
 
 
+def create_booking_response(
+    listing_id: int, availability_id: int, token: str
+) -> requests.Response:
+    create_booking_payload = {
+        "listing_id": listing_id,
+        "availability_id": availability_id,
+    }
+    url = f"{API_URL}/bookings"
+    create_booking_response = requests.post(
+        url,
+        json=create_booking_payload,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    return create_booking_response
+
+
 def get_availabilities(listing_id: int, token: str):
     url = f"{API_URL}/availabilities?listing_id={listing_id}"
     response = requests.get(

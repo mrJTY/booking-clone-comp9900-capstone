@@ -83,9 +83,7 @@ class Booking(Resource):
                 b["availability_id"]
             ).to_dict()
             if (start_vs_current(booking_time["start_time"], current_unixtime)) < 72:
-                raise Exception(
-                    "Cannot delete less than 3 days after the start date of the existing booking"
-                )
+                raise CannotUpdateLessThan3DaysOfBooking
             b1 = BookingModel.query.filter(BookingModel.booking_id == booking_id)
             b = BookingModel.query.get_or_404(booking_id)
             a = AvailabilityModel.query.get_or_404(b.to_dict()["availability_id"])
@@ -97,12 +95,20 @@ class Booking(Resource):
             b1.delete()
             db.session.commit()
             return b1, 204
+
+        except BookedMoreThan10HoursPerMonth as e:
+            return {"error": e.message}, 403
+
+        except CannotUpdateLessThan3DaysOfBooking as e:
+            return {"error": e.message}, 403
+
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
 
     @booking.doc(description=f"booking_id must be provided")
-    @booking.marshal_with(create_booking_details)
+    # Removing the marshalling because the error can return something else
+    # @booking.marshal_with(create_booking_details)
     def put(self, booking_id):
         logging.info(f"Updating booking {booking_id}")
         # get booking id
@@ -122,9 +128,7 @@ class Booking(Resource):
             current_unixtime = datetime.now().strftime("%s")
             # No updated booking is allowed if the difference between now and start date is less than 3 days
             if (start_vs_current(old_time["start_time"], current_unixtime)) < 72:
-                raise Exception(
-                    "Cannot make an updated booking less than 3 days after the start date of the existing booking"
-                )
+                raise CannotUpdateLessThan3DaysOfBooking
             # New booking cannot allow a user more than 10 hours in a month - note that this is based on the consumer
             list_bookings = BookingModel.query.filter_by(
                 user_id=current_user.user_id
@@ -149,9 +153,7 @@ class Booking(Resource):
                 new_time["end_time"], new_time["start_time"]
             )
             if (hours_booked + get_new_booking_interval) > 10:
-                raise Exception(
-                    "Not allowed to have more than 10 hours in a calendar month"
-                )
+                raise BookedMoreThan10HoursPerMonth
             b1 = BookingModel.query.get_or_404(booking_id)
             old_avail = AvailabilityModel.query.get_or_404(b["availability_id"])
             b1.user_id = current_user.user_id
@@ -167,7 +169,14 @@ class Booking(Resource):
             db.session.merge(old_avail)
             db.session.flush()
             db.session.commit()
-            return b1
+            return b1.to_dict()
+
+        except BookedMoreThan10HoursPerMonth as e:
+            return {"error": e.message}, 403
+
+        except CannotUpdateLessThan3DaysOfBooking as e:
+            return {"error": e.message}, 403
+
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
@@ -177,7 +186,8 @@ class Booking(Resource):
 class BookingList(Resource):
     @booking.doc(description=f"Creates a new booking")
     @booking.expect(create_booking_details)
-    @booking.marshal_with(get_booking_details)
+    # Removing this marshalling because error returns something else
+    # @booking.marshal_with(get_booking_details)
     def post(self):
         content = get_request_json()
         try:
@@ -227,9 +237,7 @@ class BookingList(Resource):
                 new_time["end_time"], new_time["start_time"]
             )
             if (hours_booked + get_new_booking_interval) > 10:
-                raise Exception(
-                    "Not allowed to have more than 10 hours in a calendar month"
-                )
+                raise BookedMoreThan10HoursPerMonth()
             # The following steps must be atomic
             # 1. Make a booking
             b = BookingModel(
@@ -250,6 +258,12 @@ class BookingList(Resource):
             # Return the bookingbooking_time
             booking_id = b.booking_id
             return BookingModel.query.get_or_404(booking_id).to_dict()
+
+        except BookedMoreThan10HoursPerMonth as e:
+            return {"error": e.message}, 403
+
+        except CannotUpdateLessThan3DaysOfBooking as e:
+            return {"error": e.message}, 403
 
         except Exception as e:
             logging.error(e)
@@ -312,4 +326,30 @@ class AvailabilityIdNotAvailable(Exception):
 
     def __init__(self, availability_id):
         self.message = f"availability_id {availability_id} not available"
+        super().__init__(self.message)
+
+
+class BookedMoreThan10HoursPerMonth(Exception):
+    """
+    Raised when availability_id is not available
+    """
+
+    def __init__(
+        self,
+    ):
+        self.message = "Cannot book more than 10 hours per calendar month"
+        super().__init__(self.message)
+
+
+class CannotUpdateLessThan3DaysOfBooking(Exception):
+    """
+    Raised when availability_id is not available
+    """
+
+    def __init__(
+        self,
+    ):
+        self.message = (
+            "Cannot update booking less than 3 days of start time of the booking"
+        )
         super().__init__(self.message)
