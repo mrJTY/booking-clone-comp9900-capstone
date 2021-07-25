@@ -25,3 +25,24 @@
 - Added create bookings backend endpoint
 - Refactored some quality of life improvements to tests, made tests a little bit more readable
 - Added a search endpoint for availabilities
+
+# Week 05-06
+- Implemented Followers model in the backend
+- Refactor of backend code to avoid circular dependencies
+- Added some basic search backend functionalities
+
+# Week 06-07
+- Updated search functionalities
+- Implemented a simple frontend search for the listings
+
+# Week 07-08
+- Demo B
+- Retrosepctive B and write up
+- Further tuning of existing endpoints to match
+- Profile endpoint to be able to search for username
+
+# Week 09
+- Added listing and profile images
+- Additional tests on the followers, profile, auth/me endpoints
+- Provided review on recommendation pull requests
+- Further tweaks on the backend to accomodate frontend requests. Eg: additional fields & attributes
