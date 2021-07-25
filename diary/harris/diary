@@ -45,3 +45,16 @@ and optimise it later
 
 Finally, set up the recommender system endpoint and the data setup for it. Still a work in progress. 
 Set up the delete function for the followers endpoint.
+
+Week 8
+Justin helped out with the Search listings functionality by improving and optimising it. Looked at the spec closely and we needed to consider availabilities in the search (i.e.
+only those which were available).  Furthermore I implemented the search by username on the backend, and this required a SQL query using a like statement. 
+
+Also contributed to the retrospective discussion with the group straight after our demonstration. Considered that we need to be efficient as we approach the busiest time of
+the semester. Working smarter not harder. On the other hand, mentioned the improvement of using threads on Slack and ticking off tasks in Jira as soon as that part was done. 
+
+Furthermore towards the end of the week, implemented the profile picture functionality on the backend, which means a user can put in his/her profile picture at anytime. Also
+has the ability to return all their listings by username. 
+
+
+
