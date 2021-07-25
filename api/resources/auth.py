@@ -131,17 +131,30 @@ class AuthMe(Resource):
                 hours_booked += get_interval
             get_user_dict["hours_booked"] = hours_booked
 
+            return get_user_dict
+        except Exception as e:
+            logging.error(e)
+            api.api.abort(500, f"{e}")
+
+
+@auth.route("/userfeed")
+@auth.response(404, "User not found")
+class AuthUserFeed(Resource):
+    @auth.doc(description="Information about the user's feed")
+    def get(self):
+        try:
+            out = {}
             # Who I'm following
             followees = find_followees()
-            get_user_dict["followees"] = followees
+            out["followees"] = followees
 
             # Who is following me
-            get_user_dict["followers"] = find_followers()
+            out["followers"] = find_followers()
 
             # Listings
-            get_user_dict["listings"] = find_listings_of_followees(followees)
+            out["listings"] = find_listings_of_followees(followees)
+            return out
 
-            return get_user_dict
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")

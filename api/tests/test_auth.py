@@ -36,10 +36,6 @@ def test_authenticate():
     assert type(protected_response.json()["avatar"]) == str
     # Nothing booked yet
     assert protected_response.json()["hours_booked"] == 0
-    # No followers yet
-    assert len(protected_response.json()["followers"]) == 0
-    # No followees yet
-    assert len(protected_response.json()["followees"]) == 0
 
     # Logout
     logout_response = requests.post(
@@ -49,6 +45,27 @@ def test_authenticate():
         },
     )
     assert logout_response.status_code == 200
+
+
+def test_userfeed():
+    # Login
+    token = u.login_user(TEST_USER)
+
+    # Access a protected endpoint
+    protected_url = f"{API_URL}/auth/userfeed"
+    protected_response = requests.get(
+        protected_url,
+        headers={
+            "Authorization": f"JWT {token}",
+        },
+    )
+    assert protected_response.status_code == 200
+    # No followers yet
+    assert len(protected_response.json()["followers"]) == 0
+    # No followees yet
+    assert len(protected_response.json()["followees"]) == 0
+    # No listings followed yet
+    assert len(protected_response.json()["listings"]) == 0
 
 
 def test_search_user():
@@ -77,6 +94,7 @@ def test_search_user():
     assert search_response.status_code == 200
     assert "users" in actual.keys()
     assert len(actual["users"]) == 1
+    assert actual["users"][0]["is_followed"] == False
 
     # Search for users - 2 matching returns
     search_url = f"{API_URL}/users?username=st"

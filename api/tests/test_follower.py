@@ -24,20 +24,23 @@ def test_follow_user():
     influencer_user_id = u.register_user(TEST_INFLUENCER_USER)
 
     # Login as the follower
-    token = u.login_user(TEST_FOLLOWER_USER)
+    influencer_token = u.login_user(TEST_INFLUENCER_USER)
+    consumer_token = u.login_user(TEST_FOLLOWER_USER)
 
     # Follow the influencer
     payload = {"influencer_user_id": influencer_user_id}
-    follow_response = u.create_follower(payload, token)
+    follow_response = u.create_follower(payload, consumer_token)
     assert follow_response.json()["follower_user_id"] == follower_user_id
     follow_id = follow_response.json()["follower_id"]
     follow_url = f"{API_URL}/followers/{follow_id}"
 
-    # Test auth me
-    auth_me_response = u.get_auth_me(token)
-    assert type(auth_me_response.json()["followees"]) == list
-    assert type(auth_me_response.json()["followers"]) == list
-    assert type(auth_me_response.json()["listings"]) == list
+    is_followed_response = requests.get(
+        url=f"{API_URL}/users/{influencer_user_id}",
+        headers={
+            "Authorization": f"JWT {influencer_token}",
+        },
+    )
+    assert is_followed_response.json()["is_followed"] == True
 
     # Test delete
     delete_response = requests.delete(follow_url)

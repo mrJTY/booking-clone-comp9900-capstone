@@ -3,6 +3,7 @@ import logging
 
 from api import db
 from api.models.user import UserModel
+from api.models.follower import FollowerModel
 from api.utils.req_handling import *
 from flask_restplus import Resource, fields
 import api
@@ -26,6 +27,9 @@ get_user_details = api.api.model(
         "user_id": fields.Integer(required=True, description="The UserID"),
         "username": fields.String(required=True, description="Username of the user"),
         "email": fields.String(required=True, description="Email address of the user"),
+        "is_followed": fields.Boolean(
+            required=False, description="Whether the user is being followed or not"
+        ),
     },
 )
 
@@ -38,7 +42,9 @@ class User(Resource):
     @user.marshal_with(get_user_details)
     def get(self, user_id):
         logging.info(f"Getting user {user_id}")
-        return UserModel.query.get_or_404(user_id).to_dict()
+        u = UserModel.query.get_or_404(user_id).to_dict()
+        is_followed = is_user_followed(user_id)
+        return {**u, "is_followed": is_followed}
 
     # TODO: Delete a user
     # def delete(self, todo_id):
@@ -93,4 +99,20 @@ class UserList(Resource):
             UserModel.username.ilike(f"%{keyword}%")
         ).limit(api.config.Config.RESULT_LIMIT)
         search_users = [l.to_dict() for l in search_return]
-        return {"users": search_users}
+        with_is_followed = [
+            {**u, "is_followed": is_user_followed(u["user_id"])} for u in search_users
+        ]
+        return {"users": with_is_followed}
+
+
+def is_user_followed(user_id: int):
+    followers = FollowerModel.query.filter(
+        FollowerModel.influencer_user_id == user_id
+    ).limit(api.config.Config.RESULT_LIMIT)
+    if followers is None:
+        return False
+    else:
+        unpacked = [f for f in followers]
+        if len(unpacked) > 0:
+            return True
+        return False
