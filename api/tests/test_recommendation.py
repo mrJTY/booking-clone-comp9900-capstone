@@ -129,3 +129,4 @@ def test_recommendation():
     )
     assert response.status_code == 200
     assert len(response.json()["listings"]) == 5
+    assert "listing_image" in response.json()["listings"][0].keys()

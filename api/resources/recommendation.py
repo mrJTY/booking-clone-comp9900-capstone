@@ -108,6 +108,13 @@ class RecommendationListings(Resource):
 
         top5reco = avail_bookings.head(5)
         top5reco.set_index(["listing_id"], inplace=True)
+        top5reco = top5reco.merge(
+            all_listings,
+            left_on="listing_name",
+            right_on="listing_name",
+            how="inner",
+            suffixes=["", "_y"],
+        )
         top5reco = top5reco[
             [
                 "listing_name",
@@ -117,6 +124,7 @@ class RecommendationListings(Resource):
                 "user_id",
                 "username",
                 "avg_rating",
+                "listing_image",
             ]
         ]
         # get top 5 recommendations

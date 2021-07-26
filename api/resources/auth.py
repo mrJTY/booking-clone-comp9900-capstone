@@ -131,6 +131,13 @@ class AuthMe(Resource):
                 hours_booked += get_interval
             get_user_dict["hours_booked"] = hours_booked
 
+            # Who I'm following
+            followees = find_followees()
+            get_user_dict["followees"] = followees
+
+            # Who is following me
+            get_user_dict["followers"] = find_followers()
+
             return get_user_dict
         except Exception as e:
             logging.error(e)

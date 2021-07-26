@@ -46,8 +46,7 @@ def test_profile():
     update_url = f"{API_URL}/profiles/{UPDATE_USER['username']}"
 
     response = requests.put(
-        update_url,
-        json=UPDATE_USER,
+        update_url, json=UPDATE_USER, headers={"Authorization": f"JWT {token}"}
     )
     assert response.status_code == 200
     assert response.json()["username"] == UPDATE_USER["username"]

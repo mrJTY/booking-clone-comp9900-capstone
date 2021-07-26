@@ -1,19 +1,20 @@
+import hashlib
 import logging
-import api
-from api.models.user import UserModel
-from api.models.listing import ListingModel
-from api.models.follower import FollowerModel
-from api.models.rating import RatingModel
+
+from api import db
 from api.models.booking import BookingModel
-from flask_restplus import Resource
-import api
+from api.models.follower import FollowerModel
+from api.models.listing import ListingModel
+from api.models.rating import RatingModel
+from api.models.user import UserModel
+from api.resources.listing import calculate_avg_rating, get_ratings
+from api.utils.req_handling import *
 from flask_login import current_user
+from flask_restplus import Resource
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
-from api.utils.req_handling import *
-from api import db
+import api
 import numpy as np
-from api.resources.listing import calculate_avg_rating, get_ratings
 
 profile = api.api.namespace("profiles", description="User operations")
 
@@ -43,11 +44,26 @@ class Profile(Resource):
     @profile.doc(description=f"Allows one to update an avatar")
     def put(self, username):
         logging.info(f"Updating profile picture of {username}")
-        # get listing id
         content = get_request_json()
+        avatar = content["avatar"]
+        email = content["email"]
+        # new password, don't bother checking the old password for simplicity
+        password = content["password"]
+        password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+        # Fetch the user
         user = UserModel.query.filter(UserModel.username == username).first()
-        user.avatar = content["avatar"]
+
+        if user.user_id != current_user.user_id:
+            return {"error": "unauthorized"}, 403
+
+        # Update the user
+        user.avatar = avatar
+        user.email = email
+        user.password_hash = password_hash
         flag_modified(user, "avatar")
+        flag_modified(user, "email")
+        flag_modified(user, "password_hash")
         db.session.merge(user)
         db.session.flush()
         db.session.commit()
