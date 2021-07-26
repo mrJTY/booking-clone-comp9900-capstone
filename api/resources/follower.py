@@ -78,34 +78,3 @@ class FollowerList(Resource):
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
-
-
-# TODO(Justin)
-# @follower.route("/myfollowers")
-# class MyFollowers(Resource):
-#     @follower.doc(description=f"Fetch my followers")
-#     def get(self):
-#         # Fetch me my followers
-#         my_followers_user_ids_query = (
-#             db.session.query(FollowerModel)
-#             .filter(FollowerModel.influencer_user_id == current_user.user_id)
-#             .limit(RESULT_LIMIT)
-#         )
-#
-#         q1  = [q.to_dict() for q in my_followers_user_ids_query]
-#         my_followers = [
-#             {**b.to_dict(), **l.to_dict(), **a.to_dict()}
-#             for (b, l, a) in unpacked_query
-#         ]
-#         out = {
-#             "past": [],
-#             "upcoming": [],
-#         }
-#         for b in my_followers:
-#             if b["end_time"] < datetime.utcnow().timestamp():
-#                 out["past"].append(b)
-#             else:
-#                 out["upcoming"].append(b)
-#         return {"myfollowers": out}
-#
-#

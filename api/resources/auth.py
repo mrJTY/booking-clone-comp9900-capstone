@@ -7,9 +7,7 @@ from api.config import Config
 from api.models.availability import AvailabilityModel
 from api.models.booking import BookingModel
 from api.models.user import UserModel
-from api.models.follower import FollowerModel
-from api.models.listing import ListingModel
-from api.resources.listing import calculate_avg_rating, get_ratings
+from api.resources.utils import *
 from api.utils.req_handling import *
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_restplus import Resource, fields
@@ -132,11 +130,11 @@ class AuthMe(Resource):
             get_user_dict["hours_booked"] = hours_booked
 
             # Who I'm following
-            followees = find_followees()
+            followees = find_followees(current_user.user_id)
             get_user_dict["followees"] = followees
 
             # Who is following me
-            get_user_dict["followers"] = find_followers()
+            get_user_dict["followers"] = find_followers(current_user.user_id)
 
             return get_user_dict
         except Exception as e:
@@ -152,73 +150,21 @@ class AuthUserFeed(Resource):
         try:
             out = {}
             # Who I'm following
-            followees = find_followees()
+            followees = find_followees(current_user.user_id)
+            followers = find_followers(current_user.user_id)
             out["followees"] = followees
 
             # Who is following me
-            out["followers"] = find_followers()
+            out["followers"] = followers
 
             # Listings
-            out["listings"] = find_listings_of_followees(followees)
+            listings = find_listings_of_followees(followees)
+            out["listings"] = listings
             return out
 
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
-
-
-def find_followees():
-    # Given the current user, find out who I am following
-    # Return a list of users
-    follower_user_id = current_user.user_id
-    query = (
-        db.session.query(UserModel, FollowerModel)
-        .filter(FollowerModel.follower_id == follower_user_id)
-        .limit(api.config.Config.RESULT_LIMIT)
-    )
-    unpacked_query = [q for q in query]
-    followers = [{**u.to_dict()} for (u, f) in unpacked_query]
-    return followers
-
-
-def find_followers():
-    # Given the current user, find who is following me
-    # Return a list of users
-    influencer_user_id = current_user.user_id
-    query = (
-        db.session.query(UserModel, FollowerModel)
-        .filter(FollowerModel.influencer_user_id == influencer_user_id)
-        .limit(api.config.Config.RESULT_LIMIT)
-    )
-    unpacked_query = [q for q in query]
-    followees = [{**u.to_dict()} for (u, f) in unpacked_query]
-    return followees
-
-
-def find_listings_of_followees(followees):
-    listings = []
-    # Find the listings that are owned by a followee
-    for f in followees:
-        query = (
-            db.session.query(ListingModel)
-            .filter(ListingModel.listing_id == f["user_id"])
-            .limit(api.config.Config.RESULT_LIMIT)
-        )
-        unpacked_query = [q for q in query]
-        for u in unpacked_query:
-            listings.append(u)
-
-    # Calculate avg ratings and fetch ratings for that listing
-    out = [
-        {
-            **l,
-            "avg_rating": calculate_avg_rating(l["listing_id"]),
-            "ratings": get_ratings(l["listing_id"]),
-        }
-        for l in listings
-    ]
-
-    return out
 
 
 # Add a user loader:

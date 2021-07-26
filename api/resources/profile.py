@@ -2,19 +2,13 @@ import hashlib
 import logging
 
 from api import db
-from api.models.booking import BookingModel
-from api.models.follower import FollowerModel
 from api.models.listing import ListingModel
-from api.models.rating import RatingModel
-from api.models.user import UserModel
-from api.resources.listing import calculate_avg_rating, get_ratings
+from api.resources.utils import *
 from api.utils.req_handling import *
 from flask_login import current_user
-from flask_restplus import Resource
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
 import api
-import numpy as np
 
 profile = api.api.namespace("profiles", description="User operations")
 
@@ -89,25 +83,3 @@ class Listings(Resource):
             for l in my_listings
         ]
         return {"mylistings": out}
-
-
-def find_followees(follower_user_id: int):
-    query = (
-        db.session.query(UserModel, FollowerModel)
-        .filter(FollowerModel.follower_id == follower_user_id)
-        .limit(api.config.Config.RESULT_LIMIT)
-    )
-    unpacked_query = [q for q in query]
-    followers = [{**u.to_dict()} for (u, f) in unpacked_query]
-    return followers
-
-
-def find_followers(influencer_user_id: int):
-    query = (
-        db.session.query(UserModel, FollowerModel)
-        .filter(FollowerModel.influencer_user_id == influencer_user_id)
-        .limit(api.config.Config.RESULT_LIMIT)
-    )
-    unpacked_query = [q for q in query]
-    followers = [{**u.to_dict()} for (u, f) in unpacked_query]
-    return followers

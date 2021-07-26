@@ -18,6 +18,14 @@ TEST_FOLLOWER_USER = {
 }
 
 
+TEST_LISTING = {
+    "listing_name": "Follow me coffee",
+    "address": "Some address 2033",
+    "category": "enterTAinmeNT",
+    "description": "Follow me on a coffee date",
+}
+
+
 def test_follow_user():
     # Register some users
     follower_user_id = u.register_user(TEST_FOLLOWER_USER)
@@ -25,15 +33,19 @@ def test_follow_user():
 
     # Login as the follower
     influencer_token = u.login_user(TEST_INFLUENCER_USER)
-    consumer_token = u.login_user(TEST_FOLLOWER_USER)
+    follower_token = u.login_user(TEST_FOLLOWER_USER)
+
+    # Influencer creates a listing
+    listing_id = u.create_listing(TEST_LISTING, influencer_token)
 
     # Follow the influencer
     payload = {"influencer_user_id": influencer_user_id}
-    follow_response = u.create_follower(payload, consumer_token)
+    follow_response = u.create_follower(payload, follower_token)
     assert follow_response.json()["follower_user_id"] == follower_user_id
     follow_id = follow_response.json()["follower_id"]
     follow_url = f"{API_URL}/followers/{follow_id}"
 
+    # Test is followed
     is_followed_response = requests.get(
         url=f"{API_URL}/users/{influencer_user_id}",
         headers={
@@ -41,6 +53,15 @@ def test_follow_user():
         },
     )
     assert is_followed_response.json()["is_followed"] == True
+
+    # Follower's userfeed must include the influencer's listing_id
+    userfeed_response = requests.get(
+        f"{API_URL}/auth/userfeed",
+        headers={
+            "Authorization": f"JWT {follower_token}",
+        },
+    )
+    assert listing_id == userfeed_response.json()["listings"][0]["listing_id"]
 
     # Test delete
     delete_response = requests.delete(follow_url)
