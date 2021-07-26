@@ -2,6 +2,7 @@ import logging
 
 from api import db
 from api.models.follower import FollowerModel
+from api.models.user import UserModel
 from api.utils.req_handling import *
 from flask_login import current_user
 from flask_restplus import Resource, fields
@@ -78,3 +79,24 @@ class FollowerList(Resource):
         except Exception as e:
             logging.error(e)
             api.api.abort(500, f"{e}")
+
+
+@follower.route("/unfollow/<username>")
+@follower.param("follower_id", "The follower identifier")
+class UnFollow(Resource):
+    @follower.doc(
+        description=f"The username to unfollow must be provided. User clicks on a profile with a username and unfollows someone"
+    )
+    @follower.marshal_with(get_follower_details)
+    def delete(self, username):
+        logging.info(f"Deleting follower with username {username}")
+        user_lookup = UserModel.query.filter(UserModel.username == username).first()
+
+        unfollow_user_id = user_lookup.user_id
+        # Filter by the user_id to unfollow (influencer_user_id) and the active user_id (follower_user_id)
+        b = FollowerModel.query.filter(
+            FollowerModel.influencer_user_id == unfollow_user_id
+        ).filter(FollowerModel.follower_user_id == current_user.user_id)
+        b.delete()
+        db.session.commit()
+        return b, 204

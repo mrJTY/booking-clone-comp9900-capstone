@@ -63,6 +63,13 @@ def test_follow_user():
     )
     assert listing_id == userfeed_response.json()["listings"][0]["listing_id"]
 
-    # Test delete
-    delete_response = requests.delete(follow_url)
+    # Test delete - This is slightly different as we need to know the username
+    username = TEST_INFLUENCER_USER["username"]
+    unfollow_url = f"{API_URL}/followers/unfollow/{username}"
+    delete_response = requests.delete(
+        url=unfollow_url,
+        headers={
+            "Authorization": f"JWT {follower_token}",
+        },
+    )
     assert delete_response.status_code == 204
