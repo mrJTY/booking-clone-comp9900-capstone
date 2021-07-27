@@ -9,13 +9,25 @@ def find_followees(follower_user_id):
     # Given the current user, find out who I am following
     # Return a list of users
     query = f"""
+    with tmp as (
+        select
+            u.*
+        from users as u
+        join followers as f
+            on f.influencer_user_id = u.user_id
+        where
+            f.follower_user_id = {follower_user_id}
+    )
     select
-        u.*
-    from users as u
-    join followers as f
-        on f.influencer_user_id = u.user_id
-    where
-        f.follower_user_id = {follower_user_id}
+        t.*,
+        case
+            when f.influencer_user_id is not null then true
+            else false
+        end as is_followed
+    from tmp as t
+    left join
+        (select distinct influencer_user_id from followers) as f
+        on f.influencer_user_id = t.user_id
     """
 
     with engine.connect() as conn:
@@ -28,13 +40,25 @@ def find_followers(influencer_user_id):
     # Given the current user, find who is following me
     # Return a list of users
     query = f"""
+    with tmp as(
+        select
+            u.*
+        from users as u
+        join followers as f
+            on f.follower_user_id  = u.user_id
+        where
+            f.influencer_user_id = {influencer_user_id}
+    )
     select
-        u.*
-    from users as u
-    join followers as f
-        on f.follower_user_id  = u.user_id
-    where
-        f.influencer_user_id = {influencer_user_id}
+        t.*,
+        case
+            when f.influencer_user_id is not null then true
+            else false
+        end as is_followed
+    from tmp as t
+    left join
+        (select distinct influencer_user_id from followers) as f
+        on f.influencer_user_id = t.user_id
     """
 
     with engine.connect() as conn:

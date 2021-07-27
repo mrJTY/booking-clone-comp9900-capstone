@@ -5,6 +5,7 @@ from api import db
 from api.models.follower import FollowerModel
 from api.models.user import UserModel
 from api.utils.req_handling import *
+from flask_login import current_user
 from flask_restplus import Resource, fields
 from sqlalchemy.orm.attributes import flag_modified
 import api
@@ -55,11 +56,6 @@ class User(Resource):
     def put(self, user_id):
         content = get_request_json()
         try:
-            avatar = content["avatar"]
-            email = content["email"]
-            # new password, don't bother checking the old password for simplicity
-            password = content["password"]
-            password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
 
             # Fetch the user
             user = UserModel.query.get_or_404(user_id)
@@ -67,13 +63,24 @@ class User(Resource):
             if user.user_id != current_user.user_id:
                 return {"error": "unauthorized"}, 403
 
-            # Update the user
-            user.avatar = avatar
-            user.email = email
-            user.password_hash = password_hash
-            flag_modified(user, "avatar")
-            flag_modified(user, "email")
-            flag_modified(user, "password_hash")
+            # Update the user conditionally
+            if "avatar" in content.keys():
+                avatar = content["avatar"]
+                user.avatar = avatar
+                flag_modified(user, "avatar")
+
+            if "email" in content.keys():
+                email = content["email"]
+                user.email = email
+                flag_modified(user, "email")
+
+            if "password" in content.keys():
+                # new password, don't bother checking the old password for simplicity
+                password = content["password"]
+                password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+                user.password_hash = password_hash
+                flag_modified(user, "password_hash")
+
             db.session.merge(user)
             db.session.flush()
             db.session.commit()
