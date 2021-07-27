@@ -21,8 +21,8 @@ def find_followees(follower_user_id):
     select
         t.*,
         case
-            when f.influencer_user_id is not null then true
-            else false
+            when f.influencer_user_id is not null then 1
+            else 0
         end as is_followed
     from tmp as t
     left join
@@ -52,8 +52,8 @@ def find_followers(influencer_user_id):
     select
         t.*,
         case
-            when f.influencer_user_id is not null then true
-            else false
+            when f.influencer_user_id is not null then 1
+            else 0
         end as is_followed
     from tmp as t
     left join
