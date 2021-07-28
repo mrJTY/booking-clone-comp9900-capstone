@@ -17,3 +17,6 @@ tests:
 	$(REPO_ROOT)/bin/test-backend.sh
 
 
+# Archive the repo
+zip:
+	git archive --format=zip --output=$(REPO_ROOT)/bst-final-software-quality.zip HEAD
