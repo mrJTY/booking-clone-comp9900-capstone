@@ -63,6 +63,16 @@ def test_follow_user():
     )
     assert listing_id == userfeed_response.json()["listings"][0]["listing_id"]
 
+    # Test follow again, expect a 403
+    follow_again_response = requests.post(
+        f"{API_URL}/followers/follow",
+        json=payload,
+        headers={
+            "Authorization": f"JWT {follower_token}",
+        },
+    )
+    assert follow_again_response.status_code == 403
+
     # Test delete - This is slightly different as we need to know the username
     username = TEST_INFLUENCER_USER["username"]
     unfollow_url = f"{API_URL}/followers/unfollow/{username}"

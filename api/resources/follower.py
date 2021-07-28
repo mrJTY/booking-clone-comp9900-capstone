@@ -1,6 +1,7 @@
 import logging
 
 from api import db
+from api import engine
 from api.models.follower import FollowerModel
 from api.models.user import UserModel
 from api.utils.req_handling import *
@@ -67,14 +68,35 @@ class FollowerList(Resource):
         try:
             # I am the follower who called /followers/follow
             follower_user_id = current_user.user_id
+
             # Influencer id must be sent as part of the json request
             influencer_user_id = content["influencer_user_id"]
+
+            # Do some validation first to check that you are not already following
+            with engine.connect() as conn:
+                query = f"""
+                select
+                    *
+                from followers
+                where
+                    influencer_user_id = {influencer_user_id}
+                    and follower_user_id = {follower_user_id}
+                """
+                results = conn.execute(query)
+                out = [i for i in results]
+                if len(out) > 0:
+                    raise AlreadyFollowingUser
+
             f = FollowerModel(
                 influencer_user_id=influencer_user_id, follower_user_id=follower_user_id
             )
             db.session.add(f)
             db.session.commit()
             return FollowerModel.query.get_or_404(f.follower_id).to_dict()
+
+        except AlreadyFollowingUser as e:
+            logging.error(e)
+            return {"error": "You are already following the user"}, 403
 
         except Exception as e:
             logging.error(e)
@@ -100,3 +122,7 @@ class UnFollow(Resource):
         b.delete()
         db.session.commit()
         return b, 204
+
+
+class AlreadyFollowingUser(Exception):
+    pass
