@@ -43,6 +43,8 @@ const ContextStore = ({ children }) => {
   const [searchEndDatetime, setSearchEndDatetime] = React.useState(todayPlus);
   const [useSearchTimeFrame, setUseSearchTimeFrame] = React.useState(false);
 
+  const [authMeInfo, setAuthMeInfo] = React.useState(null);
+
   const store = {
     baseUrl: `http://localhost:${port}`,
     token: [token, setToken],
@@ -63,7 +65,8 @@ const ContextStore = ({ children }) => {
     searchUserResults: [searchUserResults, setSearchUserResults],
     searchStartDatetime: [searchStartDatetime, setSearchStartDatetime],
     searchEndDatetime: [searchEndDatetime, setSearchEndDatetime],
-    useSearchTimeFrame: [useSearchTimeFrame, setUseSearchTimeFrame], 
+    useSearchTimeFrame: [useSearchTimeFrame, setUseSearchTimeFrame],
+    authMeInfo: [authMeInfo, setAuthMeInfo],
   }
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }

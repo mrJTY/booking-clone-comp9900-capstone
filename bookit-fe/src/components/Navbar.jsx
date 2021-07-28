@@ -1,6 +1,8 @@
 import React from 'react';
+import DefaultAvatar from '../assets/default-avatar.svg';
 import { useHistory } from 'react-router-dom';
 import { StoreContext } from '../utils/store';
+import { fetchAuthMe } from '../utils/auxiliary';
 import BookitLogo from '../assets/bookit-logo.png';
 import {
   ThemeProvider,
@@ -12,6 +14,10 @@ import {
   Tooltip,
   Typography,
   Grid,
+  Avatar,
+  IconButton,
+  Menu,
+  MenuItem,
 } from '@material-ui/core';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -56,6 +62,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.button,
     justifyContent: 'flex-start',
     width: '100%',
+    paddingLeft: '0.25em',
+  },
+  btnBack:{
+    fontSize: '13px',
+    boxShadow: theme.shadows[5],
   },
   navHeader: {
     display: 'flex',
@@ -66,10 +77,45 @@ const useStyles = makeStyles((theme) => ({
   navHeaderText: {
     color: 'pink',
     paddingLeft: '6px',
+    textShadow: 'pink 1px 0 25px',
   },
   img: {
     maxHeight: '24px',
     maxWidth: '24px',
+    boxShadow: theme.shadows[5],
+  },
+  profileDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    backgroundColor: theme.palette.background.button,
+    justifyContent: 'flex-start',
+    width: '100%',
+  },
+  navUserDiv: {
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'flex-end',
+    paddingRight: '0.25em',
+  },
+  navUserText: {
+    paddingRight: '1em',
+    textShadow: 'gray 1px 0 10px',
+  },
+  profileBtnDiv: {
+    paddingRight: '0.5em',
+  },
+  profileBtn: {
+    border: '1px solid gray',
+    boxShadow: theme.shadows[5],
+    padding: 0,
+  },
+  profileBtnAvatar: {
+    height: theme.spacing(5),
+    width: theme.spacing(5),
+  },
+  menuNav: {
+    width: '100%',
   },
 }));
 
@@ -82,12 +128,17 @@ const Navbar = ({ page }) => {
   const theme = useTheme();
   const token = context.token[0];
   // also need own username to navigate to own profile page
-  const user = 'me';
-  const setUsername = context.username[1];
+  const [username, setUsername] = context.username;
   const setToken = context.token[1];
   const baseUrl = context.baseUrl;
+  const [authMeInfo, setAuthMeInfo] = context.authMeInfo;
+
   // sends a POST API request confirming an admin logging out
   const logoutButton = () => {
+
+    setOpenMenu(false);
+    setAnchorProfileMenu(null);
+
     axios({
       method: 'POST',
       url: `${baseUrl}/auth/logout`,
@@ -129,6 +180,28 @@ const Navbar = ({ page }) => {
       })
   }
 
+  React.useEffect(() => {
+    async function setupUserNav() {
+      await fetchAuthMe(baseUrl, token, setAuthMeInfo);
+    }
+    setupUserNav();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+
+  const [achorProfileMenu, setAnchorProfileMenu] = React.useState(null);
+  const [openMenu, setOpenMenu] = React.useState(false);
+
+  const handleProfileMenu = (event) => {
+    setOpenMenu(true);
+    setAnchorProfileMenu(event.currentTarget);
+  };
+
+  const handleCloseProfileMenu = () => {
+    setOpenMenu(false);
+    setAnchorProfileMenu(null);
+  };
+
+
   return (
     <ThemeProvider theme={theme}>
       <Box className={classes.box}>
@@ -147,7 +220,7 @@ const Navbar = ({ page }) => {
                     id="back-button"
                     variant="outlined"
                     color="default"
-                    className={classes.buttonText}
+                    className={classes.btnBack}
                     onClick={() => {
                       history.goBack()
                     }}
@@ -170,10 +243,9 @@ const Navbar = ({ page }) => {
                 </Box>
               </Box>
             </Grid>
-
             <Grid item xs={4} align="center">
               <ButtonGroup variant="text" color="primary" aria-label="text primary button group">
-                <Tooltip title="Home">
+                <Tooltip title="Home Screen">
                   <Button
                     id="home-button"
                     variant="text"
@@ -212,7 +284,7 @@ const Navbar = ({ page }) => {
                     My Listings
                   </Button>
                 </Tooltip>
-                <Tooltip title="Discover">
+                <Tooltip title="Recommendations">
                   <Button
                     id="discover-button"
                     variant="text"
@@ -227,38 +299,85 @@ const Navbar = ({ page }) => {
                 </Tooltip>
               </ButtonGroup>
             </Grid>
-
             <Grid container item xs={4} align="flex-end" justify="flex-end">
-              <ButtonGroup variant="text" color="primary" aria-label="text profile button group">
-                <Tooltip title="Profile">
-                  <Button
-                    id="profile-button"
-                    variant="text"
-                    color={page === '/profile/me' ? "primary" : "default"}
-                    className={classes.buttonText}
-                    onClick={() => {
-                      history.push(`/profile/${user}`)
-                    }}
+              <Box className={classes.profileDiv}>
+                <Box className={classes.navUserDiv}>
+                  <Typography
+                    className={classes.navUserText}
+                    variant="subtitle1" align="left"
+                    color="textSecondary"
                   >
-                    Profile
-                  </Button>
-                </Tooltip>
-                <Tooltip title="Logout">
-                  <Button
-                    id="logout-button"
-                    variant="text"
-                    color="default"
-                    className={classes.buttonText}
-                    onClick={() => {
-                      logoutButton()
+                    {username}
+                  </Typography>
+                </Box>
+                <Box className={classes.profileBtnDiv}>
+                  <Tooltip title="User Menu">
+                    <IconButton
+                      aria-label="profile settings"
+                      className={classes.profileBtn}
+                      onClick={handleProfileMenu}
+                    >
+                      {
+                        authMeInfo &&
+                        <Avatar
+                          className={classes.profileBtnAvatar}
+                          src={authMeInfo.avatar}
+                        />
+                      }
+                      {
+                        !authMeInfo &&
+                        <Avatar
+                          className={classes.profileBtnAvatar}
+                          src={DefaultAvatar}
+                        />
+                      }
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    id="menu-nav"
+                    className={classes.menuNav}
+                    elevation={0}
+                    getContentAnchorEl={null}
+                    anchorEl={achorProfileMenu}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'center',
                     }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'center',
+                    }}
+                    open={openMenu}
+                    onClose={handleCloseProfileMenu}
                   >
-                    Logout
-                  </Button>
-                </Tooltip>
-              </ButtonGroup>
+                    <MenuItem
+                      onClick={() => {
+                        handleCloseProfileMenu()
+                        history.push(`/profile/${username}`)
+                      }}
+                    >
+                      Profile
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleCloseProfileMenu()
+                        history.push(`/usersettings`)
+                      }}
+                    >
+                      Settings
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        logoutButton()
+                      }}
+                    >
+                      Logout
+                    </MenuItem>
+                  </Menu>
+                </Box>
+              </Box>
             </Grid>
-
           </Grid>
         </Box>
       </Box>

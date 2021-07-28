@@ -1,7 +1,8 @@
 import React from 'react';
-// import PlaceholderImage from '../assets/mountaindawn.png';
 import { StoreContext } from '../utils/store';
 import Navbar from '../components/Navbar';
+import ResourceCard from '../components/ResourceCard';
+import { imageToBase64 } from '../utils/auxiliary';
 import {
   useHistory,
   useLocation,
@@ -15,14 +16,18 @@ import {
   Box,
   Tooltip,
   TextField,
-  Typography,  
+  Typography,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  FormHelperText,  
+  FormHelperText,
   CircularProgress,
+  Divider,
+  IconButton,
+  InputAdornment,
 } from '@material-ui/core';
+import ClearIcon from '@material-ui/icons/Clear';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -35,6 +40,12 @@ const useStyles = makeStyles((theme) => ({
   },
   outerContainer: {
     width: '100%',
+  },
+  outerContainerBtns: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   container: {
     textAlign: 'center',
@@ -69,6 +80,22 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     paddingBottom: '20px',
   },
+  titleSubcontainer: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  titleHeadingDiv: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    paddingRight: '10px',
+    width: '100%',
+  },
+  mytitleDiv: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+    margin: theme.spacing(1),
+  },  
   listSubcontainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -87,24 +114,22 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
   },
-  listingTextDiv: {
+  listingFormInputDiv: {
     width: '100%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     alignContent: 'center',
+    margin: '1em 0em',
   },
   listingTextField: {
-    maxWidth: '400px',
+    // maxWidth: '400px',
   },
   thumbnailContainer: {
     display: 'flex',
     flexDirection: 'row',
-    // margin: '20px',
     paddingBottom: '20px',
     justifyContent: 'center',
-    // maxHeight: '128px',
-    // maxWidth: '128px',
     width: '100%',
   },
   img: {
@@ -117,6 +142,7 @@ const useStyles = makeStyles((theme) => ({
     height: '6em',
     alignItems: 'center',
     justifyContent: 'center',
+
   },
   categoriesForm: {
     margin: theme.spacing(1),
@@ -125,73 +151,185 @@ const useStyles = makeStyles((theme) => ({
   categoriesFormSelect: {
     textAlign: 'left',
     paddingLeft: '4px',
-  },  
+  },
+  divider: {
+    margin: '20px 0px',
+    height: '2px',
+  },
+  editListingContentDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+
+  },
+  resourceCardDiv: {
+    flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  listingFormDiv: {
+    flex: 1,
+
+  },
+  uploadBtnInput: {
+    display: 'none',
+  },
+  uploadBtnDiv: {
+    display: 'flex',
+    alignItems: 'center',
+    margin: '1em 0em',
+  },
+  uploadFileDiv: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    width: '100%',
+    marginRight: '0.5em',
+  },
+  uploadFileInputDiv: {
+    marginRight: '0.5em',
+    // width: '100%',
+  },
+  uploadFileTextDiv: {
+    width: '100%',
+    // marginTop: '0.5em'
+  },
+  clearUploadBtnDiv: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    
+  },
+  clearUploadBtn: {
+    padding: 0,
+    // marginBottom: '0.5em',
+  },
 }));
 
-// The EditListing page allows a user to create a new listing.
+// class used for the Toastify error component styling
+const toastErrorStyle = {
+  backgroundColor: '#cc0000',
+  opacity: 0.8,
+  textAlign: 'center',
+  fontSize: '18px'
+};
+
+const emptyVals = {
+  listing_name: '',
+  address: '',
+  category: '',
+  description: '',
+}
+
+const emptyValsResourceCard = {
+  listing_id: 0,
+  listing_name: '',
+  address: '',
+  category: '',
+  description: '',
+  username: '',
+}
+
+// The EditListing page allows a user to create or modify an existing Listing.
 const EditListing = () => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const history = useHistory();
-  // the givenListingId refers to the selected listing Id as a parameter in the URL
-  const params = useParams();
-  const givenListingId = params.id;
+  const primaryUsername = context.username[0];
+
   React.useEffect(() => {
     // unauthorized users are redirected to the landing page
-    if (token === null || givenListingId === null) {
+    if (token === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  
   const [loadingState, setLoadingState] = React.useState('idle');
   // context variables used throughout the page
   const baseUrl = context.baseUrl;
   const [page, setPage] = context.pageState;
+
   const location = useLocation();
-  const prevPage = location.state.prevPage;
+  const params = useParams();
 
-  // class used for the Toastify error component styling
-  const toastErrorStyle = {
-    backgroundColor: '#cc0000',
-    opacity: 0.8,
-    textAlign: 'center',
-    fontSize: '18px'
-  };
+  console.log('location is:')
+  console.log(location)
 
-  const emptyVals = {
-    listing_name: '',
-    address: '',
-    category: '',
-    description: '',
+  console.log('params length is:')
+  console.log(Object.keys(params).length)
+
+  const isNewListing = Boolean(Number(Object.keys(params).length) === 0);
+  console.log('is new listing is:')
+  console.log(isNewListing)
+
+
+  let prevPage = '/mylistings';
+  if (!isNewListing && Object.keys(location.state).length > 0 &&
+      location.state?.prevPage)
+  {
+    prevPage = location.state.prevPage;
   }
+
+  console.log('prev page is')
+  console.log(prevPage)
+
   // the fields state variable contains the inputs to the new Listing
   const [fields, setFields] = React.useState(emptyVals);
 
+  const [resourceFields, setResourceFields] = React.useState(emptyValsResourceCard);
+  const [originalListingImage, setOriginalListingImage] = React.useState(null);
   // useEffect hook sets up the page
   React.useEffect(() => {
-    setPage(`/listings/edit/${givenListingId}`);
-    
+    if (isNewListing) {
+      setPage('/listings/create');
+    } else {
+      setPage(`/listings/edit/${params.id}`);
+    }
+
     async function setupEditListing () {
       setLoadingState('loading');
-      const response = await axios({
-        method: 'GET',
-        url: `${baseUrl}/listings/${givenListingId}`,
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${token}`,
-        },
-      })
-      const defaultVals = {
-        listing_name: response.data.listing_name,
-        address: response.data.address,
-        category: response.data.category,
-        description: response.data.description,
+
+      if (isNewListing) {
+        await setResourceFields(
+          resourceFields => ({
+            ...resourceFields,
+            username: `${primaryUsername}`,
+          })
+        );
+      } else {
+        const response = await axios({
+          method: 'GET',
+          url: `${baseUrl}/listings/${params.id}`,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `JWT ${token}`,
+          },
+        })
+        setOriginalListingImage(response.data.listing_image);
+        const defaultVals = {
+          listing_name: response.data.listing_name,
+          address: response.data.address,
+          category: response.data.category,
+          description: response.data.description,
+        }
+        await setFields(defaultVals);
+        const defaultValsResourceCard = {
+          listing_id: response.data.listing_id,
+          listing_name: response.data.listing_name,
+          address: response.data.address,
+          category: response.data.category,
+          description: response.data.description,
+          username: response.data.username,
+          listing_image: response.data.listing_image,
+        }
+        await setResourceFields(defaultValsResourceCard);        
+        
       }
-      await setFields(defaultVals);
+
       setLoadingState('success');
     }
-    setupEditListing()    
+    setupEditListing();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // onChange updates the state upon a user's keypress
@@ -202,12 +340,81 @@ const EditListing = () => {
         [field]: val
       })
     );
+
+    setResourceFields(
+      state => ({
+        ...state,
+        [field]: val
+      })
+    );
   }
+
+
+  const [listingImageBase64, setListingImageBase64] = React.useState(null);
+  const [listingImageFilename, setListingImageFilename] = React.useState('');
+  const updateListingImageFile = async (e) => {
+
+    console.log(e.target.files[0]);
+
+    await setListingImageFilename(e.target.files[0]?.name || '');
+    await imageToBase64(e.target.files[0], setListingImageBase64);
+
+    console.log(listingImageBase64);
+
+  };
+
+  const handleUploadClear = async () => {
+    await setListingImageFilename('');
+    await setListingImageBase64(null);
+  }
+
+  React.useEffect(() => {
+    async function listingImagePreviewChange () {
+
+
+      if (listingImageBase64 !== null) {
+        await setResourceFields(
+          resourceFields => ({
+            ...resourceFields,
+            listing_image: listingImageBase64
+          })
+        );
+        await setFields(
+          fields => ({
+            ...fields,
+            listing_image: `${listingImageBase64}`,
+          })
+        );
+      } else {
+        await delete fields['listing_image'];
+
+        if (!isNewListing) {
+          await setResourceFields(
+            resourceFields => ({
+              ...resourceFields,
+              listing_image: originalListingImage
+            })
+          );
+        } else {
+          await setResourceFields(
+            resourceFields => ({
+              ...resourceFields,
+              listing_image: listingImageBase64
+            })
+          );
+        }
+      }
+
+    }
+    listingImagePreviewChange();
+  }, [listingImageBase64]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // validates the New Listing input fields & sends a POST API request
   // upon a valid listing submission, creating a new Listing.
-  const onSubmit = (btn) => {
-    btn.preventDefault();
+  const handleSubmit = () => {
+    if (listingImageBase64 === null) {
+      delete fields['listing_image'];
+    }
     // ensure no empty fields are submitted
     if (fields.listing_name === '' || fields.address === '' ||
     fields.category === '' || fields.description === '') {
@@ -219,10 +426,16 @@ const EditListing = () => {
         }
       );
     } else {
-      // Send a POST request to modify the existing listing
+      // Send a POST request to create a new listing
+      const reqMethod = isNewListing === true
+        ? 'POST'
+        : 'PUT'
+      const reqUrl = isNewListing === true
+        ? `${baseUrl}/listings`
+        : `${baseUrl}/listings/${params.id}`
       axios({
-        method: 'PUT',
-        url: `${baseUrl}/listings/${givenListingId}`,
+        method: reqMethod,
+        url: reqUrl,
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
@@ -231,9 +444,12 @@ const EditListing = () => {
         data: fields,
       })
         .then(() => {
+          const successMsg = isNewListing === true
+            ? 'Successfully created a new Listing'
+            : `Successfully modified Listing ID ${params.id}`
           // notify user listing creation was successful
           toast.success(
-            `Successfully modified Listing ID ${givenListingId}`, {
+            successMsg, {
               position: 'top-right',
               hideProgressBar: true,
               style: {
@@ -244,12 +460,13 @@ const EditListing = () => {
             }
           );
           if (prevPage === '/mylistings') {
+            // redirect back to mylistings page
             history.push('/mylistings');
           } else {
             history.push({
-              pathname: `/listings/${givenListingId}`,
+              pathname: `/listings/${params.id}`,
               state: {
-                givenListingId: parseInt(givenListingId),
+                givenListingId: parseInt(params.id),
               }
             });
           }
@@ -272,10 +489,9 @@ const EditListing = () => {
   // classes used for Material UI component styling
   const classes = useStyles();
   return (
-    <Container>
+    <Container className={classes.outerContainer}>
       <Navbar page={page} />
       <Container className={classes.container}>
-        <Box className={classes.box}>
         {
           loadingState !== 'success' &&
           <div>
@@ -285,130 +501,222 @@ const EditListing = () => {
         {
           loadingState === 'success' &&
           <Box className={classes.containerDiv}>
-            <Typography gutterBottom component={'span'} variant="h4" align="center" color="textPrimary">
-              Modify Listing
-            </Typography>
-            <br />
-            <br />
-            <form onSubmit={onSubmit}>
-              <br />
-              <TextField
-                id="listing-name"
-                type="text"
-                label="Listing Name"
-                aria-label="listing name"
-                className={classes.listingTextField}
-                multiline
-                rows={3}
-                columns={50}
-                fullWidth
-                variant="outlined"
-                defaultValue={fields.listing_name}
-                onChange={
-                  e => onChange(setFields, 'listing_name', e.target.value)
-                }
-              />
-              <br />
-              <br />
-              <TextField
-                id="listing-address"
-                type="text"
-                label="Address"
-                aria-label="address"
-                className={classes.listingTextField}
-                multiline
-                rows={3}
-                columns={50}
-                fullWidth
-                variant="outlined"
-                defaultValue={fields.address}
-                onChange={
-                  e => onChange(setFields, 'address', e.target.value)
-                }
-              />
-              <br />
-              <br />
-              <TextField
-                id="listing-description"
-                type="text"
-                label="Description"
-                aria-label="description"
-                className={classes.listingTextField}
-                multiline
-                rows={3}
-                columns={50}
-                fullWidth
-                variant="outlined"
-                defaultValue={fields.description}
-                onChange={
-                  e => onChange(setFields, 'description', e.target.value)
-                }
-              />
-              <br />
-              <br />
-              <Box className={classes.categoriesFormDiv}>
-                <FormControl required className={classes.categoriesForm}>
-                  <InputLabel id="listing-category-label">
-                    Listing Category
-                  </InputLabel>
-                  <Select
-                    labelId="listing-category-select-label"
-                    id="listing-category"
-                    label="Category"
-                    value={fields.category}
-                    onChange={
-                      e => onChange(setFields, 'category', e.target.value)
+            <Box className={classes.mytitleDiv}>
+              <Box className={classes.titleSubcontainer}>
+                <Box className={classes.titleHeadingDiv}>
+                  <Typography gutterBottom component={'span'} variant="h4" align="center" color="textPrimary">
+                    Create New Listing
+                  </Typography>
+                </Box>
+
+                <Box className={classes.outerContainerBtns}>
+                  <Tooltip
+                    title={
+                      isNewListing === true
+                        ? 'Create Listing'
+                        : 'Modify Listing'
                     }
-                    className={classes.categoriesFormSelect}
                   >
-                    <MenuItem aria-label="None" value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={'entertainment'}>Entertainment</MenuItem>
-                    <MenuItem value={'sport'}>Sport</MenuItem>
-                    <MenuItem value={'accommodation'}>Accommodation</MenuItem>
-                    <MenuItem value={'healthcare'}>Healthcare</MenuItem>                    
-                    <MenuItem value={'other'}>Other</MenuItem>
-                  </Select>
-                  <FormHelperText>Required</FormHelperText>
-                </FormControl>
-              </Box>
-              <br />
-              <br />
-              <Tooltip title="Create Listing" aria-label="create">
-                <Button
-                  id="submit-listing" variant="contained" type="submit"
-                >
-                  Modify Listing
-                </Button>
-              </Tooltip>
-              <Tooltip title="Cancel" aria-label="cancel">
-                <Button
-                  className={classes.button}
-                  variant="outlined"
-                  color="secondary"
-                  onClick={() => {
-                    if (prevPage === '/mylistings') {
-                      history.push('/mylistings');
-                    } else {
-                      history.push({
-                        pathname: `/listings/${givenListingId}`,
-                        state: {
-                          givenListingId: parseInt(givenListingId),
+                    <Button
+                      id="submit-listing"
+                      variant="contained"
+                      // type="submit"
+                      color="primary"
+                      onClick={() => {
+                        handleSubmit();
+                      }}
+                    >
+                      {
+                        isNewListing === true
+                          ? 'Create Listing'
+                          : 'Modify Listing'
+                      }
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Cancel" aria-label="cancel">
+                    <Button
+                      className={classes.button}
+                      variant="outlined"
+                      color="secondary"
+                      onClick={() => {
+                        if (prevPage === '/mylistings') {
+                          // redirect back to mylistings page
+                          history.push('/mylistings');
+                        } else {
+                          history.push({
+                            pathname: `/listings/${params.id}`,
+                            state: {
+                              givenListingId: parseInt(params.id),
+                            }
+                          });
                         }
-                      });
-                    }
-                  }}
-                >
-                  Cancel
-                </Button>
-              </Tooltip>
-              <br />
-              <br />
-            </form>
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </Tooltip>
+                </Box>
+              </Box>
+
+              <Divider light className={classes.divider} />
+
+              <Box className={classes.editListingContentDiv}>
+
+                <Box className={classes.resourceCardDiv}>
+                  <ResourceCard
+                    resource={resourceFields}
+                    owner={primaryUsername}
+                    parentPage={'/listings/edit'}
+                  />
+                </Box>
+
+                <Box className={classes.listingFormDiv}>
+                  <Box className={classes.listingFormInputDiv}>
+                    <TextField
+                      id="listing-name"
+                      type="text"
+                      label="Listing Name"
+                      aria-label="listing name"
+                      className={classes.listingTextField}
+                      multiline
+                      rows={3}
+                      columns={50}
+                      fullWidth
+                      variant="outlined"
+                      defaultValue={fields.listing_name}
+                      onChange={
+                        e => onChange(setFields, 'listing_name', e.target.value)
+                      }
+                    />
+                  </Box>
+                  <Box className={classes.listingFormInputDiv}>
+                    <TextField
+                      id="listing-address"
+                      type="text"
+                      label="Address"
+                      aria-label="address"
+                      className={classes.listingTextField}
+                      multiline
+                      rows={3}
+                      columns={50}
+                      fullWidth
+                      variant="outlined"
+                      defaultValue={fields.address}
+                      onChange={
+                        e => onChange(setFields, 'address', e.target.value)
+                      }
+                    />
+                  </Box>
+                  <Box className={classes.listingFormInputDiv}>
+                    <TextField
+                      id="listing-description"
+                      type="text"
+                      label="Description"
+                      aria-label="description"
+                      className={classes.listingTextField}
+                      multiline
+                      rows={3}
+                      columns={50}
+                      fullWidth
+                      variant="outlined"
+                      defaultValue={fields.description}
+                      onChange={
+                        e => onChange(setFields, 'description', e.target.value)
+                      }
+                    />
+                  </Box>
+                  <Box className={classes.categoriesFormDiv}>
+                    <FormControl required className={classes.categoriesForm}>
+                      <InputLabel id="listing-category-label">
+                        Listing Category
+                      </InputLabel>
+                      <Select
+                        labelId="listing-category-select-label"
+                        id="listing-category"
+                        label="Category"
+                        value={fields.category}
+                        onChange={
+                          e => onChange(setFields, 'category', e.target.value)
+                        }
+                        className={classes.categoriesFormSelect}
+                      >
+                        <MenuItem aria-label="None" value="">
+                          <em>None</em>
+                        </MenuItem>
+                        <MenuItem value={'entertainment'}>Entertainment</MenuItem>
+                        <MenuItem value={'sport'}>Sport</MenuItem>
+                        <MenuItem value={'accommodation'}>Accommodation</MenuItem>
+                        <MenuItem value={'healthcare'}>Healthcare</MenuItem>                    
+                        <MenuItem value={'other'}>Other</MenuItem>
+                      </Select>
+                      <FormHelperText>Required</FormHelperText>
+                    </FormControl>
+                  </Box>
+
+                  <Box className={classes.uploadBtnDiv}>
+                    <Box className={classes.uploadFileDiv}>
+                      <Box className={classes.uploadFileInputDiv}>
+                        {/* Upload Button Boilerplate */}                          
+                        {/* https://material-ui.com/components/buttons/ */}
+                        <input
+                          accept="image/*"
+                          className={classes.uploadBtnInput}
+                          id="upload-btn-html"
+                          type="file"
+                          onChange={updateListingImageFile}
+                        />
+                        <Tooltip title="Upload Image">
+                          <label htmlFor="upload-btn-html">
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              component="span"
+                            >
+                              Upload
+                            </Button>
+                          </label>
+                        </Tooltip>
+                      </Box>
+                      <Box className={classes.uploadFileTextDiv}>
+                        <TextField
+                          variant="outlined"
+                          inputProps={{
+                            readOnly: true
+                          }}
+                          value={listingImageFilename}
+                          multiline
+                          fullWidth
+                          label="Filename"
+                          InputProps={{
+                            endAdornment:
+                            <InputAdornment position="end">
+                              <Box className={classes.clearUploadBtnDiv}>
+                                <Tooltip title={'Clear Upload'}>
+                                  <IconButton
+                                    size="medium"
+                                    color="default"
+                                    className={classes.clearUploadBtn}
+                                    onClick={() => {
+                                      handleUploadClear();
+                                    }}
+                                  >
+                                    <ClearIcon className={classes.clearUploadIcon} />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
+                            </InputAdornment>,
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  </Box>
+
+                </Box>
+              </Box>
+
+            </Box>
           </Box>
         }
-        </Box>
       </Container>
     </Container>
   )

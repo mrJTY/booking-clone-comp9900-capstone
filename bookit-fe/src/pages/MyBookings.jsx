@@ -77,6 +77,9 @@ const useStyles = makeStyles((theme) => ({
     marginTop: '20px',
     height: '2px',
   },
+  bookingsNotFoundDiv: {
+    margin: '2em 0em',
+  },
 }));
 
 
@@ -172,7 +175,7 @@ const MyBookings = () => {
             <Divider light className={classes.divider} />
             {
               upcomingBtn === true &&
-              mybookings.upcoming.length > 0 &&
+              mybookings.upcoming?.length > 0 &&
               mybookings.upcoming.map((booking) => (
                 <Box key={booking.booking_id}>
                   <BookingListItem booking={booking} upcoming={true} />
@@ -180,14 +183,38 @@ const MyBookings = () => {
               ))
             }
             {
+              upcomingBtn === true &&
+              mybookings.upcoming?.length === 0 &&
+              <Box className={classes.bookingsNotFoundDiv}>
+                <Typography
+                  component={'span'} align="center"
+                  variant="body1" color="textSecondary"
+                >
+                  {`No Bookings found.`}
+                </Typography>
+              </Box>
+            }            
+            {
               upcomingBtn === false &&
-              mybookings.past.length > 0 &&
+              mybookings.past?.length > 0 &&
               mybookings.past.map((booking) => (
                 <Box key={booking.booking_id}>
                   <BookingListItem booking={booking} upcoming={false} />
                 </Box>
               ))
-            }            
+            }
+            {
+              upcomingBtn === false &&
+              mybookings.past?.length === 0 &&
+              <Box className={classes.bookingsNotFoundDiv}>
+                <Typography
+                  component={'span'} align="center"
+                  variant="body1" color="textSecondary"
+                >
+                  {`No Bookings found.`}
+                </Typography>
+              </Box>
+            }
             <br />
             <br />
           </Box>

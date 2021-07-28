@@ -17,6 +17,7 @@ import {
   Typography,
   Tooltip,
   CircularProgress,
+  Divider,
 } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 
@@ -100,6 +101,13 @@ const useStyles = makeStyles((theme) => ({
     width: '16px',
     height: '16px',
   },
+  listingsNotFoundDiv: {
+    margin: '2em 0em',
+  },
+  divider: {
+    margin: '1em 0em',
+    height: '2px',
+  },
 }));
 
 
@@ -182,7 +190,12 @@ const MyListings = () => {
                       color="primary"
                       endIcon={<Add />}
                       onClick={() => {
-                        history.push(`/listings/create`)
+                        history.push({
+                          pathname: `/listings/create`,
+                          state: {
+                            prevPage: '/mylistings'
+                          }
+                        })
                       }}
                     >
                       New Listing
@@ -190,8 +203,13 @@ const MyListings = () => {
                   </Tooltip>
                 </Box>
               </Box>
+
+              <Divider light className={classes.divider} />
+
             </Box>
-            <Grid className={classes.root} container spacing={2}>
+            {
+              mylistings.length > 0 &&
+              <Grid className={classes.root} container spacing={2}>
                 <Grid item xs={12}>
                   <Grid container justify="center" spacing={2}>
                     {mylistings.map((listing) => (
@@ -211,6 +229,18 @@ const MyListings = () => {
                   </Grid>
                 </Grid>
               </Grid>
+            }
+            {
+              mylistings?.length === 0 &&
+              <Box className={classes.listingsNotFoundDiv}>
+                <Typography
+                  component={'span'} align="center"
+                  variant="body1" color="textSecondary"
+                >
+                  {`No Listings found. Try creating a new Listing.`}
+                </Typography>
+              </Box>
+            }
           </Box>
         }
       </Container>

@@ -35,3 +35,23 @@
 - Link a 'ResourceCard' to a listing (showing all availabilities) + resource owner's user profile
 - Frontend implementation of availabilities using datetime logic & validation
 - Brainstorming & assistance on the 'search' functionality
+
+# Week 7
+- Worked on implementing the Bookings functionality in the frontend, ensuring that appropriate availabilities are linked to each booking item
+- Drafted the frontend search functionality, returning a basic search of Listings
+- Began work on the Ratings system, with brainstorming ideas for implementation
+- Focused on polishing current product for next week's Presentation, with a goal of completing 3 additional epics related to Bookings, Availabilities and Ratings
+- Frontend heavily relies on state management in order to function properly, as such there was quite extensive work put into ensuring a stable framework that delivers expected user results
+
+# Week 8
+- Further work on the Bookings functionality, with a focus on the ability to change a booking & associated conditionals as per the project spec
+- Fully integrated the Ratings functionality along with the ability to add and change reviews for bookings which have occurred in the past, along with displaying the associated information in the respective Listing page
+- Further work on the search functionality, with a more robust tool being built in accordance to the project spec requirements + being able to search other users on the platform
+- Inegrated ideas for more fleshed out endpoints & user profiles + added a skeleton for the recommender located on the Discover screen
+- Prepared materials, rehearsed & conducted Presentation B which gladly went well, having met the stretch goals for ~80% project completion in both the front and back end
+
+# Week 9
+- Fully implemented the Frontend features according to the project spec, project proposal and stretch goals set out over the course of the term
+- The majority of the work leading up to release 1.0 was spent on finalizing the Search tool, User Profiles, Recommendations, State management & UI enhancements / revamp + bug fixing
+- Some final adjustments to the API endpoints were delivered as requested, which allowed for the Followers functionality to be fully implemented, with a User feed viewable from the Home screen consisting of other user's Listings of which the Primary user follows
+- Final work involved the project report and preparation for the final presentation

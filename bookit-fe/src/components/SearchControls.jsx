@@ -7,6 +7,7 @@ import {
 import { useHistory } from "react-router-dom";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from '@material-ui/icons/Clear';
+import BackspaceIcon from '@material-ui/icons/Backspace';
 import {
   Container,
   Box,
@@ -38,6 +39,9 @@ import {
 } from '@material-ui/pickers';
 
 const useStyles = makeStyles((theme) => ({
+  searchControlContainer: {
+    padding: 0,
+  },
   search: {
     background: "gray",
     height: "100%",
@@ -55,14 +59,14 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    margin: theme.spacing(1),
+    // margin: theme.spacing(1),
   },
   searchRadioDiv: {
     display: 'flex',
     flexDirection: 'row',
     width: '100%',
     margin: theme.spacing(0.5),
-    paddingLeft: '1em',
+    paddingLeft: '0.5em',
   },
   timeDiv: {
     display: 'flex',
@@ -116,7 +120,8 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   categoriesForm: {
-    margin: theme.spacing(1),
+    // margin: theme.spacing(1),
+    marginRight: '0.25em',
     width: '18em',
   },
   clearBtnDiv: {
@@ -124,6 +129,14 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: '1em',
+  },
+  clearSearchBtn: {
+    padding: 0,
+    marginRight: '0.25em',
+  },
+  clearSearchIcon: {
+    height: '34px',
+    width: '34px',
   },
 }));
 
@@ -172,6 +185,12 @@ const SearchControls = () => {
 
   const handleSearchUserTextChange = (event) => {
     setSearchUserQuery(event.target.value);
+  }
+
+  const handleSearchClear = () => {
+    searchType === 'listings'
+      ? setSearchQuery('')
+      : setSearchUserQuery('')
   }
 
   const handleSearchClick = () => {
@@ -260,7 +279,7 @@ const SearchControls = () => {
   const classes = useStyles();
 
   return (
-    <Container>
+    <Container className={classes.searchControlContainer}>
       <Box>
         {
           searchType === 'listings' &&
@@ -433,13 +452,28 @@ const SearchControls = () => {
               }
               endAdornment={
                 <InputAdornment position="end">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => { handleSearchClick(); }}
-                  >
-                    Search
-                  </Button>
+                  <Box>
+                    <Tooltip title={'Clear'}>
+                      <IconButton
+                        size="medium"
+                        color="default"
+                        className={classes.clearSearchBtn}
+                        onClick={() => { handleSearchClear(); }}
+                      >
+                        <BackspaceIcon className={classes.clearSearchIcon} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={`Search ${searchType}`}>
+                      <Button
+                        variant="contained"
+                        color="default"
+                        size="small"
+                        onClick={() => { handleSearchClick(); }}
+                      >
+                        Search
+                      </Button>
+                    </Tooltip>
+                  </Box>
                 </InputAdornment>
               }
               onKeyPress={(ekey) => {
@@ -451,27 +485,31 @@ const SearchControls = () => {
             />
           </FormControl>
         </Box>
-        {/*TODO: Add controls for descending / asc */}
         <Box className={classes.searchRadioDiv}>
           <FormControl>
             <RadioGroup
               row
               aria-label="search-category"
               name="search-category"
-              defaultValue="listings"
+              value={searchType}
+              // defaultValue="listings"
               onChange={handleSearchTypeChange}
             >
-              <FormControlLabel
-                value="listings"
-                control={<Radio/>}
-                label="Listings"
-                
-              />
-              <FormControlLabel
-                value="users"
-                control={<Radio/>}
-                label="Users"
-              />
+              <Tooltip title={'Search for Listings'} placement="bottom-start">
+                <FormControlLabel
+                  value="listings"
+                  control={<Radio/>}
+                  label="Listings"
+                  
+                />
+              </Tooltip>
+              <Tooltip title={'Search for Users'} placement="bottom-start">
+                <FormControlLabel
+                  value="users"
+                  control={<Radio/>}
+                  label="Users"
+                />
+              </Tooltip>
             </RadioGroup>
           </FormControl>
         </Box>

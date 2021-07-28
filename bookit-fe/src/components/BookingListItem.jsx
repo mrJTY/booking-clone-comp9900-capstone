@@ -214,12 +214,17 @@ const BookingListItem = ({ booking, upcoming }) => {
                 <div className={classes.listItemText}>
                   <Typography component={'span'} variant="body2" align="left" color="textSecondary">
                     <ListSpan>Owner /</ListSpan> {' '}
-                    <Link
-                      component={RouterLink}
-                      to={`/profile/${booking.username}`}
+                    <Tooltip
+                      title={`View ${booking.username}'s profile`}
+                      placement="bottom-start"
                     >
-                      {booking.username}
-                    </Link>
+                      <Link
+                        component={RouterLink}
+                        to={`/profile/${booking.username}`}
+                      >
+                        {booking.username}
+                      </Link>
+                    </Tooltip>
                   </Typography>
                 </div>                            
               </div>

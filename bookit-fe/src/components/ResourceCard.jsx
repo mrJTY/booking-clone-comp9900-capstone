@@ -16,6 +16,7 @@ import {
   Typography,
   Box,
   Link,
+  Button,
   IconButton,
 } from '@material-ui/core';
 import { Link as RouterLink } from 'react-router-dom';
@@ -36,6 +37,8 @@ const useStyles = makeStyles((theme) => ({
   cardRoot: {
     maxWidth: 345,
     minWidth: 345,
+    maxHeight: 650,
+    minHeight: 650,
   },
   button: {
     margin: theme.spacing(1),
@@ -104,7 +107,6 @@ const useStyles = makeStyles((theme) => ({
     padding: '6px 16px',
   },
   categoryText: {
-    // height: '56px',
     margin: 0,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -150,68 +152,120 @@ const ResourceCard = (
         await setAvailabilities([]);
       }
     }
-    fetchAvailabilities();
+    if (parentPage !== '/listings/edit') {
+      fetchAvailabilities();
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const classes = useStyles();
 
   return (
     <Card className={classes.cardRoot}>
-      <CardHeader
-        avatar={
-          <Avatar aria-label="resource">
-            {owner[0]}
-          </Avatar>
-        }
-        title={
-          <Typography variant="subtitle2" align="left" >
-            {resource.listing_name}
-          </Typography>
-        }
-        subheader={
-          <Typography variant="subtitle2" color="textSecondary" align="left">
-            <Link
-              component={RouterLink}
-              to={`/profile/${resource.username}`}
+      {
+        parentPage !== '/listings/edit' &&
+        <CardHeader
+          avatar={
+            <Avatar aria-label="resource">
+              {owner[0]}
+            </Avatar>
+          }
+          title={
+            <Typography
+              variant="subtitle2"
+              align="left"
+              className={classes.categoryText}
+            >
+              {resource.listing_name}
+            </Typography>
+          }
+          subheader={
+            <Typography
+              variant="subtitle2"
+              color="textSecondary"
+              align="left"
+              className={classes.categoryText}
+            >
+              <Tooltip
+                title={`View ${resource.username}'s profile`}
+                placement="bottom-start"
+              >
+                <Link
+                  component={RouterLink}
+                  to={`/profile/${resource.username}`}
+                >
+                  {resource.username}
+                </Link>
+              </Tooltip>
+            </Typography>
+          }
+        />
+      }
+      {
+        parentPage === '/listings/edit' &&
+        <CardHeader
+          
+          avatar={
+            <Avatar aria-label="resource">
+              {owner[0]}
+            </Avatar>
+          }
+          title={
+            <Typography 
+              variant="subtitle2"
+              align="left"
+              className={classes.categoryText}
+            >
+              {resource.listing_name}
+            </Typography>
+          }
+          subheader={
+            <Typography
+              variant="subtitle2"
+              color="textSecondary"
+              align="left"
+              className={classes.categoryText}
             >
               {resource.username}
-            </Link>
-          </Typography>
-        }
-      />
+            </Typography>
+          }
+        />
+      }
 
-      {/* {
-        resource.thumbnail !== null &&
-        <Tooltip title="resource Thumbnail"
-          aria-label="resource thumbnail"
-        >
-          <CardMedia
-            id="resource-card-thumbnail"
-            className={classes.media}
-            image={resource.thumbnail}
-            alt="resource thumbnail"
-          />
-        </Tooltip>
-      } */}
-
-      {/* { */}
-        {/* resource.thumbnail === null && */}
-        <Tooltip title="Resource Thumbnail"
-          aria-label="resource thumbnail"
-        >
-          <CardMedia
-            id="resource-card-thumbnail"
-            className={classes.media}
-            image={PlaceholderImage}
-            alt="Placeholder image"
-          />
-        </Tooltip>
-      {/* } */}
+      <Tooltip title="Resource Image"
+        aria-label="resource image"
+      >
+        <CardMedia
+          id="resource-card-image"
+          className={classes.media}
+          image={
+            resource.listing_image !== null
+              ? resource.listing_image
+              : PlaceholderImage
+          }
+          alt="Placeholder image"
+        />
+      </Tooltip>
 
       <CardContent className={classes.resourceCardRating}>
-        <Tooltip title={`Average rating: ${resource.avg_rating}`} placement="top" >
+        <Tooltip
+          title={
+            parentPage !== '/listings/edit'
+              ? `Average rating: ${resource.avg_rating}`
+              : 'Average rating: 0'
+          }
+          placement="top"
+        >
           <div>
-            <Rating name="avg-rating" defaultValue={resource.avg_rating} precision={0.1} readOnly />
+            <Rating
+              name="avg-rating"
+              defaultValue={
+                parentPage !== '/listings/edit'
+                  ? resource.avg_rating
+                  : 0
+              }
+              precision={0.1}
+              readOnly
+            />
           </div>
         </Tooltip>
       </CardContent>
@@ -228,7 +282,14 @@ const ResourceCard = (
       <CardContent className={classes.categoryContent}>
         <Typography component={'span'} className={classes.categoryText} align="left" variant="subtitle2" color="textSecondary">
           <WhiteText>Category / </WhiteText>
-          {resource.category.charAt(0).toUpperCase() + resource.category.slice(1)}
+          {
+            resource.category !== '' &&
+            resource.category?.charAt(0).toUpperCase() + resource.category?.slice(1)
+          }
+          {
+            resource.category === '' &&
+            'None'
+          }
         </Typography>
       </CardContent>
 
@@ -240,7 +301,14 @@ const ResourceCard = (
 
       <CardContent className={classes.resourceCardCentered}>
         <Typography variant="overline" align="center" color="textPrimary" component="p">
-          Availabilities: {availabilities.length}
+          {
+            parentPage !== '/listings/edit' &&
+            `Availabilities: ${availabilities.length}`
+          }
+          {
+            parentPage === '/listings/edit' &&
+            'Availabilities: 0'
+          }
         </Typography>
       </CardContent>
 
@@ -251,29 +319,47 @@ const ResourceCard = (
             classes.resourceCardCentered
         }
       >
-        <Box>
-          <CustomButton
-            title={'View Listing'}
-            ariaLabel={'listing'}
-            id={'resource-card-listing-button'}
-            variant={'contained'}
-            color={'primary'}
-            className={classes.button}
-            endIcon={<ArrowRight />}
-            onClick={() => {
-              history.push({
-                pathname: `/listings/${resource.listing_id}`,
-                state: {
-                  givenListingId: parseInt(resource.listing_id),
-                }
-              })
-            }}
-          />
-        </Box>
-
+        {
+          parentPage !== '/listings/edit' &&
+          <Box>
+            <CustomButton
+              title={'View Listing'}
+              ariaLabel={'listing'}
+              id={'resource-card-listing-button'}
+              variant={'contained'}
+              color={'primary'}
+              className={classes.button}
+              endIcon={<ArrowRight />}
+              onClick={() => {
+                history.push({
+                  pathname: `/listings/${resource.listing_id}`,
+                  state: {
+                    givenListingId: parseInt(resource.listing_id),
+                  }
+                })
+              }}
+            />
+          </Box>
+        }
+        {
+          parentPage === '/listings/edit' &&
+          <Box>
+            <Button
+              id={'resource-card-listing-button-mock'}
+              variant={'contained'}
+              color={'primary'}
+              className={classes.button}
+              disabled={true}
+              endIcon={<ArrowRight />}
+            >
+              View Listing
+            </Button>
+          </Box>
+        }
         {
           user === resource.username &&
           parentPage !== '/search' &&
+          parentPage !== '/listings/edit' &&
           <Box>
             <Tooltip title={'Edit'} aria-label={'edit'}>
               <IconButton

@@ -1,7 +1,7 @@
 import React from 'react';
 import { StoreContext } from '../utils/store';
 import Navbar from '../components/Navbar';
-import PlaceholderImage from '../assets/mountaindawn.png';
+import { fetchAuthMe } from '../utils/auxiliary';
 import CustomButton from '../components/CustomButton';
 import DeleteDialog from '../components/DeleteDialog';
 import ModalAvailability from '../components/ModalAvailability';
@@ -36,6 +36,7 @@ import Rating from '@material-ui/lab/Rating';
 import axios from 'axios';
 import styled from 'styled-components';
 import { format, formatDistanceStrict } from 'date-fns';
+import { toast } from 'react-toastify';
 
 const LocationSpan = styled.span`
   color: white;
@@ -57,6 +58,13 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
+  },
+  outerContainerBookedHrs: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingRight: '2em',
   },
   container: {
     textAlign: 'center',
@@ -192,14 +200,31 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     // paddingLeft: '2em',
   },
+  toasty: {
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+  },
+  divider: {
+    margin: '1em 0em',
+    height: '2px',
+  },
 }));
 
-// The EditBooking page allows a user to create or modify a booking.
+// The Listing page allows a user to view or modify a listing.
 const Listing = () => {
   const context = React.useContext(StoreContext);
   const baseUrl = context.baseUrl;
   const token = context.token[0];
   const history = useHistory();
+
+  // class used for the Toastify error component styling
+  const toastErrorStyle = {
+    backgroundColor: '#cc0000',
+    opacity: 0.8,
+    textAlign: 'center',
+    fontSize: '18px'
+  };
   // used for the delete dialog
   const [open, setOpen] = React.useState(false);
   // determines which availability in particular to delete
@@ -228,6 +253,9 @@ const Listing = () => {
   const [loadingState, setLoadingState] = React.useState('idle');
 
   const [showAvailBtn, setShowAvailBtn] = React.useState(true);
+
+  const [bookedHrs, setBookedHrs] = context.bookedHrs;
+  const [userProfile, setUserProfile] = React.useState(null);
 
   // updated ensures appropriate re-rendering upon changing or deleting a resource
   const [updated, setUpdated] = context.updates;
@@ -278,6 +306,18 @@ const Listing = () => {
       } catch(error) {
         
         console.log(error.response);
+
+        let errorText = '';
+        error.response.data.error !== undefined
+          ? errorText = error.response.data.error
+          : errorText = 'Invalid input'
+        toast.error(
+          errorText, {
+            position: 'top-right',
+            hideProgressBar: true,
+            style: toastErrorStyle
+          }
+        );
 
         // setResource(null);
       }
@@ -333,10 +373,21 @@ const Listing = () => {
         setAvailabilities([]);
       }
 
+      await fetchAuthMe(baseUrl, token, setUserProfile);
+
       setLoadingState('success');
     }
     setupListing();
   }, [updated]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  React.useEffect(() => {
+    async function setupBookedHrs () {
+      if (userProfile !== null ) {
+        await setBookedHrs(10 - parseInt(userProfile.hours_booked));
+      }
+    }
+    setupBookedHrs();
+  }, [userProfile]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // classes used for Material UI component styling
   const classes = useStyles();
@@ -404,21 +455,28 @@ const Listing = () => {
                 }
               </Box>
 
+              <Divider light className={classes.divider} />
+
               <Typography gutterBottom variant="body2" align="left">
                 Owner / {' '}
-                <Link
-                  component={RouterLink}
-                  to={`/profile/${resource.username}`}
+                <Tooltip
+                  title={`View ${resource.username}'s profile`}
+                  placement="bottom-start"
                 >
-                  {resource.username}
-                </Link>
+                  <Link
+                    component={RouterLink}
+                    to={`/profile/${resource.username}`}
+                  >
+                    {resource.username}
+                  </Link>
+                </Tooltip>
               </Typography>
               <Typography gutterBottom variant="body2" align="left" color="textSecondary">
                 <LocationSpan>Location /</LocationSpan> {resource.address}
               </Typography>
               <Box className={classes.box}>
                 <Box className={classes.imgContainer}>
-                  <img src={PlaceholderImage} alt="thumbnail" className={classes.img} />
+                  <img src={resource.listing_image} alt="thumbnail" className={classes.img} />
                 </Box>
                 <Box className={classes.outerContainer}>
                   <Box className={classes.resourceTitleDiv}>
@@ -443,10 +501,6 @@ const Listing = () => {
             <Box className={classes.mytitleDiv}>
               <Box className={classes.titleSubcontainer}>
                 <Box className={classes.titleHeadingDiv}>
-                  {/* <Typography paragraph align="left" variant="h4">
-                    Availabilities
-                  </Typography> */}
-
                   <ButtonGroup
                     variant="text"
                     color="primary"
@@ -506,7 +560,15 @@ const Listing = () => {
                       newAvail={true}
                     />
                   </Box>
-                  
+                }
+                {
+                  showAvailBtn === true &&
+                  resource.username !== username &&
+                  <Box className={classes.outerContainerBookedHrs}>
+                    <Typography align="center" variant="subtitle1" color="textPrimary">
+                      {`Remaining Booking hours: ${bookedHrs}`}
+                    </Typography>
+                  </Box>
                 }
               </Box>
 
@@ -648,12 +710,17 @@ const Listing = () => {
                             <div className={classes.listItemText}>
                               <Typography component={'span'} variant="body2" align="left" color="textSecondary">
                                 <LocationSpan>Reviewer: </LocationSpan>
-                                <Link
-                                  component={RouterLink}
-                                  to={`/profile/${rating.username}`}
+                                <Tooltip
+                                  title={`View ${rating.username}'s profile`}
+                                  placement="bottom-start"
                                 >
-                                  {rating.username}
-                                </Link>
+                                  <Link
+                                    component={RouterLink}
+                                    to={`/profile/${rating.username}`}
+                                  >
+                                    {rating.username}
+                                  </Link>
+                                </Tooltip>
                               </Typography>
                             </div>
                           }
@@ -688,14 +755,6 @@ const Listing = () => {
                         />
                       </ListItem>
                     </List>
-
-                    {/* <DeleteDialog
-                      open={open} handleClose={handleClose}
-                      deleteId={parseInt(deleteAvailId)}
-                      page={`/listings/${listingId}`}
-                      item="Review"
-                    /> */}
-
                   </Box>
                 ))
               }

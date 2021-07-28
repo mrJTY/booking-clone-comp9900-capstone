@@ -4,6 +4,11 @@ import Navbar from '../components/Navbar';
 import ResourceCard from "../components/ResourceCard";
 import SearchControls from '../components/SearchControls';
 import {
+  followUserRequest,
+  unfollowUserRequest,
+  fetchSearchUsers
+} from '../utils/auxiliary';
+import {
   Redirect
 } from 'react-router-dom';
 import {
@@ -17,9 +22,14 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  ListItemSecondaryAction,
   Avatar,
   Link,
+  Button,
+  Tooltip,
 } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import CheckIcon from '@material-ui/icons/Check';
 import { Link as RouterLink } from 'react-router-dom';
 import { useHistory } from "react-router-dom";
 
@@ -61,6 +71,11 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
   },
+  userResultsListRoot: {
+    // display: 'flex',
+    width: '100%',
+    justifyContent: 'center',
+  },
   userResultsDiv: {
     display: 'flex',
     justifyContent: 'center',
@@ -75,10 +90,12 @@ const Search = () => {
   const context = React.useContext(StoreContext);
   const classes = useStyles();
   const token = context.token[0];
+  const baseUrl = context.baseUrl;
   const [page, setPage] = context.pageState;
   const [loadingState, setLoadingState] = React.useState('idle');
+  const primaryUsername = context.username[0];
   const searchResults = context.searchResults[0];
-  const searchUserResults = context.searchUserResults[0];
+  const [searchUserResults, setSearchUserResults] = context.searchUserResults;
   const searchQuery = context.searchQuery[0];
   const searchUserQuery = context.searchUserQuery[0];
   const searchType = context.searchType[0];
@@ -129,6 +146,15 @@ const Search = () => {
   }, [searchType, searchQuery, searchUserQuery, searchCategories, useSearchTimeFrame, history]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
+  const handleClickFollow = async (follow, userId, username) => {
+    if (follow) {
+      await followUserRequest(baseUrl, token, userId);
+    } else {
+      await unfollowUserRequest(baseUrl, token, username);
+    }
+    await fetchSearchUsers(baseUrl, token, searchUserQuery, setSearchUserResults);
+  }
+
   return (
     <Container>
       <Navbar page={page}/>
@@ -153,7 +179,7 @@ const Search = () => {
                 {
                   loadingState === 'success' &&
                   searchType === 'listings' &&
-                  searchResults.length > 0 &&
+                  searchResults?.length > 0 &&
                   <Grid className={classes.root} container spacing={2}>
                     <Grid item xs={12}>
                       <Grid container justify="center" spacing={2}>
@@ -175,43 +201,111 @@ const Search = () => {
                 {
                   loadingState === 'success' &&
                   searchType === 'listings' &&
-                  searchResults.length === 0 &&
+                  searchResults?.length === 0 &&
                   <Box className={classes.noResultsDiv}>
                     No results for Listings found
                   </Box>
-                }                
+                }
                 {
                   loadingState === 'success' &&
                   searchType === 'users' &&
-                  searchUserResults.length > 0 &&
-                  <List>
+                  searchUserResults?.length > 0 &&
+                  <List className={classes.userResultsListRoot}>
                     {
                       searchUserResults.map((user) => (
-                        <ListItem key={user.user_id} className={classes.userResultsDiv} alignItems="flex-start">
+                        <ListItem key={user.user_id} className={classes.userResultsDiv}>
                           <ListItemAvatar>
-                            <Avatar aria-label="resource">
-                              {user.username[0]}
-                            </Avatar>
+                            <Avatar
+                              aria-label="user-avatar"
+                              src={user.avatar}
+                            />
                           </ListItemAvatar>
                           <ListItemText
                             primary={
-
-
-                            <Typography variant="subtitle2" color="textSecondary" align="left">
-                              <Link
-                                component={RouterLink}
-                                to={`/profile/${user.username}`}
-                              >
-                                {user.username}
-                              </Link>
-                            </Typography>
-
-                             
+                              <Typography variant="subtitle2" color="textSecondary" align="left">
+                                <Tooltip
+                                  title={`View ${user.username}'s profile`}
+                                  placement="bottom-start"
+                                >
+                                  <Link
+                                    component={RouterLink}
+                                    to={`/profile/${user.username}`}
+                                  >
+                                    {user.username}
+                                  </Link>
+                                </Tooltip>
+                              </Typography>
                             }
-                            secondary={
-                              'following?'
-                            }
+                            secondary={user.email}
                           />
+                          {
+                            user.username !== primaryUsername &&
+                            <ListItemSecondaryAction>
+                              {
+                                Boolean(Number(user.is_followed)) === true &&
+                                <Tooltip title={`Unfollow ${user.username}`} aria-label={'unfollow'}>
+                                  <Button
+                                    id={'user-unfollow-button'}
+                                    variant={'outlined'}
+                                    color={'secondary'}
+                                    className={classes.button}
+                                    onClick={() => {
+                                      if (Boolean(Number(user.is_followed)) === true) {
+                                        handleClickFollow(false, null, user.username);
+                                      }
+                                    }}
+                                  >
+                                    {'Unfollow'}
+                                  </Button>
+                                </Tooltip>
+                              }
+                              <Tooltip
+                                title={
+                                  Boolean(Number(user.is_followed)) !== true
+                                    ? `Follow ${user.username}`
+                                    : ''
+                                }
+                                aria-label={'follow'}
+                                disableHoverListener={
+                                  Boolean(Number(user.is_followed)) !== true
+                                    ? false
+                                    : true
+                                }
+                              >
+                                <Button
+                                  id={'user-follow-button'}
+                                  variant={
+                                    Boolean(Number(user.is_followed)) !== true ?
+                                      'contained' :
+                                      'outlined'
+                                  }
+                                  color={'default'}
+                                  className={classes.button}
+                                  disabled={
+                                    Boolean(Number(user.is_followed)) !== true ?
+                                      false :
+                                      true
+                                  }
+                                  onClick={() => {
+                                    if (Boolean(Number(user.is_followed)) !== true) {
+                                      handleClickFollow(true, user.user_id, null);
+                                    }
+                                  }}
+                                  endIcon={
+                                    Boolean(Number(user.is_followed)) !== true ?
+                                      <AddIcon /> :
+                                      <CheckIcon />
+                                  }
+                                >
+                                  {
+                                    Boolean(Number(user.is_followed)) !== true ?
+                                      'Follow' :
+                                      'Following'
+                                  }
+                                </Button>
+                              </Tooltip>
+                            </ListItemSecondaryAction>
+                          }
                         </ListItem>
                       ))
                     }
@@ -220,7 +314,7 @@ const Search = () => {
                 {
                   loadingState === 'success' &&
                   searchType === 'users' &&
-                  searchUserResults.length === 0 &&
+                  searchUserResults?.length === 0 &&
                   <Box className={classes.noResultsDiv}>
                     No results for Users found
                   </Box>

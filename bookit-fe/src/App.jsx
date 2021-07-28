@@ -4,13 +4,12 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import MyBookings from './pages/MyBookings';
-import EditBooking from './pages/EditBooking';
 import MyListings from './pages/MyListings';
 import Listing from './pages/Listing';
-import NewListing from './pages/NewListing';
 import EditListing from './pages/EditListing';
 import Discover from './pages/Discover';
 import Profile from './pages/Profile';
+import UserSettings from './pages/UserSettings';
 import Search from './pages/Search';
 import {
   BrowserRouter as Router,
@@ -103,14 +102,11 @@ function App () {
                 <Route exact path="/mybookings">
                   <MyBookings />
                 </Route>
-                <Route exact path="/bookings/edit/:id">
-                  <EditBooking />
-                </Route>
                 <Route exact path="/mylistings">
                   <MyListings />
                 </Route>
                 <Route exact path="/listings/create">
-                  <NewListing />
+                  <EditListing />
                 </Route>
                 <Route exact path="/listings/:id">
                   <Listing />
@@ -123,6 +119,9 @@ function App () {
                 </Route>
                 <Route exact path="/profile/:user">
                   <Profile />
+                </Route>
+                <Route exact path="/usersettings">
+                  <UserSettings />
                 </Route>
                 <Route path="/search">
                   <Search />
