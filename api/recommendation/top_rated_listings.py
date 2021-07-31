@@ -23,6 +23,7 @@ def get_top_rated_listings(n_listings: int = 5):
             group by b.listing_id
         ) as r
         on r.listing_id = l.listing_id 
+    order by r.avg_rating desc
     limit {n_listings} 
     """
     with engine.connect() as conn:

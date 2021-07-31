@@ -11,6 +11,7 @@ from api.models.user import UserModel
 from faker import Faker
 import pandas as pd
 
+random.seed(123)
 fake = Faker()
 fake_seed = 1
 
@@ -49,16 +50,13 @@ def create_fake_listings():
         address = r[1]
         category = r[2]
         description = r[3]
-        # Faker.seed(fake_seed + i)
-        # company = fake.company().lower()
-
-        # All belong to user 1
-        username = users[0].username
-
+        # Create a listing
         l = ListingModel()
         l.listing_id = i
-        # All belong to user id 1
-        l.user_id = users[0].user_id
+        # Assign listings to random users so that Stephanie isn't the only resource owner
+        random_user = random.randrange(0, n_users)
+        username = users[random_user].username
+        l.user_id = users[random_user].user_id
         l.listing_name = company
         l.category = category.lower()
         l.address = address
@@ -75,8 +73,10 @@ def create_fake_availabilties():
         # All dummy availabilities on one listing id
         listing_id = listings[i].listing_id
         # Give me a random start time (hourly blocks)
-        random.seed(123)
-        start_time = (1626458400 + random.randrange(0, 2629746, 60 * 60)) * 1000
+        # Generate random availabilities around September 2021
+        start_unix_time = 1631109600
+        # Spread it across the month
+        start_time = (start_unix_time + random.randrange(0, 2629746, 60 * 60)) * 1000
         # Set end time as 1 hour
         end_time = start_time + (60 * 60 * 1000)
         a = AvailabilityModel(
@@ -96,8 +96,9 @@ def create_fake_bookings():
         if i <= 8:
             user_id = 16
         else:
-            user_id = users[1].user_id
-        # All bookings on listing 0
+            # Assign bookings to random users so that John isn't the only one making bookings
+            random_user = random.randrange(0, n_users)
+            user_id = users[random_user].user_id
         listing_id = listings[i].listing_id
         # Availability id must match booking
         availability_id = availabilities[i].availability_id
