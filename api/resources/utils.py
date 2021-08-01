@@ -1,8 +1,6 @@
 from api.resources.listing import get_ratings, calculate_avg_rating
 from api import engine
 from api.resources.user import UserModel
-from api.resources.follower import FollowerModel
-from flask_login import login_user, logout_user, login_required, current_user
 
 
 def find_followees(follower_user_id):

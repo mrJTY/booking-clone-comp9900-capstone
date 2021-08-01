@@ -63,3 +63,12 @@ On a separate terminal, start the frontend by running:
 ```shell
 ./bin/start-frontend.sh
 ```
+
+## Running test suite
+
+To run the test suite, ensure the backend service is running.
+
+To run the tests:
+```shell
+make install
+```

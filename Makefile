@@ -1,3 +1,4 @@
+SHELL := bash
 REPO_ROOT := `git rev-parse --show-toplevel`
 
 # Install the dependencies
