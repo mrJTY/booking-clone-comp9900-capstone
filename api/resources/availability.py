@@ -1,5 +1,5 @@
 import logging
-
+from datetime import datetime
 from api import db
 from api.models.listing import ListingModel
 from api.utils.req_handling import *
@@ -135,8 +135,12 @@ class AvailabilityList(Resource):
     def get(self):
         listing_id = request.args.get("listing_id")
         logging.info(f"Searching for availabilities under listing_id: {listing_id}")
-        availabilities = AvailabilityModel.query.filter(
-            AvailabilityModel.listing_id == listing_id
-        ).all()
+        availabilities = (
+            AvailabilityModel.query.filter(AvailabilityModel.listing_id == listing_id)
+            .filter(
+                AvailabilityModel.end_time >= int(datetime.now().strftime("%s")) * 1000
+            )
+            .all()
+        )
         search_results = [a.to_dict() for a in availabilities]
         return {"availabilities": search_results}

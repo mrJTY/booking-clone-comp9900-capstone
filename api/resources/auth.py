@@ -126,7 +126,13 @@ class AuthMe(Resource):
                 get_interval = start_vs_end(
                     timeslot["end_time"], timeslot["start_time"]
                 )
-                hours_booked += get_interval
+                booking_month = datetime.fromtimestamp(
+                    timeslot["start_time"] / 1000
+                ).strftime("%m")
+                current_month = datetime.now().strftime("%m")
+                if booking_month == current_month:
+                    hours_booked += get_interval
+
             get_user_dict["hours_booked"] = hours_booked
 
             # Who I'm following
