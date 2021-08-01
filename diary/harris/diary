@@ -56,5 +56,11 @@ the semester. Working smarter not harder. On the other hand, mentioned the impro
 Furthermore towards the end of the week, implemented the profile picture functionality on the backend, which means a user can put in his/her profile picture at anytime. Also
 has the ability to return all their listings by username. 
 
+Week 9
+The program was largely done and I started writing up on the report. Since the problem statements, the architecture came from the proposal already I largely focused on the use cases
+that were presented in the proposal. I wrote up a walkthrough on every use case provided (for example, how to make a listing, how to book, how to make a rating), and showing
+that it satisifies the criteria in the spec. 
 
+Also put down the challenges that were implemented in the app (especially the SQL engine), and part of the justification for using the tools used the recommender system.
 
+Showed up for the practice rehersal on Saturday, and asked Iwan some questions about the report. 
