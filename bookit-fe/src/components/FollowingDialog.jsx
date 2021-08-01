@@ -87,6 +87,7 @@ const useStyles = makeStyles((theme) => ({
   },
   dialogContent: {
     width: 500,
+    maxHeight: 500,
     paddingTop: 0,
     paddingBottom: 0,
   },
@@ -122,21 +123,21 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-// Loads a modal which allows a user to change a booking, provided
-// they enter a name. They may choose to cancel/close the modal without
-// the modification of a booking.
+// Loads a modal which shows the list of followers of/users following the
+// associated profile, depending on the followees prop (which is a Boolean).
+// The modal also allows the primary user to follow/unfollow the users within
+// the list, depending on the followed status, and the option to navigate to
+// their profile.
 const FollowingDialog = ({
   followingDialog, handleCloseDialog, followArray,
   followees, handleClickFollow, username
 }) => {
+  // state variables
   const context = React.useContext(StoreContext);
   const primaryUsername = context.username[0];
   const theme = useTheme();
   const classes = useStyles();
   const history = useHistory();
-
-  console.log('follow array is:')
-  console.log(followArray)
 
   return (
     <ThemeProvider theme={theme}>
@@ -148,7 +149,6 @@ const FollowingDialog = ({
           aria-labelledby="edit-booking-modal-title"
           aria-describedby="edit-booking-modal-description"
           disableRestoreFocus={true}
-          disableBackdropClick={true}
         >
           <Box
             id="booking-dialog-title"
@@ -167,7 +167,6 @@ const FollowingDialog = ({
                 }
               </Typography>
             </Box>
-
             <DialogActions
               className={classes.dialogTitleCloseBtntDiv}
             >
@@ -182,11 +181,8 @@ const FollowingDialog = ({
                 </IconButton>
               </Tooltip>
             </DialogActions>
-
           </Box>
-
           <Divider className={classes.listDivider}/>
-
           <DialogContent
             dividers={true}
             className={classes.dialogContent}

@@ -42,14 +42,8 @@ const LocationSpan = styled.span`
   color: white;
 `
 
-// Page styling used on the EditGame page and its subcomponents
+// Page styling used on the Listing page and its subcomponents
 const useStyles = makeStyles((theme) => ({
-  root: {
-    backgroundColor: theme.palette.background.paper,
-    paddingLeft: '8px',
-    paddingRight: '4px',
-    marginBottom: '2px',
-  },
   outerContainer: {
     width: '100%',
   },
@@ -77,27 +71,12 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     backgroundColor: theme.palette.background.default,
   },
-  wrapper: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    alignSelf: 'flex-start',
-    alignContent: 'flex-start',
-    paddingTop: '20px',
-    width: '100%',
-  },
   containerDiv: {
     display: 'flex',
     flexDirection: 'column',
     alignSelf: 'flex-start',
     alignContent: 'flex-start',
     width: '100%',
-  },
-  subcontainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    width: '100%',
-    paddingBottom: '20px',
   },
   titleSubcontainer: {
     display: 'flex',
@@ -116,12 +95,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     width: '100%',
     justifyContent: 'flex-start',
-  },
-  titleBox: {
-    display: 'flex',
-    width: '100%',
-    justifyContent: 'center',
-    paddingBottom: '10px',
   },
   resourceTitleDiv: {
     display: 'flex',
@@ -142,14 +115,9 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     width: '10em',
   },
-  buttonText:{
+  buttonText: {
     textTransform: 'none',
     fontSize: '16px',
-  },
-  newAvailButton: {
-    margin: theme.spacing(1),
-    width: '100%',
-    justifyContent: 'center',
   },
   imgContainer: {
     display: 'flex',
@@ -168,18 +136,12 @@ const useStyles = makeStyles((theme) => ({
     minHeight: '128px',
     minWidth: '128px',
   },
-  backButton: {
-    maxHeight: '38px',
-  },
   listRootAvail: {
     flexGrow: 1,
     listStyleType: 'none',
     padding: 0,
     paddingLeft: '1em',
     paddingRight: '1em',
-  },
-  listDiv: {
-    paddingBottom: '4px',
   },
   listItemText: {
     maxWidth: '36em',
@@ -198,33 +160,38 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '52em',
     width: '100%',
     margin: theme.spacing(1),
-    // paddingLeft: '2em',
-  },
-  toasty: {
-    textAlign: 'center',
-    justifyContent: 'center',
-    alignContent: 'center',
   },
   divider: {
     margin: '1em 0em',
     height: '2px',
   },
+  availNotFoundDiv: {
+    margin: '2em 0em',
+  },
 }));
 
-// The Listing page allows a user to view or modify a listing.
+// class used for the Toastify error component styling
+const toastErrorStyle = {
+  backgroundColor: '#cc0000',
+  opacity: 0.8,
+  textAlign: 'center',
+  fontSize: '18px'
+};
+
+// The Listing page allows a user to view a Listing, its availabilities & reviews.
+// If the primary user owns the Listings, they are also able to edit/delete the
+// Listing, or add a new availability. The ability to view availabilities or reviews
+// is managed through the current state object pertaining to the respective button.
+// Information regarding a Listing that may be found on the page includes:
+// Listing owner, location, name, description, average rating, availabilities,
+// and associated reviews. The primary user may also see their remaining booking
+// hours for the month, if the Listing is not owned by them.
 const Listing = () => {
+  // state variables
   const context = React.useContext(StoreContext);
   const baseUrl = context.baseUrl;
   const token = context.token[0];
   const history = useHistory();
-
-  // class used for the Toastify error component styling
-  const toastErrorStyle = {
-    backgroundColor: '#cc0000',
-    opacity: 0.8,
-    textAlign: 'center',
-    fontSize: '18px'
-  };
   // used for the delete dialog
   const [open, setOpen] = React.useState(false);
   // determines which availability in particular to delete
@@ -237,50 +204,50 @@ const Listing = () => {
   const handleClose = () => {
     setOpen(false);
   };
-
+  // get the Listing ID from the URL parameter id
   const params = useParams();
   const listingId = params.id || null;
-
+  // if not logged in, redirect to login screen
   React.useEffect(() => {
     if (token === null || listingId === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   // context variables used throughout the page
   const [page, setPage] = context.pageState;
   // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
-
+  // availabilities vs reviews state management
   const [showAvailBtn, setShowAvailBtn] = React.useState(true);
-
+  // show the remaining booking hours
   const [bookedHrs, setBookedHrs] = context.bookedHrs;
+  // stores listing owner user data
   const [userProfile, setUserProfile] = React.useState(null);
-
   // updated ensures appropriate re-rendering upon changing or deleting a resource
   const [updated, setUpdated] = context.updates;
   const username = context.username[0];
   const [availabilities, setAvailabilities] = React.useState([]);
   const [resource, setResource] = React.useState(null);
-
+  // handles the opening of the new availability modal, if owned by primary user
   const [newAvailModal, setNewAvailModal] = React.useState(false);
   const handleCloseNewModal = () => {
     setNewAvailModal(false);
   };
-
+  // handles the opening of a modal that changes a particular availability
   const [availModal, setAvailModal] = React.useState(false);
   const handleCloseModal = () => {
     setAvailModal(false);
   };
-
   // determines which availability in particular to modify
   const [modifyAvailId, setModifyAvailId] = React.useState(null);
-
   const handleClickModfyAvail = (id) => {
     setModifyAvailId(id);
     setAvailModal(true);
   }
-
+  // called upon clicking the book it button on a particular availability
+  // sends a POST API request which checks whether the user has enough
+  // booking hours remaining for the current month, along with updating the
+  // booked out state upon a successful booking.
   const handleClickBookIt = (availId) => {
     async function attemptBooking () {
       try {
@@ -297,20 +264,30 @@ const Listing = () => {
             "availability_id": availId
           }
         })
-
         console.log(response.data);
-        
-        // setResource(response.data);
+        const successMsg = `Successfully Booked Availability ID: ${availId}`;
+        toast.success(
+          successMsg, {
+            position: 'top-right',
+            hideProgressBar: true,
+            style: {
+              opacity: 0.8,
+              textAlign: 'center',
+              fontSize: '18px'
+            }
+          }
+        );
         setUpdated(!updated);
-
       } catch(error) {
-        
         console.log(error.response);
-
         let errorText = '';
-        error.response.data.error !== undefined
-          ? errorText = error.response.data.error
-          : errorText = 'Invalid input'
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Invalid input';
+        }
         toast.error(
           errorText, {
             position: 'top-right',
@@ -318,14 +295,12 @@ const Listing = () => {
             style: toastErrorStyle
           }
         );
-
-        // setResource(null);
       }
-
     }
     attemptBooking();
   }
-
+  // use effect hook which sets up the Listing page, populating it with all
+  // of above mentioned information
   React.useEffect(() => {
     setLoadingState('loading');
     setPage(`/listings/${listingId}`);
@@ -340,17 +315,26 @@ const Listing = () => {
             "Authorization": `JWT ${token}`,
           },
         })
-
-        console.log(response.data);
-
         setResource(response.data);
-      } catch(error) {
-        
+      } catch (error) {
         console.log(error.response);
-
+        let errorText = '';
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Invalid input';
+        }
+        toast.error(
+          errorText, {
+            position: 'top-right',
+            hideProgressBar: true,
+            style: toastErrorStyle
+          }
+        );
         setResource(null);
       }
-
       try {
         const response = await axios({
           method: 'GET',
@@ -361,25 +345,32 @@ const Listing = () => {
             "Authorization": `JWT ${token}`,
           },
         })
-
-        console.log(response.data.availabilities)
-
         await setAvailabilities(response.data.availabilities);
-
       } catch(error) {
-        
         console.log(error.response);
-
+        let errorText = '';
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Invalid input';
+        }
+        toast.error(
+          errorText, {
+            position: 'top-right',
+            hideProgressBar: true,
+            style: toastErrorStyle
+          }
+        );
         setAvailabilities([]);
       }
-
       await fetchAuthMe(baseUrl, token, setUserProfile);
-
       setLoadingState('success');
     }
     setupListing();
   }, [updated]); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // sets up the remaining booking hours, and updated upon clicking book it
   React.useEffect(() => {
     async function setupBookedHrs () {
       if (userProfile !== null ) {
@@ -388,9 +379,9 @@ const Listing = () => {
     }
     setupBookedHrs();
   }, [userProfile]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // classes used for Material UI component styling
   const classes = useStyles();
+
   return (
     <Container className={classes.outerContainer}>
       <Navbar page={page} />
@@ -454,9 +445,7 @@ const Listing = () => {
                   </Box>
                 }
               </Box>
-
               <Divider light className={classes.divider} />
-
               <Typography gutterBottom variant="body2" align="left">
                 Owner / {' '}
                 <Tooltip
@@ -495,9 +484,7 @@ const Listing = () => {
                 </Box>
               </Box>
             </Box>
-
             <Divider light={true}/>
-
             <Box className={classes.mytitleDiv}>
               <Box className={classes.titleSubcontainer}>
                 <Box className={classes.titleHeadingDiv}>
@@ -539,7 +526,7 @@ const Listing = () => {
                   showAvailBtn === true &&
                   resource.username === username &&
                   <Box className={classes.outerContainerBtns}>
-                    <Tooltip title="New Availability" aria-label="new availability">
+                    <Tooltip title="Create New Availability" aria-label="new availability">
                       <Button
                         id="new-availability-button"
                         variant="contained"
@@ -563,15 +550,14 @@ const Listing = () => {
                 }
                 {
                   showAvailBtn === true &&
-                  resource.username !== username &&
                   <Box className={classes.outerContainerBookedHrs}>
                     <Typography align="center" variant="subtitle1" color="textPrimary">
-                      {`Remaining Booking hours: ${bookedHrs}`}
+                      {`Remaining Monthly Booking hours: ${bookedHrs}`}
                     </Typography>
                   </Box>
                 }
               </Box>
-
+              {/* renders all the availabilities for the listing */}
               {
                 showAvailBtn === true &&
                 availabilities.length > 0 &&
@@ -696,6 +682,19 @@ const Listing = () => {
                 ))
               }
               {
+                showAvailBtn === true &&
+                availabilities.length === 0 &&
+                <Box className={classes.availNotFoundDiv}>
+                  <Typography
+                    component={'span'} align="center"
+                    variant="body1" color="textSecondary"
+                  >
+                    {`This Listing has no availabilities yet.`}
+                  </Typography>
+                </Box>                
+              }
+              {/* renders all the reviews for the listing */}
+              {
                 showAvailBtn === false &&
                 resource !== null &&
                 resource.ratings.length > 0 &&
@@ -757,6 +756,19 @@ const Listing = () => {
                     </List>
                   </Box>
                 ))
+              }
+              {
+                showAvailBtn === false &&
+                resource !== null &&
+                resource.ratings.length === 0 &&
+                <Box className={classes.availNotFoundDiv}>
+                  <Typography
+                    component={'span'} align="center"
+                    variant="body1" color="textSecondary"
+                  >
+                    {`This Listing has no reviews yet.`}
+                  </Typography>
+                </Box>                
               }
             </Box>
           </Box>

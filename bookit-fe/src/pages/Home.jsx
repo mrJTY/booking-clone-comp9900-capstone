@@ -73,7 +73,6 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    // paddingRight: '1em',
   },
   button: {
     margin: theme.spacing(1),
@@ -89,6 +88,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// The Home screen welcomes the user and displays the SearchContronls component
+// as the first major subcomponent. When searching from the Home screen,
+// the user is navigated to the Search results page.
+// The rest of the Home screen contains an optionally rendered User Feed, which
+// has a button changing the page state and renders a list of all of the Listings
+// owned by Users the Primary User is currently following, contained within
+// ResourceCard subcomponents.
 const Home = () => {
   const context = React.useContext(StoreContext);
   const classes = useStyles();
@@ -141,15 +147,10 @@ const Home = () => {
                 <Typography paragraph align="left" variant="h4">
                   Welcome, {username}.
                 </Typography>
-
-
                 <Divider light className={classes.divider} />
-
                 <SearchControls />
               </Box>
-
               <Divider light={true}/>
-
               <Box className={classes.mytitleDiv}>
                 <Box className={classes.mysubtitleDiv}>
                   <Box className={classes.feedSubtitleDiv}>
@@ -162,7 +163,6 @@ const Home = () => {
                       User Feed
                     </Typography>
                   </Box>
-
                   <Box className={classes.showFeedBtnDiv}>
                     <Tooltip 
                       title={
@@ -195,7 +195,6 @@ const Home = () => {
                       </Button>
                     </Tooltip>
                   </Box>
-
                 </Box>
                 {
                   loadingState === 'success' &&

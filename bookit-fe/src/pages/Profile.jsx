@@ -1,6 +1,5 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
-// import DefaultAvatar from '../assets/default-avatar.svg';
 import {
   followUserRequest,
   unfollowUserRequest,
@@ -13,7 +12,6 @@ import {
 } from '../utils/auxiliary';
 import ResourceCard from '../components/ResourceCard';
 import {
-  // useHistory,
   Redirect,
   useParams,
 } from 'react-router-dom';
@@ -33,7 +31,7 @@ import AddIcon from '@material-ui/icons/Add';
 import CheckIcon from '@material-ui/icons/Check';
 import FollowingDialog from '../components/FollowingDialog';
 
-// Page styling used on the MyListings screen and its subcomponents
+// Page styling used on the Profile screen and its subcomponents
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -128,18 +126,16 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: '0.5em',
   },
   usernameTextDiv: {
-    // flex: 1,
     width: '100%',
   },
   bookedHrsDiv: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '14em',
+    width: '20em',
   },
   followDiv: {
     display: 'flex',
-    // flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -148,7 +144,7 @@ const useStyles = makeStyles((theme) => ({
     margin: '0em 0.5em',
   },
   followText: {
-    // paddingRight: '0.5em',
+
   },
   followTextOuterDiv: {
     display: 'flex',
@@ -174,47 +170,47 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
+// The Profile page allows a user to view a user profile, whether it is their own
+// or that of another user. If the primary user owns the Profile, they are able
+// to view their username, a popup modal containing a list of followers/following,
+// their remaining monthly booking hours, their email and avatar.
+// If the profile is that of another user, the main differences are instead of
+// being able to view booking hours, the user may choose to follow/unfollow them
+// instead, and they also see all the Listings that user owns as ResourceCards.
 const Profile = () => {
+  // state variables
   const context = React.useContext(StoreContext);
   const baseUrl = context.baseUrl;
   const token = context.token[0];
   const primaryUsername = context.username[0];
   const [bookedHrs, setBookedHrs] = context.bookedHrs;
-  // const history = useHistory();
   const params = useParams();
   const profileUsername = params.user;
-
-  console.log(params)
-
+  // redirect to login screen if user is not logged in
   React.useEffect(() => {
     if (token === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // object containing all of the users a user is following from a GET API request
-  // const [following, setFollowing] = context.following;
   // the page variable stores the current page as a string
   const [page, setPage] = context.pageState;
   // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
   const [userProfile, setUserProfile] = React.useState(null);
-
+  // followers/following popu modal open state variables
   const [followersDialog, setFollowersDialog] = React.useState(false);
   const handleCloseFollowersDialog = () => {
     setFollowersDialog(false);
   };
-
   const [followingDialog, setFollowingDialog] = React.useState(false);
   const handleCloseFollowingDialog = () => {
     setFollowingDialog(false);
   };
-
+  // state variable triggering an update of the follow/unfollow buttons
   const [changeFollowState, setChangeFollowState] = React.useState(false);
-
+  // state variable pertaining to a particular user's Listings
   const [userListings, setUserListings] = React.useState(null);
-
+  // renders the profile page contents
   React.useEffect(() => {
     setPage('/profile/me');
     async function setupProfile () {
@@ -229,8 +225,7 @@ const Profile = () => {
     }
     setupProfile();
   }, [profileUsername]); // eslint-disable-line react-hooks/exhaustive-deps
-
-
+  // renders the follow/unfollow buttons depending on the followed state
   React.useEffect(() => {
     async function followStateChange () {
       if (changeFollowState === true) {
@@ -244,7 +239,7 @@ const Profile = () => {
     }
     followStateChange();
   }, [changeFollowState]); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // renders & updates the primary user's remaining booking hours
   React.useEffect(() => {
     async function setupBookedHrs () {
       if (profileUsername === primaryUsername && userProfile !== null ) {
@@ -253,8 +248,8 @@ const Profile = () => {
     }
     setupBookedHrs();
   }, [userProfile]); // eslint-disable-line react-hooks/exhaustive-deps
-
-
+  // called upon clicking the follow button - sends an API request to
+  // follow/unfollow a user depending on the followed state
   const handleClickFollow = async (follow, userId, username) => {
     if (follow) {
       await followUserRequest(baseUrl, token, userId);
@@ -263,7 +258,6 @@ const Profile = () => {
     }
     setChangeFollowState(true);
   }
-
   // classes used for Material UI component styling
   const classes = useStyles();
 
@@ -286,15 +280,12 @@ const Profile = () => {
                 <Typography paragraph align="left" variant="h4">
                   Profile
                 </Typography>
+                <Divider light className={classes.divider} />
               </Box>
-
-              <Divider light className={classes.divider} />
-
               <Box className={classes.box}>
                 <Box className={classes.imgContainer}>
                   <Tooltip title={`${userProfile.username}'s Avatar`}>
                     <img src={
-                        // DefaultAvatar
                         userProfile.avatar
                       }
                       alt="thumbnail"
@@ -326,7 +317,6 @@ const Profile = () => {
                               color={'secondary'}
                               className={classes.button}
                               onClick={() => {
-                                console.log('Clicked Unfollow')
                                 if (Boolean(Number(userProfile.is_followed)) === true) {
                                   handleClickFollow(false, null, userProfile.username);
                                 }
@@ -387,12 +377,11 @@ const Profile = () => {
                       userProfile.username === primaryUsername &&
                       <Box className={classes.bookedHrsDiv}>
                         <Typography align="center" variant="subtitle1" color="textPrimary">
-                          {`Remaining Booking hours: ${bookedHrs}`}
+                          {`Remaining Monthly Booking hours: ${bookedHrs}`}
                         </Typography>
                       </Box>
                     }
                   </Box>
-
                   <Box className={classes.followTextOuterDiv}>
                     <Box className={classes.followTextItemDiv}>
                       <Tooltip
@@ -453,15 +442,12 @@ const Profile = () => {
                       </Typography>                      
                     </Box>
                   </Box>
-
                   <Typography paragraph align="left" variant="body2" color="textSecondary" component="p">
                     {userProfile.email}
                   </Typography>
                 </Box>
               </Box>
-
               <Divider light={true}/>
-
               {
                 userProfile.username !== primaryUsername &&
                 <Box className={classes.mytitleDiv}>
@@ -473,7 +459,7 @@ const Profile = () => {
                         variant="h5"
                         color="textSecondary"
                       >
-                        User Listings
+                        {`${userProfile.username}'s Listings`}
                       </Typography>
                     </Box>
                   </Box>

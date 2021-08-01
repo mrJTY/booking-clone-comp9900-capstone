@@ -38,28 +38,15 @@ import {
   KeyboardDateTimePicker,
 } from '@material-ui/pickers';
 
+// Material UI styling used on the SearchControls component
 const useStyles = makeStyles((theme) => ({
   searchControlContainer: {
     padding: 0,
-  },
-  search: {
-    background: "gray",
-    height: "100%",
-  },
-  searchIcon: {
-    height: "100%",
-  },
-  searchButton: {
-    height: "100%",
-  },
-  formControl: {
-    margin: theme.spacing(3),
   },
   searchContainerDiv: {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    // margin: theme.spacing(1),
   },
   searchRadioDiv: {
     display: 'flex',
@@ -120,7 +107,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   categoriesForm: {
-    // margin: theme.spacing(1),
     marginRight: '0.25em',
     width: '18em',
   },
@@ -148,63 +134,55 @@ const searchCategoriesList = [
   { key: 4, value: 'Other'},
 ];
 
-
+// The SearchControls component is used within the Home and Search screens, which
+// allows the user to search for Listings or Users, depending on the selected
+// search type. When searching for Listings, the user may filter within
+// one or more Listings categories, and/or within an availability time frame.
+// Searching for Listings includes matches relating to its Title, Description
+// and Location. Searching for Users simply returns similar matches to the input.
 const SearchControls = () => {
+  // state variables
   const context = React.useContext(StoreContext);
   const baseUrl = context.baseUrl;
   const token = context.token[0];
   const page = context.pageState[0];
+  // a separation of search queries depending on search type
   const [searchQuery, setSearchQuery] = context.searchQuery;
-  const [searchUserQuery, setSearchUserQuery] = context.searchUserQuery;  
+  const [searchUserQuery, setSearchUserQuery] = context.searchUserQuery;
+  // the search type refers to either 'listings' or 'users'
   const [searchType, setSearchType] = context.searchType;
   const [searchCategories, setSearchCategories] = context.searchCategories;
+  // searchResults refers to listings
   const setSearchResults = context.searchResults[1];
+  // searchUserResults refers to users
   const setSearchUserResults = context.searchUserResults[1];
   const [searchStartDatetime, setSearchStartDatetime] = context.searchStartDatetime;
   const [searchEndDatetime, setSearchEndDatetime] = context.searchEndDatetime;
   const [useSearchTimeFrame, setUseSearchTimeFrame] = context.useSearchTimeFrame;
   const history = useHistory();
 
-  // const [searchVals, setSearchVals] = React.useState(
-  // {
-  //   search: '',
-  // });
-
-  // const handleChangeSearchVals = (prop) => (event) => {
-  //   setSearchVals({ ...searchVals, [prop]: event.target.value });
-  // };
-
   // Handle changes on the radio button to search listing vs users
   const handleSearchTypeChange = (event) => {
     setSearchType(event.target.value);
   }
-
+  // both text change handlers dynamically update the query state upon input
   const handleSearchTextChange = (event) => {
     setSearchQuery(event.target.value);
   }
-
   const handleSearchUserTextChange = (event) => {
     setSearchUserQuery(event.target.value);
   }
-
+  // clears the input field depending on the search type
   const handleSearchClear = () => {
     searchType === 'listings'
       ? setSearchQuery('')
       : setSearchUserQuery('')
   }
-
+  // handle click also fires on the Enter keypress - this sends a API request
+  // to update the respective query results variable and potentially navigates
+  // to the search results page is not already on it
   const handleSearchClick = () => {
-
-    console.log('search query:')
-    console.log(searchQuery)
-    console.log('search type:')    
-    console.log(searchType)
-    console.log('search categories:')    
-    console.log(searchCategories)
     let categoriesFlat = searchCategories.join(',').toLowerCase();
-    console.log('categories flat:')    
-    console.log(categoriesFlat)
-
     if (searchType === 'listings') {
       fetchSearchListings(
         baseUrl, token, searchQuery, categoriesFlat,
@@ -226,21 +204,20 @@ const SearchControls = () => {
       );
     }    
   }
-
+  // handles the changing of listing category
   const handleChangeCategory = (event) => {
     setSearchCategories(event.target.value);
   };
-
   const handleDeleteCategoryChip = (categoryName) => () => {
     setSearchCategories(
       (categories) => categories.filter((category) => category !== categoryName)
     );
   };
-
   const handleClearSearchCategories = () => {
     setSearchCategories([]);
   };
-
+  // state / end date time functions ensure hourly granularity, with the
+  // end time always at least an hour ahead of the start time
   const handleStartDateChange = (date) => {
     const mins = date.getMinutes();
     if (mins <= 30) {
@@ -255,7 +232,6 @@ const SearchControls = () => {
     }
     setSearchStartDatetime(date);
   };
-
   const handleEndDateChange = async (date) => {
     if (date <= searchStartDatetime) {
       let newDatetime = new Date(searchStartDatetime);
@@ -271,11 +247,11 @@ const SearchControls = () => {
       setSearchEndDatetime(date);
     }
   };
-
+  // updates the render state of the time slot buttons visibility
   const handleChangeUseTimeframe = () => {
     setUseSearchTimeFrame(!useSearchTimeFrame);
   }
-
+  // material UI styling extention / overrides
   const classes = useStyles();
 
   return (
@@ -284,7 +260,6 @@ const SearchControls = () => {
         {
           searchType === 'listings' &&
           <Box className={classes.timeDiv}>
-
             <Box className={classes.categoriesFormDiv}>
               <FormControl className={classes.categoriesForm}>
                 <InputLabel id="mutiple-categories-label">
@@ -344,7 +319,6 @@ const SearchControls = () => {
                 </Tooltip>
               </Box>
             </Box>
-
             <Box className={classes.timePickersDiv}>
               {
                 useSearchTimeFrame === true &&
@@ -433,13 +407,11 @@ const SearchControls = () => {
             <FilledInput
               id="outlined-adornment-search"
               type="text"
-              // value={searchVal.search}
               value={
                 searchType === 'listings' ?
                 searchQuery :
                 searchUserQuery
               }
-              // onChange={handleChange('search')}
               onChange={
                 searchType === 'listings' ?
                   e => handleSearchTextChange(e) :
@@ -492,7 +464,6 @@ const SearchControls = () => {
               aria-label="search-category"
               name="search-category"
               value={searchType}
-              // defaultValue="listings"
               onChange={handleSearchTypeChange}
             >
               <Tooltip title={'Search for Listings'} placement="bottom-start">

@@ -99,6 +99,7 @@ const useStyles = makeStyles((theme) => ({
 const BookingDialog = ({
   bookingDialog, handleCloseModal, listingId, bookingId, currentAvail, availabilities
 }) => {
+  // state variables
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
@@ -106,19 +107,20 @@ const BookingDialog = ({
   const theme = useTheme();
   const classes = useStyles();
   const history = useHistory();
-
+  // sets up the default start / end times to be the time as of now + 1 hr for end time
   let today = new Date();
   today.setMinutes(60);
   let todayPlus = new Date(today);
   todayPlus.setMinutes(60);
-
+  // state variable used for availability selection
   const [modifyBookingAvailId, setModifyBookingAvailId] = context.modifyBookingAvailId;
   const handleAvailChange = (id) => {
     setModifyBookingAvailId(id);
   };
-
+  // called upon clicking the confirm button, sends an API PUT request to update
+  // the bookings endpoint with the newly changed booking time slot.
+  // Returns an error if the existing booking start time is less than 3 days away
   const confirmBtn = async () => {
-
     await axios({
       method: 'PUT',
       url: `${baseUrl}/bookings/${bookingId}`,
@@ -150,9 +152,13 @@ const BookingDialog = ({
       .catch((error) => {
         console.log(error.response);
         let errorText = '';
-        error.response.data.message !== undefined
-          ? errorText = error.response.data.message
-          : errorText = 'Bad request'
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Bad request';
+        }
         toast.error(
           errorText, {
             position: 'top-right',
@@ -238,12 +244,15 @@ const BookingDialog = ({
             >
             {
             availabilities.length > 0 &&
+            currentAvail !== null &&
+            currentAvail !== {} &&
             <List className={classes.listRoot}>
               {
                 availabilities.map((availability) => (
                 <Box key={availability.availability_id}>
                   {
                     availability.is_available &&
+                    parseInt(availability.availability_id) !== parseInt(currentAvail.availability_id) &&
                     <ListItem
                       disableGutters divider
                     >

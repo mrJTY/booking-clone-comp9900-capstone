@@ -1,53 +1,86 @@
 import axios from 'axios';
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 // class used for the Toastify error component styling
-// const toastErrorStyle = {
-//   backgroundColor: '#cc0000',
-//   opacity: 0.8,
-//   textAlign: 'center',
-//   fontSize: '18px'
-// };
+const toastErrorStyle = {
+  backgroundColor: '#cc0000',
+  opacity: 0.8,
+  textAlign: 'center',
+  fontSize: '18px'
+};
+
 
 export async function fetchAuthMe (baseUrl, token, setUserInfo)
 {
-  const response = await axios({
-    method: 'GET',
-    url: `${baseUrl}/auth/me`,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-  
-  console.log('auth me response is:')
-  console.log(response)
-  
-  setUserInfo(response.data);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${baseUrl}/auth/me`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    setUserInfo(response.data);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setUserInfo(null);
+  }
 }
 
 
 export async function fetchMyListings (baseUrl, token, setMylistings)
 {
-  const response = await axios({
-    method: 'GET',
-    url: `${baseUrl}/listings/mylistings`,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-
-  console.log(response.data)
-
-  await setMylistings(response.data.mylistings);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${baseUrl}/listings/mylistings`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    await setMylistings(response.data.mylistings);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setMylistings(null);
+  }
 }
 
 
-export async function fetchSearchListings
-  (
+export async function fetchSearchListings (
     baseUrl, token, searchQuery, searchCategoriesFlat,
     useSearchTimeFrame, searchStartDatetime, searchEndDatetime,
     setSearchResults,
@@ -60,156 +93,287 @@ export async function fetchSearchListings
   searchCategoriesFlat.length > 0 && (
     queryUrl += `&categories=${searchCategoriesFlat}`
   );
-
-  console.log(queryUrl);
-
-  const response = await axios({
-    method: 'GET',
-    url: queryUrl,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-  await setSearchResults(response.data.listings);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: queryUrl,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    await setSearchResults(response.data.listings);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Invalid input';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setSearchResults(null);
+  }
 }
 
 
-export async function fetchSearchUsers (baseUrl, token, searchUserQuery, setSearchUserResults)
+export async function fetchSearchUsers (
+    baseUrl, token, searchUserQuery, setSearchUserResults
+  )
 {
   let queryUrl = `${baseUrl}/users?username=${searchUserQuery}`;
-
-  console.log(queryUrl);
-
-  const response = await axios({
-    method: 'GET',
-    url: queryUrl,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-
-  console.log(response.data)
-
-  await setSearchUserResults(response.data.users);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: queryUrl,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    await setSearchUserResults(response.data.users);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setSearchUserResults(null);
+  }
 }
 
 
 export async function fetchMyBookings (baseUrl, token, setMybookings)
 {
-  const response = await axios({
-    method: 'GET',
-    url: `${baseUrl}/bookings/mybookings`,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-  
-  console.log('mybookings response is:')
-  console.log(response)
-
-  await setMybookings(response.data.mybookings);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${baseUrl}/bookings/mybookings`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    await setMybookings(response.data.mybookings);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setMybookings(null);
+  }
 }
 
 
 export async function fetchProfile (baseUrl, token, username, setProfile)
 {
-  const response = await axios({
-    method: 'GET',
-    url: `${baseUrl}/profiles/${username}`,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-  
-  console.log('GET profile response is:')
-  console.log(response)
-
-  await setProfile(response.data);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${baseUrl}/profiles/${username}`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    await setProfile(response.data);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setProfile(null);
+  }
 }
 
 
-export async function fetchProfileListings (baseUrl, token, username, setProfileListings)
+export async function fetchProfileListings (
+    baseUrl, token, username, setProfileListings
+  )
 {
-  const response = await axios({
-    method: 'GET',
-    url: `${baseUrl}/profiles/${username}/listings`,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-  
-  console.log('GET profile listings response is:')
-  console.log(response)
-
-  await setProfileListings(response.data);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${baseUrl}/profiles/${username}/listings`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    await setProfileListings(response.data);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setProfileListings(null);
+  }
 }
 
 
 export async function followUserRequest (baseUrl, token, followee_user_id)
 {
-  const response = await axios({
-    method: 'POST',
-    url: `${baseUrl}/followers/follow`,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-    data: {
-      "influencer_user_id": followee_user_id,
+  try {
+    const response = await axios({
+      method: 'POST',
+      url: `${baseUrl}/followers/follow`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+      data: {
+        "influencer_user_id": followee_user_id,
+      }
+    })
+    console.log(response)
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
     }
-  })
-  
-  console.log('POST follow response is:')
-  console.log(response)
-  
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+  }
 }
 
 
 export async function unfollowUserRequest (baseUrl, token, unfollow_username)
 {
-  const response = await axios({
-    method: 'DELETE',
-    url: `${baseUrl}/followers/unfollow/${unfollow_username}`,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-  
-  console.log('DELETE ufollow response is:')
-  console.log(response)
-  
+  try {
+    const response = await axios({
+      method: 'DELETE',
+      url: `${baseUrl}/followers/unfollow/${unfollow_username}`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    console.log(response)
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+  }
 }
 
 
 export async function fetchUserFeed (baseUrl, token, setUserFeed)
 {
-  const response = await axios({
-    method: 'GET',
-    url: `${baseUrl}/auth/userfeed`,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-  
-  console.log('user feed response is:')
-  console.log(response)
-  
-  setUserFeed(response.data);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: `${baseUrl}/auth/userfeed`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    setUserFeed(response.data);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setUserFeed(null);
+  }
 }
 
 
@@ -219,18 +383,36 @@ export async function fetchRecommendations (baseUrl, token, setRecListings, top5
   top5 === true ? 
     reqUrl += `top_5_rated_listings`:
     reqUrl += `listings`;
-
-  const response = await axios({
-    method: 'GET',
-    url: reqUrl,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      "Authorization": `JWT ${token}`,
-    },
-  })
-  
-  setRecListings(response.data);
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: reqUrl,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": `JWT ${token}`,
+      },
+    })
+    setRecListings(response.data);
+  } catch (error) {
+    console.log(error.response);
+    let errorText = '';
+    if (error.response.data.error !== undefined) {
+      errorText = error.response.data.error;
+    } else if (error.response.data.message !== undefined) {
+      errorText = error.response.data.message;
+    } else {
+      errorText = 'Bad request';
+    }
+    toast.error(
+      errorText, {
+        position: 'top-right',
+        hideProgressBar: true,
+        style: toastErrorStyle
+      }
+    );
+    setRecListings(null);
+  }
 }
 
 // convert an image to a base64 image src

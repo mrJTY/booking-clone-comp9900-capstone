@@ -14,16 +14,17 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 // The DeleteDialog component is a Material UI dialog wrapper which takes in
-// props as state handlers, and a relevant listing id. The user is promtped
-// whether they would like to confirm the deletion of a particular listing,
+// props as state handlers, and a relevant item id. The user is promtped
+// whether they would like to confirm the deletion of a particular item,
 // and upon confirmation an API DELETE request is sent.
 const DeleteDialog = ({ open, handleClose, deleteId, page, item, deleteUuid }) => {
+  // state variables
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
   const [updated, setUpdate] = context.updates;
   const history = useHistory();
-
+  // the API URL depends on the item prop
   let deleteUrl = `${baseUrl}/listings/${deleteId}`;
   if (item === "Availability") {
     deleteUrl = `${baseUrl}/availabilities/${deleteId}`;
@@ -62,9 +63,13 @@ const DeleteDialog = ({ open, handleClose, deleteId, page, item, deleteUuid }) =
             })
               .catch((error) => {
                 let errorText = '';
-                error.response.data.message !== undefined
-                  ? errorText = error.response.data.message
-                  : errorText = 'Invalid input'
+                if (error.response.data.error !== undefined) {
+                  errorText = error.response.data.error;
+                } else if (error.response.data.message !== undefined) {
+                  errorText = error.response.data.message;
+                } else {
+                  errorText = 'Invalid input';
+                }
                 toast.error(
                   errorText, {
                     position: 'top-right',

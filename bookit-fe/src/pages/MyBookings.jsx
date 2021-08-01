@@ -3,7 +3,6 @@ import Navbar from '../components/Navbar';
 import { StoreContext } from '../utils/store';
 import { fetchMyBookings } from '../utils/auxiliary';
 import BookingListItem from '../components/BookingListItem';
-
 import {
   Redirect,
 } from 'react-router-dom';
@@ -82,36 +81,38 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
+// The MyBookings page allows the primary user to manage their upcoming & past
+// bookings. Each Booking is represented by a BookingListItem subcomponent,
+// which allowed the primary user to change their booking, provided it is more
+// than 3 days away. Moreover, the primary user may also enter their reviews in
+// the past bookings tab, which opens up the RatingDialog subcomponent, contained
+// within east BookingListItem.
 const MyBookings = () => {
+  // state variables
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
   const [mybookings, setMybookings] = context.mybookings;
   const updated = context.updates[0];
-  
   React.useEffect(() => {
     if (token === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  // the page variable stores the current page as a string
   const [page, setPage] = context.pageState;
-  // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
+  // toggle between upcoming and past bookings
   const [upcomingBtn, setUpcomingBtn] = React.useState(true);
-
+  // sends a fetch API request to populate the primary user's bookings
   React.useEffect(() => {
     setPage('/mybookings');
     async function setupMyBookings () {
       setLoadingState('loading');
       await fetchMyBookings(baseUrl, token, setMybookings);
-
       setLoadingState('success');
     }
     setupMyBookings();
   }, [updated]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // classes used for Material UI component styling
   const classes = useStyles();
 
@@ -190,7 +191,7 @@ const MyBookings = () => {
                   component={'span'} align="center"
                   variant="body1" color="textSecondary"
                 >
-                  {`No Bookings found.`}
+                  {`No upcoming Bookings found.`}
                 </Typography>
               </Box>
             }            
@@ -211,7 +212,7 @@ const MyBookings = () => {
                   component={'span'} align="center"
                   variant="body1" color="textSecondary"
                 >
-                  {`No Bookings found.`}
+                  {`No past Bookings found.`}
                 </Typography>
               </Box>
             }

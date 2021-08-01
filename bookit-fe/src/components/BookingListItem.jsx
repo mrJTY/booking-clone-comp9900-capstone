@@ -32,7 +32,7 @@ import { format, formatDistanceStrict } from 'date-fns';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-
+import { toast } from 'react-toastify';
 
 const ListSpan = styled.span`
   color: white;
@@ -72,16 +72,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// class used for the Toastify error component styling
+const toastErrorStyle = {
+  backgroundColor: '#cc0000',
+  opacity: 0.8,
+  textAlign: 'center',
+  fontSize: '18px'
+};
 
+// The BookingListItem is a subcomponent of the MyBookings page, and contains
+// information relating to the primary user's upcoming & past bookings.
+// Within each list item there is the ability to view the associated listing,
+// the listing name, owner and the booking details. Depending on whether it is
+// an upcoming or past booking, the user may update/delete a booking or add/modify
+// their review, opening up an update, delete or rating modal respectively.
 const BookingListItem = ({ booking, upcoming }) => {
+  // state variables
   const history = useHistory();
   const classes = useStyles();
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
-
-  // console.log(booking)
-
   // used for the delete dialog
   const [openDelete, setOpenDelete] = React.useState(false);
   // determines which booking in particular to delete
@@ -94,8 +105,6 @@ const BookingListItem = ({ booking, upcoming }) => {
   const handleCloseDelete = () => {
     setOpenDelete(false);
   };
-
-
   // used for the delete review dialog
   const [openDeleteReview, setOpenDeleteReview] = React.useState(false);
   const [deleteReviewId, setDeleteReviewId] = React.useState(null);
@@ -107,8 +116,7 @@ const BookingListItem = ({ booking, upcoming }) => {
   const handleCloseDeleteReview = () => {
     setOpenDeleteReview(false);
   };
-
-
+  // used for the booking modal to change a booking time slot
   const [bookingModal, setBookingModal] = React.useState(false);
   const handleCloseModal = () => {
     setBookingModal(false);
@@ -119,34 +127,35 @@ const BookingListItem = ({ booking, upcoming }) => {
   const [modifyBookingListingId, setModifyBookingListingId] = React.useState(null);
   // determines which associated availability of a particular booking to modify
   const setModifyBookingAvailId = context.modifyBookingAvailId[1];
-
+  // availabilities state variables
   const [availabilities, setAvailabilities] = React.useState([]);
   const [currentAvail, setCurrentAvail] = React.useState({});
-
+  // ratings state variables
   const [ratingId, setRatingId] = React.useState(null);
   const [ratingStars, setRatingStars] = React.useState(null);
   const [ratingComment, setRatingComment] = React.useState('');
-
+  // used to open the rating dialog
   const [ratingDialog, setRatingDialog] = React.useState(false);
   const handleCloseRatingDialog = () => {
     setRatingDialog(false);
   };
-
-  const handleClickReview = async (bookingId, ratingId, ratingStars, ratingComment) => {
+  // called upon clicking the review button, sets up state variables for the modal
+  const handleClickReview = async (
+    bookingId, ratingId, ratingStars, ratingComment
+  ) => {
     await setModifyBookingId(bookingId);
     await setRatingId(ratingId);
     await setRatingStars(ratingStars);
     await setRatingComment(ratingComment);
-
     setRatingDialog(true);
   }
-
+  // called upon clicking edit booking - sets up associated state variables
+  // and calls an API request to populate the booking dialog with all of
+  // the alternative bookings associated with the listing in question
   const handleClickModfyBooking = async (bookingId, listingId, availId) => {
     setModifyBookingAvailId(availId);
-
     setModifyBookingId(bookingId);
     setModifyBookingListingId(listingId);
-
     async function setupBookingDialog () {
       try {
         const response = await axios({
@@ -158,19 +167,26 @@ const BookingListItem = ({ booking, upcoming }) => {
             "Authorization": `JWT ${token}`,
           },
         })
-
-        // console.log('current avail response is:')
-        // console.log(response.data)
-
         await setCurrentAvail(response.data);
-
       } catch(error) {
-        
         console.log(error.response);
-
+        let errorText = '';
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Invalid input';
+        }
+        toast.error(
+          errorText, {
+            position: 'top-right',
+            hideProgressBar: true,
+            style: toastErrorStyle
+          }
+        );
         await setCurrentAvail({});
       }      
-      
       try {
         const response = await axios({
           method: 'GET',
@@ -182,14 +198,25 @@ const BookingListItem = ({ booking, upcoming }) => {
           },
         })
         await setAvailabilities(response.data.availabilities);
-
       } catch(error) {
-        
         console.log(error.response);
-
+        let errorText = '';
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Invalid input';
+        }
+        toast.error(
+          errorText, {
+            position: 'top-right',
+            hideProgressBar: true,
+            style: toastErrorStyle
+          }
+        );
         await setAvailabilities([]);
       }
-
     }
     await setupBookingDialog();
     setBookingModal(true);

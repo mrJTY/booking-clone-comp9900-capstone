@@ -31,7 +31,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-// Page styling used on the EditGame page and its subcomponents
+// Page styling used on the EditListing page and its subcomponents
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.paper,
@@ -123,7 +123,7 @@ const useStyles = makeStyles((theme) => ({
     margin: '1em 0em',
   },
   listingTextField: {
-    // maxWidth: '400px',
+
   },
   thumbnailContainer: {
     display: 'flex',
@@ -213,14 +213,14 @@ const toastErrorStyle = {
   textAlign: 'center',
   fontSize: '18px'
 };
-
+// default values for the input fields
 const emptyVals = {
   listing_name: '',
   address: '',
   category: '',
   description: '',
 }
-
+// default values for the dummy resource card
 const emptyValsResourceCard = {
   listing_id: 0,
   listing_name: '',
@@ -230,65 +230,55 @@ const emptyValsResourceCard = {
   username: '',
 }
 
-// The EditListing page allows a user to create or modify an existing Listing.
+// The EditListing page allows a user to create a new Listing or
+// modify an existing Listing. They are presented with a UI consisting of a 
+// replica Resource Card component, which dynamically updates as they enter
+// their desired details and optionally upload a new listing image.
 const EditListing = () => {
+  // state variables
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const history = useHistory();
   const primaryUsername = context.username[0];
-
+  // redirect to login screen if user not logged in
   React.useEffect(() => {
     // unauthorized users are redirected to the landing page
     if (token === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  
   const [loadingState, setLoadingState] = React.useState('idle');
   // context variables used throughout the page
   const baseUrl = context.baseUrl;
   const [page, setPage] = context.pageState;
-
   const location = useLocation();
   const params = useParams();
-
-  console.log('location is:')
-  console.log(location)
-
-  console.log('params length is:')
-  console.log(Object.keys(params).length)
-
+  // checks whether the listing is new or existing through the parameter
   const isNewListing = Boolean(Number(Object.keys(params).length) === 0);
-  console.log('is new listing is:')
-  console.log(isNewListing)
-
-
+  // the previous page is defaulted to the mylistings page, which is the
+  // destination upon clicking the confirm button. Otherwise, the user is
+  // redirected to the individual Listing page.
   let prevPage = '/mylistings';
   if (!isNewListing && Object.keys(location.state).length > 0 &&
       location.state?.prevPage)
   {
     prevPage = location.state.prevPage;
   }
-
-  console.log('prev page is')
-  console.log(prevPage)
-
   // the fields state variable contains the inputs to the new Listing
   const [fields, setFields] = React.useState(emptyVals);
-
+  // populates the mock resource card
   const [resourceFields, setResourceFields] = React.useState(emptyValsResourceCard);
   const [originalListingImage, setOriginalListingImage] = React.useState(null);
-  // useEffect hook sets up the page
+  // useEffect hook sets up the page, populating the input fields & resource
+  // card with either dummy data or existing data
   React.useEffect(() => {
     if (isNewListing) {
       setPage('/listings/create');
     } else {
       setPage(`/listings/edit/${params.id}`);
     }
-
     async function setupEditListing () {
       setLoadingState('loading');
-
       if (isNewListing) {
         await setResourceFields(
           resourceFields => ({
@@ -297,41 +287,57 @@ const EditListing = () => {
           })
         );
       } else {
-        const response = await axios({
-          method: 'GET',
-          url: `${baseUrl}/listings/${params.id}`,
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `JWT ${token}`,
-          },
-        })
-        setOriginalListingImage(response.data.listing_image);
-        const defaultVals = {
-          listing_name: response.data.listing_name,
-          address: response.data.address,
-          category: response.data.category,
-          description: response.data.description,
+        try {
+          const response = await axios({
+            method: 'GET',
+            url: `${baseUrl}/listings/${params.id}`,
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: `JWT ${token}`,
+            },
+          })
+          setOriginalListingImage(response.data.listing_image);
+          const defaultVals = {
+            listing_name: response.data.listing_name,
+            address: response.data.address,
+            category: response.data.category,
+            description: response.data.description,
+          }
+          await setFields(defaultVals);
+          const defaultValsResourceCard = {
+            listing_id: response.data.listing_id,
+            listing_name: response.data.listing_name,
+            address: response.data.address,
+            category: response.data.category,
+            description: response.data.description,
+            username: response.data.username,
+            listing_image: response.data.listing_image,
+          }
+          await setResourceFields(defaultValsResourceCard);        
+        } catch(error) {
+          console.log(error.response)
+          let errorText = '';
+          if (error.response.data.error !== undefined) {
+            errorText = error.response.data.error;
+          } else if (error.response.data.message !== undefined) {
+            errorText = error.response.data.message;
+          } else {
+            errorText = 'Invalid input';
+          }
+          toast.error(
+            errorText, {
+              position: 'top-right',
+              hideProgressBar: true,
+              style: toastErrorStyle
+            }
+          );
         }
-        await setFields(defaultVals);
-        const defaultValsResourceCard = {
-          listing_id: response.data.listing_id,
-          listing_name: response.data.listing_name,
-          address: response.data.address,
-          category: response.data.category,
-          description: response.data.description,
-          username: response.data.username,
-          listing_image: response.data.listing_image,
-        }
-        await setResourceFields(defaultValsResourceCard);        
-        
       }
-
       setLoadingState('success');
     }
     setupEditListing();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   // onChange updates the state upon a user's keypress
   const onChange = (setFunc, field, val) => {
     setFunc(
@@ -340,7 +346,7 @@ const EditListing = () => {
         [field]: val
       })
     );
-
+    // dynamically updates the resource card upon key press
     setResourceFields(
       state => ({
         ...state,
@@ -348,30 +354,23 @@ const EditListing = () => {
       })
     );
   }
-
-
+  // image upload state variables
   const [listingImageBase64, setListingImageBase64] = React.useState(null);
   const [listingImageFilename, setListingImageFilename] = React.useState('');
+  // calls upon the imageToBase64 function from the auxiliary functions
+  // to convert the selected image to base64 and set the filename as such
   const updateListingImageFile = async (e) => {
-
-    console.log(e.target.files[0]);
-
     await setListingImageFilename(e.target.files[0]?.name || '');
     await imageToBase64(e.target.files[0], setListingImageBase64);
-
-    console.log(listingImageBase64);
-
   };
-
+  // clears the currently uploaded image
   const handleUploadClear = async () => {
     await setListingImageFilename('');
     await setListingImageBase64(null);
   }
-
+  // dynamically updates the resource card preview image upon clicking upload
   React.useEffect(() => {
     async function listingImagePreviewChange () {
-
-
       if (listingImageBase64 !== null) {
         await setResourceFields(
           resourceFields => ({
@@ -387,7 +386,6 @@ const EditListing = () => {
         );
       } else {
         await delete fields['listing_image'];
-
         if (!isNewListing) {
           await setResourceFields(
             resourceFields => ({
@@ -404,11 +402,9 @@ const EditListing = () => {
           );
         }
       }
-
     }
     listingImagePreviewChange();
   }, [listingImageBase64]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // validates the New Listing input fields & sends a POST API request
   // upon a valid listing submission, creating a new Listing.
   const handleSubmit = () => {
@@ -473,9 +469,13 @@ const EditListing = () => {
         })
         .catch((error) => {
           let errorText = '';
-          error.response.data.message !== undefined
-            ? errorText = error.response.data.message
-            : errorText = 'Invalid input'
+          if (error.response.data.error !== undefined) {
+            errorText = error.response.data.error;
+          } else if (error.response.data.message !== undefined) {
+            errorText = error.response.data.message;
+          } else {
+            errorText = 'Invalid input';
+          }
           toast.error(
             errorText, {
               position: 'top-right',
@@ -488,6 +488,7 @@ const EditListing = () => {
   };
   // classes used for Material UI component styling
   const classes = useStyles();
+
   return (
     <Container className={classes.outerContainer}>
       <Navbar page={page} />
@@ -505,10 +506,13 @@ const EditListing = () => {
               <Box className={classes.titleSubcontainer}>
                 <Box className={classes.titleHeadingDiv}>
                   <Typography gutterBottom component={'span'} variant="h4" align="center" color="textPrimary">
-                    Create New Listing
+                    {
+                      isNewListing
+                        ? 'Create New Listing'
+                        : 'Modify Listing'
+                    }
                   </Typography>
                 </Box>
-
                 <Box className={classes.outerContainerBtns}>
                   <Tooltip
                     title={
@@ -557,11 +561,8 @@ const EditListing = () => {
                   </Tooltip>
                 </Box>
               </Box>
-
               <Divider light className={classes.divider} />
-
               <Box className={classes.editListingContentDiv}>
-
                 <Box className={classes.resourceCardDiv}>
                   <ResourceCard
                     resource={resourceFields}
@@ -569,7 +570,6 @@ const EditListing = () => {
                     parentPage={'/listings/edit'}
                   />
                 </Box>
-
                 <Box className={classes.listingFormDiv}>
                   <Box className={classes.listingFormInputDiv}>
                     <TextField
@@ -652,7 +652,6 @@ const EditListing = () => {
                       <FormHelperText>Required</FormHelperText>
                     </FormControl>
                   </Box>
-
                   <Box className={classes.uploadBtnDiv}>
                     <Box className={classes.uploadFileDiv}>
                       <Box className={classes.uploadFileInputDiv}>
@@ -710,10 +709,8 @@ const EditListing = () => {
                       </Box>
                     </Box>
                   </Box>
-
                 </Box>
               </Box>
-
             </Box>
           </Box>
         }

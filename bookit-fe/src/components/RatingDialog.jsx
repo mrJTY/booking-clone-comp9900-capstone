@@ -1,13 +1,11 @@
 import React from 'react';
 import { StoreContext } from '../utils/store';
-// import { useHistory } from 'react-router-dom';
 import {
   makeStyles,
   useTheme,
   ThemeProvider,
   Box,
   Button,
-  // Typography,
   Divider,
   Tooltip,
   Dialog,
@@ -23,7 +21,7 @@ import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 import 'date-fns';
 
-
+// Material UI styling used on the RatingDialog component
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: 'flex',
@@ -83,24 +81,26 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// Loads a modal which allows a user to change a rating, provided
-// they enter a name. They may choose to cancel/close the modal without
-// the modification of a rating.
+// Loads a modal which allows a user to create or change a review for a past booking.
+// Utilizes the Material UI Rating component, which allows for a 0.5 precision
+// 5 star rating model, with at minimum 1 star.
+// They may choose to cancel/close the modal without the modification of a rating.
 const RatingDialog = ({
   ratingDialog, handleCloseRatingDialog, bookingId,
   ratingId, ratingStars, ratingComment
 }) => {
+  // state variables
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
   const [updated, setUpdate] = context.updates;
   const theme = useTheme();
   const classes = useStyles();
-  // const history = useHistory();
-
+  // sets the default rating to 2.5 stars
   const [rating, setRating] = React.useState(2.5);
+  // the input comment state variable
   const [comment, setComment] = React.useState('');
-
+  // sets up the review modal with initial values
   React.useEffect(() => {
     if (ratingStars !== undefined && ratingStars !== null) {
       setRating(ratingStars);
@@ -109,11 +109,12 @@ const RatingDialog = ({
       setComment(ratingComment);
     }
   }, [ratingStars, ratingComment]); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // handles input changes to the comment section
   const handleReviewTextChange = (event) => {
     setComment(event.target.value);
   }
-
+  // called upon clicking the confirm button - an API request is sent containing
+  // the input comment and associataed rating.
   const confirmBtn = async () => {
     const reqMethod = ratingId === null ? 'POST' : 'PUT';
     const reqUrl = ratingId === null ?
@@ -150,9 +151,13 @@ const RatingDialog = ({
       .catch((error) => {
         console.log(error.response);
         let errorText = '';
-        error.response.data.message !== undefined
-          ? errorText = error.response.data.message
-          : errorText = 'Bad request'
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Bad request';
+        }
         toast.error(
           errorText, {
             position: 'top-right',
@@ -167,7 +172,6 @@ const RatingDialog = ({
         );
       })
     setUpdate(!updated);
-    // history.push('/mybookings');
     handleCloseRatingDialog();
   }
 
@@ -190,7 +194,6 @@ const RatingDialog = ({
             {ratingId === null ? 'New Review' : 'Modify Review'}
             <Divider className={classes.listDivider}/>
           </DialogTitle>
-
           <DialogActions>
             <Box className={classes.dialogRatingDiv}>
               <Rating
@@ -207,9 +210,7 @@ const RatingDialog = ({
               />
             </Box>
           </DialogActions>
-
           <DialogContent
-            // dividers={true}
             className={classes.dialogContent}
           >
             <DialogContentText
@@ -233,7 +234,6 @@ const RatingDialog = ({
               }
             />
           </DialogContent>
-
           <DialogActions>
             <Box className={classes.modalButtons}>
               <Tooltip title={"Confirm"}>

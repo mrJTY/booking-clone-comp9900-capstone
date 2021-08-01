@@ -70,6 +70,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+// class used for the Toastify error component styling
+const toastErrorStyle = {
+  backgroundColor: '#cc0000',
+  opacity: 0.8,
+  textAlign: 'center',
+  fontSize: '18px'
+};
+
 // The Login page prompts the user to enter their email and password,
 // which are both validated upon input. Appropriate error messages are shown
 // using Toastify when incorrect input is detected, or if invalid details
@@ -84,13 +92,7 @@ const Login = () => {
   const baseUrl = context.baseUrl;
   const setPage = context.pageState[1];
   const history = useHistory();
-  // class used for the Toastify error component styling
-  const toastErrorStyle = {
-    backgroundColor: '#cc0000',
-    opacity: 0.8,
-    textAlign: 'center',
-    fontSize: '18px'
-  };
+
   // useForm hook comes from react-hook-form, which handles user input
   // and controls form submission
   const { handleSubmit, control } = useForm();
@@ -128,7 +130,6 @@ const Login = () => {
         }
       })
         .then((response) => {
-          console.log(response)
           // store the authorization token
           setToken(response.data.accessToken);
           // navigate to the Home screen
@@ -136,9 +137,13 @@ const Login = () => {
         })
         .catch((error) => {
           let errorText = '';
-          error.response.data.message !== undefined
-            ? errorText = error.response.data.message
-            : errorText = 'Invalid input'
+          if (error.response?.data.error !== undefined) {
+            errorText = error.response.data.error;
+          } else if (error.response?.data.message !== undefined) {
+            errorText = error.response.data.message;
+          } else {
+            errorText = 'Invalid input';
+          }
           toast.error(
             errorText, {
               position: 'top-right',

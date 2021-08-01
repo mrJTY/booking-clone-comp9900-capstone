@@ -65,6 +65,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+// class used for the Toastify error component styling
+const toastErrorStyle = {
+  backgroundColor: '#cc0000',
+  opacity: 0.8,
+  textAlign: 'center',
+  fontSize: '18px'
+};
+
 // The Register page prompts the user to enter their email, password and name,
 // which are all validated upon input. Appropriate error messages are shown
 // using Toastify when incorrect input is detected, or if invalid details
@@ -76,13 +84,7 @@ const Register = () => {
   const context = React.useContext(StoreContext);
   const baseUrl = context.baseUrl;
   const history = useHistory();
-  // class used for the Toastify error component styling
-  const toastErrorStyle = {
-    backgroundColor: '#cc0000',
-    opacity: 0.8,
-    textAlign: 'center',
-    fontSize: '18px'
-  };
+
   // useForm hook comes from react-hook-form, which handles user input
   // and controls form submission
   const { handleSubmit, control } = useForm();
@@ -128,9 +130,6 @@ const Register = () => {
         }
       })
         .then((response) => {
-
-          console.log(response);
-
           toast.success(
             'Successfully signed up to BookIt', {
               position: 'top-right',
@@ -142,15 +141,18 @@ const Register = () => {
               }
             }
           );
-
           // navigate to the Login screen
           history.push('/login');
         })
         .catch((error) => {
           let errorText = '';
-          error.response.data.message !== undefined
-            ? errorText = error.response.data.message
-            : errorText = 'Invalid input'
+          if (error.response?.data.error !== undefined) {
+            errorText = error.response.data.error;
+          } else if (error.response?.data.message !== undefined) {
+            errorText = error.response.data.message;
+          } else {
+            errorText = 'Invalid input';
+          }
           toast.error(
             errorText, {
               position: 'top-right',

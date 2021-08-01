@@ -110,27 +110,24 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
+// The MyListings page allows the primary user to create a new listing, redirecting
+// to the EditListing page, and also populates the page with their existing
+// Listings as Resource Card subcomponents. This allows for efficient navigation
+// to one's managing one's own Listings all in one place.
 const MyListings = () => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const history = useHistory();
   const baseUrl = context.baseUrl;
-
   React.useEffect(() => {
     if (token === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // state variables
   const username = context.username[0];
   const [mylistings, setMylistings] = context.mylistings;
-
-  // object containing all of the users a user is following from a GET API request
-  // const [following, setFollowing] = context.following;
-  // the page variable stores the current page as a string
   const [page, setPage] = context.pageState;
-  // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
   // updated ensures appropriate re-rendering upon changing or deleting a resource
   const updated = context.updates[0];
@@ -157,7 +154,6 @@ const MyListings = () => {
     }
     setupMyListings();
   }, [updated]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // classes used for Material UI component styling
   const classes = useStyles();
 
@@ -182,7 +178,7 @@ const MyListings = () => {
                   </Typography>
                 </Box>
                 <Box className={classes.outerContainerBtns}>
-                  <Tooltip title="New Listing" aria-label="new listing">
+                  <Tooltip title="Create New Listing" aria-label="new listing">
                     <Button
                       id="new-listing-button"
                       className={classes.button}
@@ -203,9 +199,7 @@ const MyListings = () => {
                   </Tooltip>
                 </Box>
               </Box>
-
               <Divider light className={classes.divider} />
-
             </Box>
             {
               mylistings.length > 0 &&

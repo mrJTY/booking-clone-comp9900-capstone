@@ -35,10 +35,11 @@ const toastErrorStyle = {
 };
 
 // The UserSettingsDialog component is a Material UI dialog wrapper which takes in
-// props as state handlers, and a relevant listing id. The user is promtped
-// whether they would like to confirm the deletion of a particular listing,
-// and upon confirmation an API DELETE request is sent.
+// props state handlers, particularly the items of interest to be changed,
+// and the associated request body. The user is prompted whether they want to
+// confirm the selected changes, and an API PUT request is sent.
 const UserSettingsDialog = ({ open, handleClose, itemsChecked, reqBody }) => {
+  // state variables
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
@@ -46,16 +47,15 @@ const UserSettingsDialog = ({ open, handleClose, itemsChecked, reqBody }) => {
   const [authMeInfo, setAuthMeInfo] = context.authMeInfo;
   const history = useHistory();
   const [loadingClose, setLoadingClose] = React.useState('done');
-
-  console.log('reqbody is:', reqBody);
-
+  // initial dialog set up
   React.useEffect(() => {
     async function setupGetUserId () {
       await fetchAuthMe(baseUrl, token, setAuthMeFetch);
     }
     setupGetUserId();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // called upon clicking the confirm button - an API request is sent which
+  // contains the reqBody prop as its body.
   const onSubmit = () => {
     axios({
       method: 'PUT',
@@ -69,7 +69,7 @@ const UserSettingsDialog = ({ open, handleClose, itemsChecked, reqBody }) => {
     })
       .then(() => {
         setLoadingClose('loading');
-        // notify user listing creation was successful
+        // notify user modification was successful
         toast.success(
           `Successfully modified your User Account`, {
             position: 'top-right',
@@ -91,9 +91,13 @@ const UserSettingsDialog = ({ open, handleClose, itemsChecked, reqBody }) => {
       })
       .catch((error) => {
         let errorText = '';
-        error.response?.data.message !== undefined
-          ? errorText = error.response.data.message
-          : errorText = 'Bad request'
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Bad request';
+        }
         toast.error(
           errorText, {
             position: 'top-right',

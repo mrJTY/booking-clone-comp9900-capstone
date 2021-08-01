@@ -1,6 +1,5 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
-// import DefaultAvatar from '../assets/default-avatar.svg';
 import { StoreContext } from '../utils/store';
 import UserSettingsDialog from '../components/UserSettingsDialog';
 import {
@@ -8,7 +7,6 @@ import {
   imageToBase64,
 } from '../utils/auxiliary';
 import {
-  // useHistory,
   Redirect,
 } from 'react-router-dom';
 import {
@@ -29,7 +27,7 @@ import {
 } from '@material-ui/core';
 import { toast } from 'react-toastify';
 
-// Page styling used on the MyListings screen and its subcomponents
+// Page styling used on the UserSettings screen and its subcomponents
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -115,16 +113,13 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // marginBottom: '0.5em',
   },
   usernameTextDiv: {
-    // flex: 1,
     width: '100%',
     marginBottom: '0.5em',
   },
   confirmDiv: {
     display: 'flex',
-    // flex: 1,
     width: '20em',
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -134,7 +129,7 @@ const useStyles = makeStyles((theme) => ({
     margin: '0em 0.5em',
   },
   followText: {
-    // paddingRight: '0.5em',
+
   },
   followTextDiv: {
     display: 'flex',
@@ -178,6 +173,10 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     margin: '1em 0em',
   },
+  formControlLegend: {
+    textAlign: 'left',
+    marginLeft: '0.5em',
+  },
   formControlCheckbox: {
 
   },
@@ -197,11 +196,9 @@ const useStyles = makeStyles((theme) => ({
   },
   uploadFileInputDiv: {
     marginRight: '0.5em',
-    // width: '100%',
   },
   uploadFileTextDiv: {
     width: '100%',
-    // marginTop: '0.5em'
   },
   divider: {
     margin: '1em 0em',
@@ -209,6 +206,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// styling for the error notification
 const toastErrorStyle = {
   backgroundColor: '#cc0000',
   opacity: 0.8,
@@ -220,11 +218,13 @@ const toastErrorObj = {
   hideProgressBar: true,
   style: toastErrorStyle
 };
+// default checked items
 const emptyVals = {
   avatar: '',
   email: '',
   password: '',
 }
+// generic state update function
 const onChange = (setFunc, field, val) => {
   setFunc(
     state => ({
@@ -234,34 +234,39 @@ const onChange = (setFunc, field, val) => {
   );
 }
 
+// The UserSettings page allows a user to view a change their profile &
+// account settings. They are allowed to change any of 3 items:
+// - Email
+// - Password
+// - Avatar
+// Note that the primary user is not allowed to change their own username.
+// In order to change an item, the input field(s) must be non-empty, and the
+// adjacent checkbox must be checked as well. A preview image of the current
+// avatar also gets updated upon upload, such that the user may see whether
+// they would like to use their newly chosen avatar.
+// A reset button simply clears all input fields and sets them as the current
+// account details, including the avatar preview image.
 const UserSettings = () => {
+  // state variables
   const context = React.useContext(StoreContext);
   const baseUrl = context.baseUrl;
   const token = context.token[0];
   const [authMeInfo, setAuthMeInfo] = context.authMeInfo
-  // const history = useHistory();
-
+  // redirected to login if not logged in
   React.useEffect(() => {
     if (token === null) {
       return <Redirect to={{ pathname: '/login' }} />
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // object containing all of the users a user is following from a GET API request
-  // const [following, setFollowing] = context.following;
   // the page variable stores the current page as a string
   const [page, setPage] = context.pageState;
   // page loading state
   const [loadingState, setLoadingState] = React.useState('idle');
-
-  // const [userProfile, setUserProfile] = React.useState(null);
-
-
-  // the fields state variable contains the inputs to the new Listing
+  // the fields state variable contains the inputs to the profile fields
   const [fields, setFields] = React.useState(emptyVals);
   const [defaultFields, setDefaultFields] = React.useState(emptyVals);
   const [avatarBase64, setAvatarBase64] = React.useState(null);
-
+  // initial page set up rendering all the input fields & image preview
   React.useEffect(() => {
     setPage('/usersettings');
     async function setupUserSettings () {
@@ -279,53 +284,43 @@ const UserSettings = () => {
     }
     setupUserSettings();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-
+  // state variables pertaining to the selected items to change
   const [itemsToChange, setItemsToChange] = React.useState([]);
+  // state variable that opens the confirmation dialog popup
   const [openSettingsDialog, setOpenSettingsDialog] = React.useState(false);
   const handleCloseSettingsDialog = () => {
     setOpenSettingsDialog(false);
   }
-
+  // default values for the checked fields
   const [checkedFields, setCheckedFields] = React.useState({
     email: false,
     password: false,
     avatar: false,
   });
+  // handles checked item changes
   const handleCheckboxChange = (event, field) => {
     setCheckedFields({ ...checkedFields, [field]: event.target.checked });
   };
-
+  // avatar state variable
   const [avatarFilename, setAvatarFilename] = React.useState('');
   const updateAvatarFile = async (e) => {
-    console.log(e.target.files[0]);
     await setAvatarFilename(e.target.files[0]?.name || '');
     await imageToBase64(e.target.files[0], setAvatarBase64);
-
-    console.log(avatarBase64);
-
   };
-
+  // changes the current avatar preview, triggered on every new image upload
   React.useEffect(() => {
     async function setupAvatarChange () {
       await onChange(setFields, 'avatar', avatarBase64);
     }
     setupAvatarChange();
   }, [avatarBase64]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // classes used for Material UI component styling
   const classes = useStyles();
-
+  // called upon clicking the Save Changes button which opens a popup dialog
+  // upon conditional checks ensuring the checked items are non-empty
   const handleClickSaveChanges = () => {
-
-    console.log('checked fields are:')
-    console.log(checkedFields)
-    console.log('fields are:', fields);
-
     const checkedItemsArray = Object.keys(checkedFields).filter((key) => checkedFields[key]);
-
     setItemsToChange(checkedItemsArray);
-
     if (checkedItemsArray.length === 0) {
       toast.error(
         'Select at least one item to modify settings',
@@ -346,12 +341,9 @@ const UserSettings = () => {
       }
     }
   }
-
+  // the request body for the API PUT request depends on the checked items
   const [reqBody, setReqBody] = React.useState({});
-
-  // console.log('items to change are:')
-  // console.log(itemsToChange)
-
+  // dynamically changes the request body depending on checked items
   React.useEffect(() => {
     async function setupReqBody () {
       let newReqBody = {}
@@ -382,10 +374,8 @@ const UserSettings = () => {
                 <Typography paragraph align="left" variant="h4">
                   User Settings
                 </Typography>
+                <Divider light className={classes.divider} />
               </Box>
-
-              <Divider light className={classes.divider} />
-
               <Box className={classes.box}>
                 <Box className={classes.imgContainer}>
                   <Tooltip title={`Preview: ${authMeInfo.username}'s Avatar`}>
@@ -514,7 +504,7 @@ const UserSettings = () => {
                     </Box>
                     <Box className={classes.innerContainerCheck}>
                       <FormControl component="fieldset" className={classes.formControlCheckbox}>
-                        <FormLabel component="legend">
+                        <FormLabel component="legend" className={classes.formControlLegend}>
                           Change Items
                         </FormLabel>
                         <FormGroup>

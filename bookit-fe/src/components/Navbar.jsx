@@ -121,7 +121,15 @@ const useStyles = makeStyles((theme) => ({
 
 // The Nav component is a subcomponent of the all admin pages, and contains
 // useful buttons to navigate within the app.
+// It contains the following buttons:
+// - Back
+// - Home
+// - My Bookings
+// - My Listings
+// - Discover
+// - Profile menu (depicted as the primary user's avatar)
 const Navbar = ({ page }) => {
+  // state variables
   const context = React.useContext(StoreContext);
   const history = useHistory();
   const classes = useStyles();
@@ -132,13 +140,10 @@ const Navbar = ({ page }) => {
   const setToken = context.token[1];
   const baseUrl = context.baseUrl;
   const [authMeInfo, setAuthMeInfo] = context.authMeInfo;
-
   // sends a POST API request confirming an admin logging out
   const logoutButton = () => {
-
     setOpenMenu(false);
     setAnchorProfileMenu(null);
-
     axios({
       method: 'POST',
       url: `${baseUrl}/auth/logout`,
@@ -158,9 +163,13 @@ const Navbar = ({ page }) => {
       })
       .catch((error) => {
         let errorText = '';
-        error.response.data.message !== undefined
-          ? errorText = error.response.data.message
-          : errorText = 'Invalid Auth token'
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Invalid Auth token';
+        }
         toast.error(
           errorText, {
             position: 'top-right',
@@ -179,28 +188,26 @@ const Navbar = ({ page }) => {
         setUsername(null);
       })
   }
-
+  // calls an API request to update the user's username & avatar if applicable
   React.useEffect(() => {
     async function setupUserNav() {
       await fetchAuthMe(baseUrl, token, setAuthMeInfo);
     }
     setupUserNav();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-
+  // profile menu state variables
   const [achorProfileMenu, setAnchorProfileMenu] = React.useState(null);
   const [openMenu, setOpenMenu] = React.useState(false);
-
+  // anchors the menu to the avatar
   const handleProfileMenu = (event) => {
     setOpenMenu(true);
     setAnchorProfileMenu(event.currentTarget);
   };
-
+  // called upon closing the profile menu by clicking eleswhere, or on a menu item
   const handleCloseProfileMenu = () => {
     setOpenMenu(false);
     setAnchorProfileMenu(null);
   };
-
 
   return (
     <ThemeProvider theme={theme}>

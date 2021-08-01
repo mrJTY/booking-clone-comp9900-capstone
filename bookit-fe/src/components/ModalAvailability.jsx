@@ -10,7 +10,11 @@ import {
   Grid,
   Typography,
   Divider,
-  Tooltip
+  Tooltip,
+  List,
+  ListItemText,
+  ListItem,
+  Paper
 } from '@material-ui/core';
 import axios from 'axios';
 import PropTypes from 'prop-types';
@@ -29,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center'
   },
   paper: {
-    width: 400,
+    width: '525px',
     backgroundColor: theme.palette.background.paper,
     border: '2px solid #000',
     boxShadow: theme.shadows[5],
@@ -46,35 +50,51 @@ const useStyles = makeStyles((theme) => ({
   },
   createButton: {
     margin: theme.spacing(1),
-    // backgroundColor: '#12824C',
-    // color: '#FFFFFF',
   },
   modalTitle: {
     paddingTop: '10px',
   },
+  timeslotTitleTextListItem: {
+    padding: 0,
+    paddingLeft: '0.5em',
+  },
+  timeslotTitleTextDiv: {
+    
+  },
+  timeslotTextListItem: {
+    padding: 0,
+    paddingLeft: '1em',
+  },
 }));
 
-// Loads a modal which allows a user to create a new availability, provided
-// they enter a name. They may choose to cancel/close the modal without
-// the creation of a new availability.
+// Loads a modal which allows a user to create a new availability, or modify
+// and existing one. The User is prompted with a start and end time interval,
+// which are separated by at least one hour. The start time is defaulted
+// to the current date time, rounded to the nearest next hour.
+// The user may only choose time slots in hourly granularity, with a maximum
+// of a 10 hour interval per availability.
+// They may choose to cancel/close the modal without creation/modifications.
 const ModalAvailability = ({
   availModal, handleCloseModal, givenListingId, newAvail, availId
 }) => {
+  // state variables
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
   const [updated, setUpdate] = context.updates;
   const theme = useTheme();
   const classes = useStyles();
-
+  // sets up the start & end times to be exactly 1 hr apart, with the start time
+  // being the current datetime rounded up to the next nearest hour.
   let today = new Date();
   today.setMinutes(60);
   let todayPlus = new Date(today);
   todayPlus.setMinutes(60);
-
+  // datetime state variables
   const [startDatetime, setStartDatetime] = React.useState(today);
   const [endDatetime, setEndDatetime] = React.useState(todayPlus);
-  
+  // ensures the user may only enter a max of 10 hr interval, which causes
+  // the end datetime to revert to a 10 hr maximum if the limit is exceeded.
   const tenHourLimit = async (date) => {
     const inputDatetimeDiff = date - startDatetime;
     const tenHrsMs = 60000 * 60 * 10; // 60000 ms in a min * 60mins * 10 hrs
@@ -97,7 +117,7 @@ const ModalAvailability = ({
       setEndDatetime(tenHrsDatetime);
     }
   }
-
+  // handles the start time change, and rounds to the nearest hour.
   const handleStartDateChange = (date) => {
     const mins = date.getMinutes();
     if (mins <= 30) {
@@ -112,7 +132,8 @@ const ModalAvailability = ({
     }
     setStartDatetime(date);
   };
-
+  // handles the end time change, and rounds to the nearest hour, always being
+  // at least 1 hour ahead of the start time
   const handleEndDateChange = async (date) => {
     if (date <= startDatetime) {
       let newDatetime = new Date(startDatetime);
@@ -129,15 +150,11 @@ const ModalAvailability = ({
     }
     await tenHourLimit(date);
   };
-
+  // handles the confirm button - sends an API request depending on the reqMethod
+  // prop, and sends the input start & end datetimes as miliseconds since the Epoch.
   const availButton = async () => {
     const startTime = startDatetime.getTime();
     const endTime = endDatetime.getTime();
-
-    console.log('start and end times are:');
-    console.log(startTime);
-    console.log(endTime);
-
     const reqMethod = newAvail === true ? 'POST' : 'PUT';
     const reqUrl = newAvail === true ?
       `${baseUrl}/availabilities` :
@@ -151,7 +168,6 @@ const ModalAvailability = ({
     if (newAvail === true) {
       reqBody.availability_id = availId;
     }
-
     await axios({
       method: reqMethod,
       url: reqUrl,
@@ -180,9 +196,13 @@ const ModalAvailability = ({
       })
       .catch((error) => {
         let errorText = '';
-        error.response.data.message !== undefined
-          ? errorText = error.response.data.message
-          : errorText = 'Bad request'
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Bad request';
+        }
         toast.error(
           errorText, {
             position: 'top-right',
@@ -196,16 +216,10 @@ const ModalAvailability = ({
           }
         );
       })
-    // history.push({
-    //   pathname: `/listings/${givenListingId}`,
-    //   state: {
-    //     givenListingId: parseInt(givenListingId),
-    //   }
-    // })
     setUpdate(!updated);
     handleCloseModal();
   }
-
+  // forms the body of the JSX expression within the modal
   const body = (
     <Box className={classes.paper}>
       <Box>
@@ -213,43 +227,78 @@ const ModalAvailability = ({
           {newAvail === true ? 'Create' : 'Modify'} Availability
         </Typography>
       </Box>
-
       <Divider light={true} />
-
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        <Grid container justify="space-around">
-          <KeyboardDateTimePicker
-            margin="normal"
-            id="time"
-            label="Start Time"
-            value={startDatetime}
-            onChange={handleStartDateChange}
-            minutesStep={60}
-            openTo="hours"
-            views={["hours"]}
-            format="dd/MM/yyyy hh:mm a"
-            showTodayButton
-            ampm={true}
-            disablePast
+      <List dense>
+        <ListItem className={classes.timeslotTitleTextListItem}>
+          <ListItemText disableTypography
+            primary={
+              <div className={classes.timeslotTitleTextDiv}>
+                <Typography align="left" variant="subtitle2" color="textPrimary" component={'span'}>
+                  {`${newAvail === true ? 'Create a new' : 'Modify the'} availability time slot below.`}
+                </Typography>
+              </div>
+            }
           />
-          <KeyboardDateTimePicker
-            margin="normal"
-            id="time"
-            label="End Time"
-            value={endDatetime}
-            onChange={handleEndDateChange}
-            minutesStep={60}
-            openTo="hours"
-            views={["hours"]}
-            format="dd/MM/yyyy hh:mm a"
-            showTodayButton
-            disablePast
+        </ListItem>
+        <ListItem className={classes.timeslotTextListItem}>
+          <ListItemText disableTypography
+            primary={
+              <div>
+                <div>
+                  <Typography align="left" variant="body2" color="textSecondary" component={'span'}>
+                    {'The time slot may only be created for a future time.'}
+                  </Typography>
+                </div>
+                <div>
+                  <Typography align="left" variant="body2" color="textSecondary" component={'span'}>
+                    {'The time slot may only use hourly time intervals.'}
+                  </Typography>
+                </div>                
+                <div>
+                  <Typography align="left" variant="body2" color="textSecondary" component={'span'}>
+                    {'The time slot must not exceed 10 hours in total duration.'}
+                  </Typography>
+                </div>                
+              </div>
+            }
           />
-        </Grid>
-      </MuiPickersUtilsProvider>
-
+        </ListItem>        
+      </List>
+      <Paper elevation={5}>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <Grid container justify="space-around">
+            <KeyboardDateTimePicker
+              margin="normal"
+              id="time"
+              label="Start Time"
+              value={startDatetime}
+              onChange={handleStartDateChange}
+              minutesStep={60}
+              openTo="hours"
+              views={["hours"]}
+              format="dd/MM/yyyy hh:mm a"
+              showTodayButton
+              ampm={true}
+              disablePast
+            />
+            <KeyboardDateTimePicker
+              margin="normal"
+              id="time"
+              label="End Time"
+              value={endDatetime}
+              onChange={handleEndDateChange}
+              minutesStep={60}
+              openTo="hours"
+              views={["hours"]}
+              format="dd/MM/yyyy hh:mm a"
+              showTodayButton
+              disablePast
+            />
+          </Grid>
+        </MuiPickersUtilsProvider>
+      </Paper>
       <br />
-
+      <Divider light={true} />
       <Box className={classes.modalButtons}>
         <Tooltip title={newAvail === true ? "Create" : "Confirm"}>
           <Button

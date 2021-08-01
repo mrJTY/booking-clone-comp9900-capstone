@@ -72,7 +72,6 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
   },
   userResultsListRoot: {
-    // display: 'flex',
     width: '100%',
     justifyContent: 'center',
   },
@@ -86,7 +85,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// The Search page is a results screen which contains the SearchControls component
+// along with any search results contained in the global state variables which
+// depend on the search type. The SearchControls component contains an extended
+// description on the search functionality.
+// Within the Search results section, if the results are Listings then
+// a list of ResourceCard subcomponents are rendered.
+// If the search results are that of Users, then a list of users populates the rest
+// of the page, where the Primary User may navigate to their another user's Profile
+// or choose to follow/unfollow them from within the search results.
 const Search = () => {
+  // state variables
   const context = React.useContext(StoreContext);
   const classes = useStyles();
   const token = context.token[0];
@@ -94,23 +103,26 @@ const Search = () => {
   const [page, setPage] = context.pageState;
   const [loadingState, setLoadingState] = React.useState('idle');
   const primaryUsername = context.username[0];
+  // searchResults refers to listings
   const searchResults = context.searchResults[0];
+  // whereas searchUserResults refers to users
   const [searchUserResults, setSearchUserResults] = context.searchUserResults;
+  // a separation of queries ensures clearing one does not clear the other
   const searchQuery = context.searchQuery[0];
   const searchUserQuery = context.searchUserQuery[0];
+  // the search type refers to either 'listings' or 'users'
   const searchType = context.searchType[0];
   const searchCategories = context.searchCategories[0];
   const useSearchTimeFrame = context.useSearchTimeFrame[0];
   const searchStartDatetime = context.searchStartDatetime[0];
   const searchEndDatetime = context.searchEndDatetime[0];
   const history = useHistory();
-
   React.useEffect(() => {
     if (token === null) {
       return <Redirect to={{pathname: '/login'}}/>
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // ensure a change in search results renders appropriately
   React.useEffect(() => {
     setPage('/search');
     async function setupSearch() {
@@ -119,7 +131,8 @@ const Search = () => {
     }
     setupSearch();
   }, [searchResults]); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // any change in the state variables within the dependency array update
+  // the URL parameters accordingly
   React.useEffect(() => {
     const params = new URLSearchParams();
     if (searchQuery && searchType === 'listings') {
@@ -144,8 +157,8 @@ const Search = () => {
     }
     history.push({ search: params.toString() })
   }, [searchType, searchQuery, searchUserQuery, searchCategories, useSearchTimeFrame, history]); // eslint-disable-line react-hooks/exhaustive-deps
-
-
+  // depending on the is_followed boolean, the primary user
+  // may follow or unfollow another user within the search results list
   const handleClickFollow = async (follow, userId, username) => {
     if (follow) {
       await followUserRequest(baseUrl, token, userId);

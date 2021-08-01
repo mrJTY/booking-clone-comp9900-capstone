@@ -27,6 +27,7 @@ import RoomIcon from '@material-ui/icons/Room';
 import Rating from '@material-ui/lab/Rating';
 import axios from 'axios';
 import styled from 'styled-components';
+import { toast } from 'react-toastify';
 
 const WhiteText = styled.span`
   color: white;
@@ -116,14 +117,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-// The ResourceCard component is a subcomponent representing a resource
+// class used for the Toastify error component styling
+const toastErrorStyle = {
+  backgroundColor: '#cc0000',
+  opacity: 0.8,
+  textAlign: 'center',
+  fontSize: '18px'
+};
+
+// The ResourceCard component is a subcomponent representing a Listing
 // and contains various information about a particular resource.
+// The component itself requires the Listing as a Prop in order to render it.
 // The contents include a title, default thumbnail image, resource owner,
-// address and brief description and relevant interaction buttons.
+// avg rating, address and brief description and relevant interaction buttons.
+// A user may navigate to the Listing owner's profile by clicking on their username
+// or navigate to the individiaul Listing page itself by clicking on the
+// 'View Listing' button.
 const ResourceCard = (
 {
   resource, owner, parentPage, handleClickOpen
 }) => {
+  // state variables
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
@@ -131,7 +145,8 @@ const ResourceCard = (
   const user = context.username[0];
   const history = useHistory();
   const [availabilities, setAvailabilities] = React.useState([]);
-
+  // sends an API fetch request to find the number of availabilities
+  // a particular Listing may have
   React.useEffect(() => {
     async function fetchAvailabilities () {
       try {
@@ -146,9 +161,22 @@ const ResourceCard = (
         })
         await setAvailabilities(response.data.availabilities);
       } catch(error) {
-
         console.log(error.response);
-
+        let errorText = '';
+        if (error.response.data.error !== undefined) {
+          errorText = error.response.data.error;
+        } else if (error.response.data.message !== undefined) {
+          errorText = error.response.data.message;
+        } else {
+          errorText = 'Invalid input';
+        }
+        toast.error(
+          errorText, {
+            position: 'top-right',
+            hideProgressBar: true,
+            style: toastErrorStyle
+          }
+        );
         await setAvailabilities([]);
       }
     }
@@ -156,7 +184,7 @@ const ResourceCard = (
       fetchAvailabilities();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // material UI styling
   const classes = useStyles();
 
   return (
@@ -269,7 +297,6 @@ const ResourceCard = (
           </div>
         </Tooltip>
       </CardContent>
-
       <CardContent className={classes.locationContent}>
         <Box className={classes.locationDiv}>
           <RoomIcon className={classes.locationIcon} />
@@ -278,7 +305,6 @@ const ResourceCard = (
           </Typography>
         </Box>
       </CardContent>
-
       <CardContent className={classes.categoryContent}>
         <Typography component={'span'} className={classes.categoryText} align="left" variant="subtitle2" color="textSecondary">
           <WhiteText>Category / </WhiteText>
@@ -292,13 +318,11 @@ const ResourceCard = (
           }
         </Typography>
       </CardContent>
-
       <CardContent className={classes.resourceCardDescDiv}>
         <Typography className={classes.resourceCardDesc} paragraph align="left" variant="body2" color="textSecondary" component="p">
           {resource.description}
         </Typography>
       </CardContent>
-
       <CardContent className={classes.resourceCardCentered}>
         <Typography variant="overline" align="center" color="textPrimary" component="p">
           {
@@ -311,7 +335,6 @@ const ResourceCard = (
           }
         </Typography>
       </CardContent>
-
       <CardActions
         className={
           user === resource.username && parentPage === '/mylistings' ?

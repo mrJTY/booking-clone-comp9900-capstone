@@ -4,7 +4,6 @@ import { StoreContext } from '../utils/store';
 import { fetchRecommendations } from '../utils/auxiliary';
 import ResourceCard from '../components/ResourceCard';
 import {
-  // useHistory,
   Redirect,
 } from 'react-router-dom';
 import {
@@ -20,7 +19,7 @@ import {
 } from '@material-ui/core';
 import Carousel from 'react-material-ui-carousel';
 
-// Page styling used on the MyBookings screen and its subcomponents
+// Page styling used on the Discover screen and its subcomponents
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -88,8 +87,6 @@ const useStyles = makeStyles((theme) => ({
   },
   top5GridRoot: {
     flexWrap: 'nowrap',
-    // overflow: 'scroll',
-    // overflowY: 'hidden',
   },
   top5GridItem: {
   },
@@ -98,31 +95,31 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-
+// The Discover page leverages the ResourceCard & Carousel subcomponents,
+// displaying the Top 5 and Recommended Listings for the primary user.
+// Distinction between which to display is managed through two buttons
+// in the top-right corner of the screen.
 const Discover = () => {
   const context = React.useContext(StoreContext);
   const token = context.token[0];
   const baseUrl = context.baseUrl;
-  // const history = useHistory();
   // classes used for Material UI component styling
   const classes = useStyles();
-
+  // redirect to login if not logged in
   React.useEffect(() => {
     if (token === null) {
       return <Redirect to={{pathname: '/login'}}/>
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // object containing all of the users a user is following from a GET API request
-  // const [following, setFollowing] = context.following;
   // the page variable stores the current page as a string
   const [page, setPage] = context.pageState;
-  // page loading state
+  // page loading state variables
   const [loadingState, setLoadingState] = React.useState('idle');
   const [top5Listings, setTop5Listings] = React.useState('idle');
   const [recListings, setRecListings] = React.useState('idle');
+  // default the display to Top 5 rated Listings
   const [top5Btn, settop5Btn] = React.useState(true);
-
+  // sets up the Discover page by fetching both Top 5 and Recommended Listings
   React.useEffect(() => {
     setPage('/discover');
     async function setupDiscover() {
@@ -250,7 +247,7 @@ const Discover = () => {
             {
               top5Btn !== true &&
               recListings.listings?.length === 0 &&
-              <Box className={classes.bookingsNotFoundDiv}>
+              <Box className={classes.recommendationsNotFoundDiv}>
                 <Typography
                   component={'span'} align="center"
                   variant="body1" color="textSecondary"
