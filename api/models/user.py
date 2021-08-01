@@ -12,6 +12,7 @@ class UserModel(db.Model):
     password_hash = db.Column(db.Text)
     authenticated = db.Column(db.Boolean, default=False)
     avatar = db.Column(db.Text, nullable=True, default=DEFAULT_AVATAR)
+    user_description = db.Column(db.Text, nullable=True, default="")
 
     # See: https://realpython.com/using-flask-login-for-user-management-with-flask/
     def is_active(self):
@@ -39,5 +40,6 @@ class UserModel(db.Model):
             "username": self.username,
             "email": self.email,
             "avatar": self.avatar,
+            "user_description": self.user_description,
         }
         return data

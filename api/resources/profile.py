@@ -64,6 +64,11 @@ class Profile(Resource):
             user.password_hash = password_hash
             flag_modified(user, "password_hash")
 
+        if "user_description" in content.keys():
+            description = content["user_description"]
+            user.user_description = user_description
+            flag_modified(user, "user_description")
+
         db.session.merge(user)
         db.session.flush()
         db.session.commit()

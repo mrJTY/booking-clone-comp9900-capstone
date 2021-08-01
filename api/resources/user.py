@@ -32,6 +32,9 @@ get_user_details = api.api.model(
         "is_followed": fields.Boolean(
             required=False, description="Whether the user is being followed or not"
         ),
+        "user_description": fields.String(
+            required=True, description="Description of the user"
+        ),
     },
 )
 
@@ -80,6 +83,11 @@ class User(Resource):
                 password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
                 user.password_hash = password_hash
                 flag_modified(user, "password_hash")
+
+            if "description" in content.keys():
+                description = content["description"]
+                user.description = description
+                flag_modified(user, "description")
 
             db.session.merge(user)
             db.session.flush()
