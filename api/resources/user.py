@@ -84,10 +84,10 @@ class User(Resource):
                 user.password_hash = password_hash
                 flag_modified(user, "password_hash")
 
-            if "description" in content.keys():
-                description = content["description"]
-                user.description = description
-                flag_modified(user, "description")
+            if "user_description" in content.keys():
+                user_description = content["user_description"]
+                user.user_description = user_description
+                flag_modified(user, "user_description")
 
             db.session.merge(user)
             db.session.flush()
