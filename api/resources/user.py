@@ -120,7 +120,12 @@ class UserList(Resource):
 
         except Exception as e:
             logging.error(e)
-            api.api.abort(500, f"{e}")
+            # Previously throws a 500 because of uniqueness constraint insert into DB
+            # The error message was correct but this just makes it more explicit!
+            api.api.abort(
+                403,
+                f"Cannot add user due to database constraints (user may be existing already)",
+            )
 
     @user.doc(description=f"Returns a user by search")
     @user.expect(get_user_details)

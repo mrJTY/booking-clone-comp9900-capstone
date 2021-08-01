@@ -41,8 +41,12 @@
 - Further tuning of existing endpoints to match
 - Profile endpoint to be able to search for username
 
-# Week 09
+# Week 09-10
 - Added listing and profile images
 - Additional tests on the followers, profile, auth/me endpoints
 - Provided review on recommendation pull requests
 - Further tweaks on the backend to accomodate frontend requests. Eg: additional fields & attributes
+- Last minute bug fixes and tests
+- Last minute integration
+- Project report write up
+- Demo rehearsal

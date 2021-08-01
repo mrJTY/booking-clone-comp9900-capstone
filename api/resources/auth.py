@@ -82,7 +82,7 @@ class AuthLogin(Resource):
             return api.api.abort(403, "Incorrect user credentials")
         except Exception as e:
             logging.error(e)
-            api.api.abort(500, f"{e}")
+            return api.api.abort(403, "Incorrect user credentials")
 
 
 @auth.route("/logout")

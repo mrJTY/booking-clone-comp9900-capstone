@@ -73,10 +73,12 @@ def create_fake_availabilties():
         # All dummy availabilities on one listing id
         listing_id = listings[i].listing_id
         # Give me a random start time (hourly blocks)
-        # Generate random availabilities around September 2021
-        start_unix_time = 1631109600
-        # Spread it across the month
-        start_time = (start_unix_time + random.randrange(0, 2629746, 60 * 60)) * 1000
+        # Start generating from mid July so we get past bookings
+        start_unix_time = 1626703200
+        # Spread it across two months
+        start_time = (
+            start_unix_time + random.randrange(0, 2629746, 60 * 60 * 2)
+        ) * 1000
         # Set end time as 1 hour
         end_time = start_time + (60 * 60 * 1000)
         a = AvailabilityModel(

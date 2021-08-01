@@ -84,6 +84,7 @@ class Booking(Resource):
             ).to_dict()
             if (start_vs_current(booking_time["start_time"], current_unixtime)) < 72:
                 raise CannotUpdateLessThan3DaysOfBooking
+            # TODO(Harris): BookedMoreThan10HoursPerMonth isn't being thrown
             b1 = BookingModel.query.filter(BookingModel.booking_id == booking_id)
             b = BookingModel.query.get_or_404(booking_id)
             a = AvailabilityModel.query.get_or_404(b.to_dict()["availability_id"])
@@ -97,6 +98,7 @@ class Booking(Resource):
             return b1, 204
 
         except BookedMoreThan10HoursPerMonth as e:
+            # Well this error isn't being thrown so that's why it's not getting returned
             return {"error": e.message}, 403
 
         except CannotUpdateLessThan3DaysOfBooking as e:
@@ -104,7 +106,8 @@ class Booking(Resource):
 
         except Exception as e:
             logging.error(e)
-            api.api.abort(500, f"{e}")
+            # Just a generic error
+            api.api.abort(500, "Cannot delete booking")
 
     @booking.doc(description=f"booking_id must be provided")
     # Removing the marshalling because the error can return something else
