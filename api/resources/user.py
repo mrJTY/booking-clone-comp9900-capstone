@@ -33,7 +33,7 @@ get_user_details = api.api.model(
             required=False, description="Whether the user is being followed or not"
         ),
         "user_description": fields.String(
-            required=True, description="Description of the user"
+            required=False, description="Description of the user"
         ),
     },
 )
