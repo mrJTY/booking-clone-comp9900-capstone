@@ -32,3 +32,18 @@
 - Wrote code in the generate_fake_data.py file which reads data from the aforementioned csv file and inserts into database
 - Wrote code to assign each of the bookings to a random user. 
 - Continued working on recommender engine, especially brainstorming which features to use and how the system would work
+
+# Week 7
+- Added more data for listing venues, users, and ratings to csv file
+- Worked on implementing the function responsible for reading the csv file and appropriately adding data to database. I had to make sure that the reviews were properly distributed across different listings.
+- Researched methods to perform sentiment analysis for the recommender system. I also explored more methods to implement the recommender system and determine how the top 5 venues would be selected. 
+
+# Week 8
+- Finally decided on using the VADER algorithm to perform sentiment analysis on reviews. 
+- Implemented the recommender system by ordering each venue based on user's past booking history, average rating, and average sentiment based on reviews. 
+- Spent time figuring out how to convert the output of my recommender engine to an appropriate JSON format which would be used to display the recommendations on the front end. 
+
+# Week 9
+- Wrote up my section for the project report. I provided a detailed description of how the recommender system works (especially sentiment analysis) and also the challenges I faced in implementing it. 
+- Patched up some bug fixed on my recommender system. 
+- As a team, we did a trial run to practise for our demonstration next week. I prepared by writing a script for my demo on the recommender system. 
