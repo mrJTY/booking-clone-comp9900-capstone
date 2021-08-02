@@ -65,7 +65,7 @@ class Profile(Resource):
             flag_modified(user, "password_hash")
 
         if "user_description" in content.keys():
-            description = content["user_description"]
+            user_description = content["user_description"]
             user.user_description = user_description
             flag_modified(user, "user_description")
 

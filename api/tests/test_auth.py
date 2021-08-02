@@ -10,6 +10,7 @@ TEST_USER = {
     "username": "test_user",
     "email": "test@test.com",
     "password": "test",
+    "user_description": "sport",
 }
 
 
@@ -34,7 +35,9 @@ def test_authenticate():
     assert protected_response.json()["email"] == TEST_USER["email"]
     assert protected_response.json()["avatar"] == DEFAULT_AVATAR
     assert type(protected_response.json()["avatar"]) == str
-    assert protected_response.json()["user_description"] == ""
+    assert (
+        protected_response.json()["user_description"] == TEST_USER["user_description"]
+    )
     assert type(protected_response.json()["user_description"]) == str
     # Nothing booked yet
     assert protected_response.json()["hours_booked"] == 0

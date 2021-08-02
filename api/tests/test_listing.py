@@ -23,6 +23,7 @@ TEST_LISTING_USER = {
     "username": "test_listing_user",
     "email": "test_listing@test.com",
     "password": "test123",
+    "user_description": "sport",
 }
 
 

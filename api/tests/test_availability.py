@@ -10,6 +10,7 @@ TEST_AVAILABILITY_USER = {
     "username": "test_availability_user",
     "email": "test_availability@test.com",
     "password": "test123",
+    "user_description": "sport",
 }
 
 TEST_LISTING = {

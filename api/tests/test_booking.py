@@ -9,24 +9,28 @@ OWNER = {
     "username": "krusty_krab",
     "email": "krusty@test.com",
     "password": "krabbypatties",
+    "user_description": "sport",
 }
 
 OWNER2 = {
     "username": "krusty_krab2",
     "email": "krust2y@test.com",
     "password": "krabbypatties",
+    "user_description": "sport",
 }
 
 CONSUMER = {
     "username": "sponge_bob",
     "email": "sponge@bob.com",
     "password": "krabby",
+    "user_description": "sport",
 }
 
 CONSUMER2 = {
     "username": "sponge_bob2",
     "email": "sponge2@bob.com",
     "password": "krabby",
+    "user_description": "sport",
 }
 
 LISTING = {

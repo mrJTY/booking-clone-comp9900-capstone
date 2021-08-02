@@ -10,12 +10,14 @@ OWNER = {
     "username": "krusty_krab_rating",
     "email": "krusty_rating@test.com",
     "password": "krabbypatties",
+    "user_description": "sport",
 }
 
 CONSUMER = {
     "username": "sponge_bob_rating",
     "email": "sponge_rating@bob.com",
     "password": "krabby",
+    "user_description": "sport",
 }
 
 LISTING = {

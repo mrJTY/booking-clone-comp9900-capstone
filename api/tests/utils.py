@@ -12,9 +12,11 @@ def register_user(user: dict) -> int:
     expected = {
         "email": user["email"],
         "username": user["username"],
+        "user_description": user["user_description"],
     }
     assert actual["email"] == expected["email"]
     assert actual["username"] == expected["username"]
+    assert actual["user_description"] == expected["user_description"]
     return actual["user_id"]
 
 

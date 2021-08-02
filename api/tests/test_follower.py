@@ -9,12 +9,14 @@ TEST_INFLUENCER_USER = {
     "username": "test_influencer_user",
     "email": "test_influencer@test.com",
     "password": "test",
+    "user_description": "sport",
 }
 
 TEST_FOLLOWER_USER = {
     "username": "test_follower_user",
     "email": "test_follower@test.com",
     "password": "test",
+    "user_description": "sport",
 }
 
 

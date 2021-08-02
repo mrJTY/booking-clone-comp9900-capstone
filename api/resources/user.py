@@ -20,6 +20,9 @@ create_user_details = api.api.model(
             required=True, description="The password of the user"
         ),
         "email": fields.String(required=True, description="Email address of the user"),
+        "user_description": fields.String(
+            required=True, description="Description of the user"
+        ),
     },
 )
 
@@ -33,7 +36,7 @@ get_user_details = api.api.model(
             required=False, description="Whether the user is being followed or not"
         ),
         "user_description": fields.String(
-            required=False, description="Description of the user"
+            required=True, description="Description of the user"
         ),
     },
 )
@@ -115,10 +118,12 @@ class UserList(Resource):
             password = content["password"]
             email = content["email"]
             password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+            user_description = content["user_description"]
             u = UserModel(
                 username=username,
                 email=email,
                 password_hash=password_hash,
+                user_description=user_description,
             )
             logging.info(u)
             db.session.add(u)

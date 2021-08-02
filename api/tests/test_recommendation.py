@@ -15,6 +15,7 @@ TEST_RECOMMENDATION_USER = {
     "username": "test_recommendation_user",
     "email": "test_recommendation@test.com",
     "password": "test123",
+    "user_description": "sport",
 }
 
 
@@ -25,9 +26,11 @@ def test_register_user():
     expected = {
         "email": TEST_RECOMMENDATION_USER["email"],
         "username": TEST_RECOMMENDATION_USER["username"],
+        "user_description": TEST_RECOMMENDATION_USER["user_description"],
     }
     assert actual["email"] == expected["email"]
     assert actual["username"] == expected["username"]
+    assert actual["user_description"] == expected["user_description"]
 
 
 def test_create_listing():
