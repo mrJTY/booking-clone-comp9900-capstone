@@ -41,6 +41,7 @@ Verify that this installed the following:
 - Firstly, navigate to the repository root directory
 - Then, open two separate terminals
 - Enter the following commands
+- Once the NodeJS server is running on localhost, interact with the app using a web browser (Chrome/Chromium preferably)
 
 Start the backend service by running:
 ```shell
@@ -51,6 +52,9 @@ On a separate terminal, start the frontend by running:
 ```shell
 make frontend
 ```
+
+Now you may open a web browser and navigate to the link mentioned on the terminal, usually `localhost:3000`
+
 ---
 If there are any issues running the make commands, run the following commands instead:
 
