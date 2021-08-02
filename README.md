@@ -74,5 +74,5 @@ To run the test suite, ensure the backend service is running.
 
 To run the tests:
 ```shell
-make install
+make tests
 ```
