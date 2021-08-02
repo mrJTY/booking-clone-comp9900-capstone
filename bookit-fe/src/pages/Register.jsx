@@ -12,8 +12,16 @@ import {
   Typography,
   Divider,
   FormControl,
-  Tooltip
+  Tooltip,
+  Input,
+  InputLabel,
+  Select,
+  Chip,
+  MenuItem,
+  IconButton,
+  FormHelperText,
 } from '@material-ui/core';
+import ClearIcon from '@material-ui/icons/Clear';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -50,19 +58,51 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '250px',
     maxWidth: '266px',
   },
-  box: {
+  inputFieldsDiv: {
     display: 'flex',
+    width: '100%',
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  box: {
     margin: theme.spacing(1),
   },
-  button: {
+  buttonRegister: {
     margin: theme.spacing(1),
     width: '12em',
+  },
+  button: {
+
   },
   toasty: {
     textAlign: 'center',
     justifyContent: 'center',
     alignContent: 'center',
-  }
+  },
+  chipsMenu: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  chipItem: {
+    margin: 1,
+  },
+  categoriesFormDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    height: '6em',
+    alignItems: 'center',
+    margin: '1em 0em',
+  },
+  categoriesForm: {
+    marginRight: '0.25em',
+    width: '18em',
+  },
+  clearBtnDiv: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: '1em',
+  },
 }));
 
 // class used for the Toastify error component styling
@@ -72,6 +112,14 @@ const toastErrorStyle = {
   textAlign: 'center',
   fontSize: '18px'
 };
+
+const resourceCategoriesList = [
+  { key: 0, value: 'Entertainment'},
+  { key: 1, value: 'Sport'},
+  { key: 2, value: 'Accommodation'},
+  { key: 3, value: 'Healthcare'},
+  { key: 4, value: 'Other'},
+];
 
 // The Register page prompts the user to enter their email, password and name,
 // which are all validated upon input. Appropriate error messages are shown
@@ -84,13 +132,21 @@ const Register = () => {
   const context = React.useContext(StoreContext);
   const baseUrl = context.baseUrl;
   const history = useHistory();
-
   // useForm hook comes from react-hook-form, which handles user input
   // and controls form submission
   const { handleSubmit, control } = useForm();
   const onSubmit = (data) => {
+    let categoriesFlat = resourceCategories.join(',').toLowerCase();
     // Check for empty fields
-    if (data.email === '') {
+    if (categoriesFlat === null || categoriesFlat === '') {
+      toast.error(
+        'Please enter one or more categories', {
+          position: 'top-right',
+          hideProgressBar: true,
+          style: toastErrorStyle
+        }
+      );      
+    } else if (data.email === '') {
       toast.error(
         'Please enter your Email address', {
           position: 'top-right',
@@ -126,7 +182,8 @@ const Register = () => {
         data: {
           email: data.email,
           password: data.password,
-          username: data.username
+          username: data.username,
+          user_description: categoriesFlat,
         }
       })
         .then((response) => {
@@ -167,8 +224,24 @@ const Register = () => {
     // redirect user to the Login page
     history.push('/login');
   };
+
+  const [resourceCategories, setResourceCategories] = React.useState([]);
+  // handles the changing of listing category
+  const handleChangeCategory = (event) => {
+    setResourceCategories(event.target.value);
+  };
+  const handleDeleteCategoryChip = (categoryName) => () => {
+    setResourceCategories(
+      (categories) => categories.filter((category) => category !== categoryName)
+    );
+  };
+  const handleClearResourceCategories = () => {
+    setResourceCategories([]);
+  };
+
   // classes used for Material UI component styling
   const classes = useStyles();
+
   return (
     <Container className={classes.container}>
       <Box className={classes.logo}>
@@ -187,69 +260,137 @@ const Register = () => {
         </Typography>
       </Box>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Box className={classes.box}>
-          <FormControl>
-            <Controller
-              name="email"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  label="Email"
-                  color="primary"
-                  {...field}
-                />
-              )}
-            />
-          </FormControl>
+        <Box className={classes.inputFieldsDiv}>
+          <Box className={classes.box}>
+            <FormControl required>
+              <Controller
+                name="email"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    label="Email"
+                    color="primary"
+                    {...field}
+                  />
+                )}
+              />
+            </FormControl>
+          </Box>
+          <Box className={classes.box}>
+            <FormControl required>
+              <Controller
+                name="password"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    type="password"
+                    label="Password"
+                    color="primary"
+                    {...field}
+                  />
+                )}
+              />
+            </FormControl>
+          </Box>
+          <Box className={classes.box}>
+            <FormControl required>
+              <Controller
+                name="username"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <TextField
+                    label="Username"
+                    color="primary"
+                    {...field}
+                  />
+                )}
+              />
+            </FormControl>
+          </Box>
         </Box>
-        <Box className={classes.box}>
-          <FormControl>
-            <Controller
-              name="password"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  type="password"
-                  label="Password"
-                  color="primary"
-                  {...field}
-                />
+        <Box className={classes.categoriesFormDiv}>
+          <FormControl required className={classes.categoriesForm}>
+            <InputLabel id="mutiple-categories-label">
+              User Resource Categories
+            </InputLabel>
+            <Select
+              labelId="mutiple-categories-label"
+              id="mutiple-categories"
+              multiple
+              value={resourceCategories}
+              onChange={handleChangeCategory}
+              input={<Input id="select-multiple-categories" />}
+              renderValue={(selected) => (
+                <div className={classes.chipsMenu}>
+                  {selected.map((value) => (
+                    <Chip
+                      key={value}
+                      label={value}
+                      className={classes.chipItem}
+                      onMouseDown={(event) => {
+                        event.stopPropagation();
+                      }}
+                      onDelete={handleDeleteCategoryChip(value)}
+                    />
+                  ))}
+                </div>
               )}
-            />
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: '16em',
+                    width: '16em',
+                  },
+                },
+              }}
+            >
+              {resourceCategoriesList.map((category) => (
+                <MenuItem key={category.key} value={category.value}>
+                  {category.value}
+                </MenuItem>
+              ))}
+            </Select>
+            <FormHelperText>
+              Required - one or more
+            </FormHelperText>
           </FormControl>
+          <Box className={classes.clearBtnDiv}>
+            <Tooltip title={'Clear Categories'} aria-label={'delete'}>
+              <IconButton
+                id={'clear-menu-button'}
+                color={'default'}
+                className={classes.button}
+                size="small"
+                onClick={() => {
+                  handleClearResourceCategories()
+                }}
+              >
+                <ClearIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
-        <Box className={classes.box}>
-          <FormControl>
-            <Controller
-              name="username"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  label="Username"
-                  color="primary"
-                  {...field}
-                />
-              )}
-            />
-          </FormControl>
-        </Box>
+
         <br />
         <Tooltip title="Sign Up" aria-label="sign up">
           <Button
-            className={classes.button}
+            className={classes.buttonRegister}
             variant="outlined" color="primary" type="submit"
           >
             Sign Up
           </Button>
         </Tooltip>
       </form>
+
+
+
       <Box className={classes.box}>
         <Tooltip title="Back to Login" aria-label="back to login">
           <Button
-            className={classes.button}
+            className={classes.buttonRegister}
             variant="outlined" color="default" onClick={backButtonLogin}
           >
             Back to Login

@@ -140,9 +140,18 @@ const UserSettingsDialog = ({ open, handleClose, itemsChecked, reqBody }) => {
               <ListItem
                 key={item}
               >
-                <ListItemText>
-                  {item.charAt(0).toUpperCase() + item.slice(1)}
-                </ListItemText>
+                {
+                  item === 'user_description' &&
+                  <ListItemText>
+                    {'Categories'}
+                  </ListItemText>
+                }
+                {
+                  item !== 'user_description' &&
+                  <ListItemText>
+                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                  </ListItemText>
+                }
               </ListItem>
             ))}
             </List>

@@ -8,7 +8,7 @@ import { StoreContext } from '../utils/store';
 import {
   fetchProfile,
   fetchProfileListings,
-  fetchAuthMe
+  fetchAuthMe,
 } from '../utils/auxiliary';
 import ResourceCard from '../components/ResourceCard';
 import {
@@ -30,6 +30,11 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import CheckIcon from '@material-ui/icons/Check';
 import FollowingDialog from '../components/FollowingDialog';
+import styled from 'styled-components';
+
+const WhiteText = styled.span`
+  color: white;
+`
 
 // Page styling used on the Profile screen and its subcomponents
 const useStyles = makeStyles((theme) => ({
@@ -442,8 +447,26 @@ const Profile = () => {
                       </Typography>                      
                     </Box>
                   </Box>
+                  <Typography gutterBottom align="left" variant="body2" color="textSecondary" component="p">
+                    <WhiteText>Resource Categories / </WhiteText>
+                    {
+                      userProfile.user_description !== '' &&
+                      `${
+                        userProfile.user_description
+                        .toLowerCase()
+                        .split(',')
+                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(', ')
+                      }`
+                    }
+                    {
+                      userProfile.user_description === '' &&
+                      'Other'
+                    }
+                  </Typography>
                   <Typography paragraph align="left" variant="body2" color="textSecondary" component="p">
-                    {userProfile.email}
+                  <WhiteText>email / </WhiteText>
+                    {`${userProfile.email}`}
                   </Typography>
                 </Box>
               </Box>

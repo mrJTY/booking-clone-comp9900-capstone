@@ -24,7 +24,15 @@ import {
   FormGroup,
   Checkbox,
   Divider,
+  Input,
+  InputLabel,
+  Select,
+  Chip,
+  MenuItem,
+  IconButton,
+  FormHelperText,
 } from '@material-ui/core';
+import ClearIcon from '@material-ui/icons/Clear';
 import { toast } from 'react-toastify';
 
 // Page styling used on the UserSettings screen and its subcomponents
@@ -184,6 +192,10 @@ const useStyles = makeStyles((theme) => ({
     margin: '0.5em 0em',
     maxWidth: '10em',
   },
+  formControlCheckboxCategories: {
+    margin: '2em 0em',
+    maxWidth: '10em',
+  },
   uploadBtnInput: {
     display: 'none',
   },
@@ -204,6 +216,30 @@ const useStyles = makeStyles((theme) => ({
     margin: '1em 0em',
     height: '2px',
   },
+  chipsMenu: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  chipItem: {
+    margin: 1,
+  },
+  categoriesFormDiv: {
+    display: 'flex',
+    flexDirection: 'row',
+    height: '6em',
+    alignItems: 'center',
+    marginBottom: '0.5em',
+  },
+  categoriesForm: {
+    marginRight: '0.25em',
+    width: '18em',
+  },
+  clearBtnDiv: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: '1em',
+  },  
 }));
 
 // styling for the error notification
@@ -220,6 +256,7 @@ const toastErrorObj = {
 };
 // default checked items
 const emptyVals = {
+  user_description: '',
   avatar: '',
   email: '',
   password: '',
@@ -233,6 +270,14 @@ const onChange = (setFunc, field, val) => {
     })
   );
 }
+
+const resourceCategoriesList = [
+  { key: 0, value: 'entertainment'},
+  { key: 1, value: 'sport'},
+  { key: 2, value: 'accommodation'},
+  { key: 3, value: 'healthcare'},
+  { key: 4, value: 'other'},
+];
 
 // The UserSettings page allows a user to view a change their profile &
 // account settings. They are allowed to change any of 3 items:
@@ -266,6 +311,8 @@ const UserSettings = () => {
   const [fields, setFields] = React.useState(emptyVals);
   const [defaultFields, setDefaultFields] = React.useState(emptyVals);
   const [avatarBase64, setAvatarBase64] = React.useState(null);
+  const [resourceCategories, setResourceCategories] = React.useState([]);
+  const [resourceCategoriesDefault, setResourceCategoriesDefault] = React.useState([]);
   // initial page set up rendering all the input fields & image preview
   React.useEffect(() => {
     setPage('/usersettings');
@@ -273,11 +320,18 @@ const UserSettings = () => {
       setLoadingState('loading');
       await fetchAuthMe(baseUrl, token, setAuthMeInfo);
       setAvatarBase64(authMeInfo.avatar);
+      let categoriesVal = authMeInfo.user_description.toLowerCase();
+      if (categoriesVal === '') {
+        categoriesVal = 'other';
+      }
       const defaultVals = {
+        user_description: categoriesVal,
         avatar: authMeInfo.avatar,
         email: authMeInfo.email,
         password: '',
       }
+      await setResourceCategories(categoriesVal.split(','));
+      await setResourceCategoriesDefault(categoriesVal.split(','));
       await setFields(defaultVals);
       await setDefaultFields(defaultVals);
       setLoadingState('success');
@@ -293,6 +347,7 @@ const UserSettings = () => {
   }
   // default values for the checked fields
   const [checkedFields, setCheckedFields] = React.useState({
+    user_description: false,
     email: false,
     password: false,
     avatar: false,
@@ -318,7 +373,7 @@ const UserSettings = () => {
   const classes = useStyles();
   // called upon clicking the Save Changes button which opens a popup dialog
   // upon conditional checks ensuring the checked items are non-empty
-  const handleClickSaveChanges = () => {
+  const handleClickSaveChanges = async () => {
     const checkedItemsArray = Object.keys(checkedFields).filter((key) => checkedFields[key]);
     setItemsToChange(checkedItemsArray);
     if (checkedItemsArray.length === 0) {
@@ -327,7 +382,10 @@ const UserSettings = () => {
         toastErrorObj
       );
     } else {
+      let categoriesFlat = resourceCategories.join(',').toLowerCase();
+      await onChange(setFields, 'user_description', categoriesFlat);
       if (
+        (checkedItemsArray.includes('user_description') && fields.user_description.length < 1) ||
         (checkedItemsArray.includes('email') && fields.email.length < 1) ||
         (checkedItemsArray.includes('password') && fields.password.length < 1) ||
         (checkedItemsArray.includes('avatar') && fields.avatar.length < 1)
@@ -355,6 +413,27 @@ const UserSettings = () => {
     setupReqBody();
   }, [fields, itemsToChange]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // handles the changing of a resource category
+  const handleChangeCategory = (event) => {
+    setResourceCategories(event.target.value);
+  };
+  const handleDeleteCategoryChip = (categoryName) => () => {
+    setResourceCategories(
+      (categories) => categories.filter((category) => category !== categoryName)
+    );
+  };
+  const handleClearResourceCategories = () => {
+    setResourceCategories([]);
+  };
+  // state update upon change of resourceCategories
+  React.useEffect(() => {
+    async function setupResourceChange () {
+      let categoriesFlat = resourceCategories.join(',').toLowerCase();
+      await onChange(setFields, 'user_description', categoriesFlat);
+    }
+    setupResourceChange();
+  }, [resourceCategories]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <Container className={classes.outerContainer}>
       <Navbar page={page} />
@@ -380,7 +459,6 @@ const UserSettings = () => {
                 <Box className={classes.imgContainer}>
                   <Tooltip title={`Preview: ${authMeInfo.username}'s Avatar`}>
                     <img src={
-                        // DefaultAvatar
                         fields.avatar
                       }
                       alt="thumbnail"
@@ -419,10 +497,12 @@ const UserSettings = () => {
                             setFields(defaultFields);
                             setAvatarFilename('');
                             setCheckedFields({
+                              user_description: false,
                               email: false,
                               password: false,
                               avatar: false,
                             });
+                            setResourceCategories(resourceCategoriesDefault);
                           }}
                         >
                           Reset
@@ -432,6 +512,71 @@ const UserSettings = () => {
                   </Box>
                   <Box className={classes.innerContainerInputCheckbox}>
                     <Box className={classes.innerContainerInput}>
+
+                      <Box className={classes.categoriesFormDiv}>
+                        <FormControl required className={classes.categoriesForm}>
+                          <InputLabel id="mutiple-categories-label">
+                            User Resource Categories
+                          </InputLabel>
+                          <Select
+                            labelId="mutiple-categories-label"
+                            id="mutiple-categories"
+                            multiple
+                            value={resourceCategories}
+                            onChange={handleChangeCategory}
+                            input={<Input id="select-multiple-categories" />}
+                            renderValue={(selected) => (
+                              <div className={classes.chipsMenu}>
+                                {selected.map((value) => (
+                                  <Chip
+                                    key={value}
+                                    label={value.charAt(0).toUpperCase() + value.slice(1)}
+                                    className={classes.chipItem}
+                                    onMouseDown={(event) => {
+                                      event.stopPropagation();
+                                    }}
+                                    onDelete={handleDeleteCategoryChip(value)}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            MenuProps={{
+                              PaperProps: {
+                                style: {
+                                  maxHeight: '16em',
+                                  width: '16em',
+                                },
+                              },
+                            }}
+                          >
+                            {resourceCategoriesList.map((category) => (
+                              <MenuItem key={category.key} value={category.value}>
+                                {category.value.charAt(0).toUpperCase() + category.value.slice(1)}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          <FormHelperText>
+                            Required - one or more
+                          </FormHelperText>
+                        </FormControl>
+                        <Box className={classes.clearBtnDiv}>
+                          <Tooltip title={'Clear Categories'} aria-label={'delete'}>
+                            <IconButton
+                              id={'clear-menu-button'}
+                              color={'default'}
+                              className={classes.button}
+                              size="small"
+                              onClick={() => {
+                                handleClearResourceCategories()
+                              }}
+                            >
+                              <ClearIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </Box>
+
+
                       <Box className={classes.inputFieldCheckboxDiv}>
                         <Box className={classes.inputFieldDiv}>
                           <TextField
@@ -508,6 +653,21 @@ const UserSettings = () => {
                           Change Items
                         </FormLabel>
                         <FormGroup>
+                          <Tooltip title="Change Categories" placement="bottom">
+                            <FormControlLabel
+                              className={classes.formControlCheckboxCategories}
+                              control={
+                                <Checkbox
+                                  checked={checkedFields.user_description}
+                                  onChange={(e) => {
+                                    handleCheckboxChange(e, "user_description")
+                                  }}
+                                  name="user_description"
+                                />
+                              }
+                              label="Categories"
+                            />
+                          </Tooltip>                          
                           <Tooltip title="Change Email" placement="bottom">
                             <FormControlLabel
                               className={classes.formControlCheckboxLabel}
