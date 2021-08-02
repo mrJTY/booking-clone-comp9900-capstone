@@ -1,8 +1,12 @@
 SHELL := bash
 REPO_ROOT := `git rev-parse --show-toplevel`
 
+# Init a git repo (it's not provided in a zip file so git commands fail)
+git-init:
+	git init
+
 # Install the dependencies
-install:
+install: git-init
 	$(REPO_ROOT)/bin/install.sh
 
 # Start the backend
