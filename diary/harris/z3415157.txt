@@ -66,7 +66,7 @@ Also put down the challenges that were implemented in the app (especially the SQ
 Showed up for the practice rehersal on Saturday, and asked Iwan some questions about the report. 
 
 Week 10
-Made some last minute changes as we realised that we missed putting in the types of resources they provide ar registration. Successfully made the last minute fix at the backend,
+Made some last minute changes as we realised that we missed putting in the types of resources they provide a registration. Successfully made the last minute fix at the backend,
 while Vidan got the feature working on the frontend. We got this done just before the software quality part was due.
 
 Also made more edits on the Project Report, such as putting figure numbers in the report, added in more things for the Bookit spec - functional mapping which was a separate
